@@ -134,10 +134,10 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           >
             <h4 className="text-accent-periwinkle font-semibold text-lg mb-6">Income Distribution</h4>
             <div className="space-y-4">
-              <BarRow label="Top 1%" value={country.incomeShares.top1} color="#d4878f" />
-              <BarRow label="Top 10%" value={country.incomeShares.top10} color="#c9a87c" />
-              <BarRow label="Middle 40%" value={country.incomeShares.middle40} color="#929ee8" />
-              <BarRow label="Bottom 50%" value={country.incomeShares.bottom50} color="#7eb8a8" />
+              <BarRow label="Top 1%" value={country.incomeShares.top1} color="#CC6677" />
+              <BarRow label="Top 10%" value={country.incomeShares.top10} color="#DDCC77" />
+              <BarRow label="Middle 40%" value={country.incomeShares.middle40} color="#88CCEE" />
+              <BarRow label="Bottom 50%" value={country.incomeShares.bottom50} color="#44AA99" />
             </div>
             <p className="text-text-muted text-xs mt-4">Gini (income): {country.giniIncome.toFixed(2)}</p>
           </motion.div>
@@ -150,10 +150,10 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           >
             <h4 className="text-accent-amber font-semibold text-lg mb-6">Wealth Distribution</h4>
             <div className="space-y-4">
-              <BarRow label="Top 1%" value={country.wealthShares.top1} color="#d4878f" />
-              <BarRow label="Top 10%" value={country.wealthShares.top10} color="#c9a87c" />
-              <BarRow label="Middle 40%" value={country.wealthShares.middle40} color="#929ee8" />
-              <BarRow label="Bottom 50%" value={country.wealthShares.bottom50} color="#7eb8a8" />
+              <BarRow label="Top 1%" value={country.wealthShares.top1} color="#CC6677" />
+              <BarRow label="Top 10%" value={country.wealthShares.top10} color="#DDCC77" />
+              <BarRow label="Middle 40%" value={country.wealthShares.middle40} color="#88CCEE" />
+              <BarRow label="Bottom 50%" value={country.wealthShares.bottom50} color="#44AA99" />
             </div>
             <p className="text-text-muted text-xs mt-4">Gini (wealth): {country.giniWealth.toFixed(2)}</p>
           </motion.div>

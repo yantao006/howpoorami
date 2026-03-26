@@ -23,13 +23,14 @@ interface WealthClassEntry {
 
 const MARGIN = { top: 20, right: 80, bottom: 50, left: 120 };
 
+// Paul Tol qualitative palette — colorblind-safe
 const BAR_COLORS: Record<string, string> = {
-  "Bottom 50%": "#7eb8a8",
-  "Middle 40%": "#929ee8",
-  "Top 10-1%": "#b49ad4",
-  "Top 1-0.1%": "#c9a87c",
-  "Top 0.1-0.01%": "#d4878f",
-  "Top 0.01%": "#e8636b",
+  "Bottom 50%": "#44AA99",
+  "Middle 40%": "#88CCEE",
+  "Top 10-1%": "#DDCC77",
+  "Top 1-0.1%": "#CC6677",
+  "Top 0.1-0.01%": "#AA4499",
+  "Top 0.01%": "#882255",
 };
 
 const WEALTH_CLASS_CONFIG: ReadonlyArray<{
@@ -148,7 +149,7 @@ export default function TaxRateChart({
 
       {/* Regressivity callout */}
       {isRegressive && regressivityGap && (
-        <p className="text-center text-xs font-semibold mb-3" style={{ color: "#e8636b" }}>
+        <p className="text-center text-xs font-semibold mb-3" style={{ color: "#882255" }}>
           The ultra-wealthy pay {regressivityGap}% less than the middle class
         </p>
       )}
@@ -247,19 +248,19 @@ export default function TaxRateChart({
                 <Line
                   from={{ x: bracketX - 8, y: middle40Y }}
                   to={{ x: bracketX, y: middle40Y }}
-                  stroke="#e8636b"
+                  stroke="#882255"
                   strokeWidth={1.5}
                 />
                 <Line
                   from={{ x: bracketX, y: middle40Y }}
                   to={{ x: bracketX, y: top001Y }}
-                  stroke="#e8636b"
+                  stroke="#882255"
                   strokeWidth={1.5}
                 />
                 <Line
                   from={{ x: bracketX - 8, y: top001Y }}
                   to={{ x: bracketX, y: top001Y }}
-                  stroke="#e8636b"
+                  stroke="#882255"
                   strokeWidth={1.5}
                 />
                 {/* Gap label */}
@@ -267,7 +268,7 @@ export default function TaxRateChart({
                   x={bracketX + 6}
                   y={(middle40Y + top001Y) / 2}
                   dy="0.35em"
-                  fill="#e8636b"
+                  fill="#882255"
                   fontSize={10}
                   fontWeight={600}
                   fontFamily="var(--font-body)"

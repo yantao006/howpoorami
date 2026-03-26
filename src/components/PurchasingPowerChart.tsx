@@ -29,23 +29,24 @@ interface TooltipPayload {
 
 const MARGIN = { top: 50, right: 30, bottom: 55, left: 60 };
 
+// Paul Tol qualitative palette — colorblind-safe
 const LINES = [
   {
     key: "wageIndex" as const,
     label: "Wages",
-    color: "#7eb8a8",
+    color: "#44AA99",
     dash: undefined,
   },
   {
     key: "cpiIndex" as const,
     label: "Cost of Living",
-    color: "#c9a87c",
+    color: "#DDCC77",
     dash: undefined,
   },
   {
     key: "housePriceIndex" as const,
     label: "House Prices",
-    color: "#d4878f",
+    color: "#CC6677",
     dash: undefined,
   },
 ] as const;

@@ -13,13 +13,14 @@ interface WealthHoardingChartProps {
   readonly height: number;
 }
 
+// Paul Tol qualitative palette — colorblind-safe
 const COLORS: Record<keyof DetailedWealthShares, string> = {
-  bottom50: "#7eb8a8",
-  middle40: "#929ee8",
-  next9: "#b49ad4",
-  next09: "#c9a87c",
-  next009: "#d4878f",
-  top001: "#e8636b",
+  bottom50: "#44AA99",
+  middle40: "#88CCEE",
+  next9: "#DDCC77",
+  next09: "#CC6677",
+  next009: "#AA4499",
+  top001: "#882255",
 };
 
 const GROUP_LABELS: Record<keyof DetailedWealthShares, string> = {
@@ -184,6 +185,9 @@ export default function WealthHoardingChart({
   width,
   height,
 }: WealthHoardingChartProps) {
+  // Fallback: when WID.world detailed splits are unavailable, estimate
+  // sub-percentile breakdown using typical distribution ratios (55/28/17).
+  // These are approximations, not sourced data.
   const shares = DETAILED_SHARES[country.code] ?? {
     bottom50: country.wealthShares.bottom50,
     middle40: country.wealthShares.middle40,
@@ -227,7 +231,7 @@ export default function WealthHoardingChart({
               const showLabel = shouldShowLabel(rect, innerWidth);
               const showDetails = shouldShowDetails(rect, innerWidth);
               const textColor =
-                rect.key === "bottom50" || rect.key === "middle40"
+                rect.key === "bottom50" || rect.key === "middle40" || rect.key === "next9"
                   ? "#1a1a2e"
                   : "#ffffff";
 

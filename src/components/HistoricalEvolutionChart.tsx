@@ -43,11 +43,12 @@ interface TooltipPayload {
 
 const MARGIN = { top: 40, right: 30, bottom: 60, left: 65 };
 
+// Paul Tol qualitative palette — colorblind-safe
 const COLORS = {
-  bottom50: { fill: "#7eb8a8", opacity: 0.4, label: "Bottom 50%" },
-  middle40: { fill: "#929ee8", opacity: 0.3, label: "Middle 40%" },
-  top10: { fill: "#d4878f", opacity: 0.3, label: "Top 10%" },
-  top1Line: { stroke: "#e8636b", label: "Top 1%" },
+  bottom50: { fill: "#44AA99", opacity: 0.4, label: "Bottom 50%" },
+  middle40: { fill: "#88CCEE", opacity: 0.3, label: "Middle 40%" },
+  top10: { fill: "#CC6677", opacity: 0.3, label: "Top 10%" },
+  top1Line: { stroke: "#882255", label: "Top 1%" },
 } as const;
 
 const COUNTRY_EVENTS: Readonly<Record<string, readonly EventMarker[]>> = {

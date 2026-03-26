@@ -24,10 +24,11 @@ interface DataPoint {
 
 const MARGIN = { top: 20, right: 30, bottom: 60, left: 65 };
 
+// Paul Tol qualitative palette — colorblind-safe
 const COLORS = {
-  top1: { line: "#d4878f", fill: "#d4878f", label: "Top 1%" },
-  top10: { line: "#c9a87c", fill: "#c9a87c", label: "Top 10%" },
-  bottom50: { line: "#7eb8a8", fill: "#7eb8a8", label: "Bottom 50%" },
+  top1: { line: "#CC6677", fill: "#CC6677", label: "Top 1%" },
+  top10: { line: "#DDCC77", fill: "#DDCC77", label: "Top 10%" },
+  bottom50: { line: "#44AA99", fill: "#44AA99", label: "Bottom 50%" },
 } as const;
 
 export default function HistoricalChart({
@@ -103,9 +104,9 @@ export default function HistoricalChart({
   return (
     <div className="relative">
       <svg width={width} height={height}>
-        <LinearGradient id="hist-top1" from="#d4878f" fromOpacity={0.2} to="#d4878f" toOpacity={0.02} />
-        <LinearGradient id="hist-top10" from="#c9a87c" fromOpacity={0.15} to="#c9a87c" toOpacity={0.02} />
-        <LinearGradient id="hist-bottom50" from="#7eb8a8" fromOpacity={0.2} to="#7eb8a8" toOpacity={0.02} />
+        <LinearGradient id="hist-top1" from="#CC6677" fromOpacity={0.2} to="#CC6677" toOpacity={0.02} />
+        <LinearGradient id="hist-top10" from="#DDCC77" fromOpacity={0.15} to="#DDCC77" toOpacity={0.02} />
+        <LinearGradient id="hist-bottom50" from="#44AA99" fromOpacity={0.2} to="#44AA99" toOpacity={0.02} />
 
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Grid */}
@@ -272,21 +273,21 @@ export default function HistoricalChart({
           </p>
           <div className="mt-1.5 space-y-1">
             <p className="text-xs">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#c9a87c] mr-1.5" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[#DDCC77] mr-1.5" />
               <span className="text-text-secondary">Top 10%: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.top10.toFixed(1)}%
               </span>
             </p>
             <p className="text-xs">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#d4878f] mr-1.5" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[#CC6677] mr-1.5" />
               <span className="text-text-secondary">Top 1%: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.top1.toFixed(1)}%
               </span>
             </p>
             <p className="text-xs">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#7eb8a8] mr-1.5" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[#44AA99] mr-1.5" />
               <span className="text-text-secondary">Bottom 50%: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.bottom50.toFixed(1)}%

@@ -9,10 +9,10 @@ interface WealthShareBarsProps {
 }
 
 const SEGMENTS = [
-  { key: "top1" as const, label: "Top 1%", color: "#d4878f", popWidth: 1 },
-  { key: "top10" as const, label: "Next 9%", color: "#c9a87c", popWidth: 9 },
-  { key: "middle40" as const, label: "Middle 40%", color: "#929ee8", popWidth: 40 },
-  { key: "bottom50" as const, label: "Bottom 50%", color: "#7eb8a8", popWidth: 50 },
+  { key: "top1" as const, label: "Top 1%", color: "#CC6677", popWidth: 1 },
+  { key: "top10" as const, label: "Next 9%", color: "#DDCC77", popWidth: 9 },
+  { key: "middle40" as const, label: "Middle 40%", color: "#88CCEE", popWidth: 40 },
+  { key: "bottom50" as const, label: "Bottom 50%", color: "#44AA99", popWidth: 50 },
 ];
 
 export default function WealthShareBars({ country }: WealthShareBarsProps) {

@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { Group } from "@visx/group";
 import { LinePath, Line } from "@visx/shape";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { curveMonotoneX } from "@visx/curve";
-import { useTooltip, TooltipWithBounds } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
+import ChartTooltip from "@/components/ChartTooltip";
 import {
   PURCHASING_POWER,
   ECONOMIC_SOURCES,
@@ -32,19 +32,19 @@ const MARGIN = { top: 50, right: 30, bottom: 55, left: 60 };
 const LINES = [
   {
     key: "wageIndex" as const,
-    label: "Avg. Wages (real)",
+    label: "Wages",
     color: "#7eb8a8",
     dash: undefined,
   },
   {
     key: "cpiIndex" as const,
-    label: "Consumer Prices",
+    label: "Cost of Living",
     color: "#c9a87c",
     dash: undefined,
   },
   {
     key: "housePriceIndex" as const,
-    label: "House Prices (real)",
+    label: "House Prices",
     color: "#d4878f",
     dash: undefined,
   },
@@ -57,8 +57,11 @@ export default function PurchasingPowerChart({
 }: PurchasingPowerChartProps) {
   const data = PURCHASING_POWER[countryCode];
 
-  const { tooltipData, tooltipLeft, tooltipTop, showTooltip, hideTooltip } =
-    useTooltip<TooltipPayload>();
+  const [tooltip, setTooltip] = useState<{
+    data: TooltipPayload;
+    left: number;
+    top: number;
+  } | null>(null);
 
   const innerWidth = width - MARGIN.left - MARGIN.right;
   const innerHeight = height - MARGIN.top - MARGIN.bottom;
@@ -96,7 +99,6 @@ export default function PurchasingPowerChart({
       if (!point) return;
 
       const x0 = xScale.invert(point.x - MARGIN.left);
-      // Find closest data point
       let closest = data.series[0];
       for (const d of data.series) {
         if (Math.abs(d.year - x0) < Math.abs(closest.year - x0)) {
@@ -104,24 +106,21 @@ export default function PurchasingPowerChart({
         }
       }
 
-      const tooltipY = Math.min(
-        Math.max(MARGIN.top, point.y),
-        MARGIN.top + innerHeight
-      );
-
-      showTooltip({
-        tooltipData: {
+      setTooltip({
+        data: {
           year: closest.year,
           wageIndex: closest.wageIndex,
           cpiIndex: closest.cpiIndex,
           housePriceIndex: closest.housePriceIndex,
         },
-        tooltipLeft: xScale(closest.year) + MARGIN.left,
-        tooltipTop: tooltipY,
+        left: xScale(closest.year) + MARGIN.left,
+        top: Math.min(Math.max(MARGIN.top, point.y), MARGIN.top + innerHeight),
       });
     },
-    [data, xScale, showTooltip],
+    [data, xScale, innerHeight],
   );
+
+  const hideTooltip = useCallback(() => setTooltip(null), []);
 
   if (!data || width < 10 || height < 10) {
     return (
@@ -152,7 +151,7 @@ export default function PurchasingPowerChart({
         ))}
         <div className="flex items-center gap-2">
           <div className="h-0.5 w-5 border-t border-dashed border-text-muted" />
-          <span className="text-text-secondary text-xs">Base (2000)</span>
+          <span className="text-text-secondary text-xs">Year 2000 baseline</span>
         </div>
       </div>
 
@@ -218,10 +217,10 @@ export default function PurchasingPowerChart({
           )}
 
           {/* Tooltip hover line */}
-          {tooltipData && (
+          {tooltip && (
             <Line
-              from={{ x: xScale(tooltipData.year), y: 0 }}
-              to={{ x: xScale(tooltipData.year), y: innerHeight }}
+              from={{ x: xScale(tooltip.data.year), y: 0 }}
+              to={{ x: xScale(tooltip.data.year), y: innerHeight }}
               stroke="var(--color-text-muted)"
               strokeWidth={1}
               strokeDasharray="3,3"
@@ -271,16 +270,15 @@ export default function PurchasingPowerChart({
       </svg>
 
       {/* Tooltip */}
-      {tooltipData && (
-        <TooltipWithBounds
-          left={(tooltipLeft ?? 0) + 12}
-          top={(tooltipTop ?? 0) - 12}
-          className="!bg-bg-card !border !border-border-subtle !rounded-lg !shadow-lg !px-3 !py-2"
-          unstyled
-          style={{ pointerEvents: "none" }}
+      {tooltip && (
+        <ChartTooltip
+          left={tooltip.left}
+          top={tooltip.top}
+          containerWidth={width}
+          containerHeight={height}
         >
           <p className="text-text-primary text-sm font-semibold mb-1.5">
-            {tooltipData.year}
+            {tooltip.data.year}
           </p>
           {LINES.map((line) => (
             <div
@@ -295,14 +293,14 @@ export default function PurchasingPowerChart({
                 <span className="text-text-secondary">{line.label}</span>
               </span>
               <span className="text-text-primary font-medium tabular-nums">
-                {tooltipData[line.key].toFixed(1)}
+                {tooltip.data[line.key].toFixed(1)}
               </span>
             </div>
           ))}
           <p className="text-text-muted text-[10px] mt-1.5 border-t border-border-subtle pt-1">
-            Indexed: 2000 = 100
+            100 = year 2000 level
           </p>
-        </TooltipWithBounds>
+        </ChartTooltip>
       )}
 
       {/* Sources */}

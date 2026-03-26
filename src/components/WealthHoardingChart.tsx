@@ -301,22 +301,19 @@ export default function WealthHoardingChart({
       </svg>
 
       {/* Legend — always readable, even for tiny segments */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 mt-4">
         {rectangles.map((rect) => (
-          <div key={rect.key} className="flex items-center gap-2 min-w-0">
+          <div key={rect.key} className="flex items-center gap-1.5 min-w-0">
             <span
-              className="inline-block w-3 h-3 rounded-sm shrink-0"
+              className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
               style={{ backgroundColor: rect.color }}
             />
-            <div className="min-w-0">
-              <span className="text-text-primary text-sm font-medium">
+            <div className="min-w-0 truncate">
+              <span className="text-text-primary text-xs sm:text-sm font-medium">
                 {rect.label}
               </span>
-              <span className="text-text-secondary text-sm ml-1.5 tabular-nums">
+              <span className="text-text-secondary text-xs sm:text-sm ml-1 tabular-nums">
                 {rect.wealthShare.toFixed(1)}%
-              </span>
-              <span className="text-text-muted text-xs ml-1">
-                ({formatPeopleCount(rect.peopleCount)})
               </span>
             </div>
           </div>

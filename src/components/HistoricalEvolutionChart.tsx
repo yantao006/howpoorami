@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { Group } from "@visx/group";
 import { AreaClosed, LinePath, Bar, Line } from "@visx/shape";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { curveMonotoneX } from "@visx/curve";
-import { useTooltip, TooltipWithBounds } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
+import ChartTooltip from "@/components/ChartTooltip";
 import { motion } from "framer-motion";
 import { type CountryData, type CountryCode } from "@/data/wealth-data";
 
@@ -160,14 +160,11 @@ export default function HistoricalEvolutionChart({
     [innerHeight]
   );
 
-  const {
-    tooltipData,
-    tooltipLeft,
-    tooltipTop,
-    tooltipOpen,
-    showTooltip,
-    hideTooltip,
-  } = useTooltip<TooltipPayload>();
+  const [tooltip, setTooltip] = useState<{
+    data: TooltipPayload;
+    left: number;
+    top: number;
+  } | null>(null);
 
   const handleTooltip = useCallback(
     (
@@ -182,25 +179,22 @@ export default function HistoricalEvolutionChart({
       const idx = findClosestIndex(stackedData, x0);
       const point = stackedData[idx];
 
-      const tooltipY = Math.min(
-        Math.max(MARGIN.top, coords.y),
-        MARGIN.top + innerHeight
-      );
-
-      showTooltip({
-        tooltipData: {
+      setTooltip({
+        data: {
           year: point.year,
           bottom50: point.bottom50,
           middle40: point.middle40,
           top10: point.top10,
           top1: point.top1,
         },
-        tooltipLeft: xScale(point.year) + MARGIN.left,
-        tooltipTop: tooltipY,
+        left: xScale(point.year) + MARGIN.left,
+        top: Math.min(Math.max(MARGIN.top, coords.y), MARGIN.top + innerHeight),
       });
     },
-    [stackedData, xScale, showTooltip]
+    [stackedData, xScale, innerHeight]
   );
+
+  const hideTooltip = useCallback(() => setTooltip(null), []);
 
   const visibleEvents = useMemo(() => {
     const [minYear, maxYear] = xScale.domain();
@@ -326,10 +320,10 @@ export default function HistoricalEvolutionChart({
           />
 
           {/* Tooltip crosshair */}
-          {tooltipOpen && tooltipData && (
+          {tooltip && (
             <Line
-              from={{ x: xScale(tooltipData.year), y: 0 }}
-              to={{ x: xScale(tooltipData.year), y: innerHeight }}
+              from={{ x: xScale(tooltip.data.year), y: 0 }}
+              to={{ x: xScale(tooltip.data.year), y: innerHeight }}
               stroke="var(--text-muted)"
               strokeWidth={1}
               strokeDasharray="3,3"
@@ -417,62 +411,59 @@ export default function HistoricalEvolutionChart({
       </div>
 
       {/* Tooltip */}
-      {tooltipOpen && tooltipData && (
-        <TooltipWithBounds
-          left={(tooltipLeft ?? 0) + 12}
-          top={(tooltipTop ?? 0) - 12}
-          className="!bg-transparent !p-0"
-          unstyled
-          style={{ pointerEvents: "none" }}
+      {tooltip && (
+        <ChartTooltip
+          left={tooltip.left}
+          top={tooltip.top}
+          containerWidth={width}
+          containerHeight={height}
         >
-          <div className="bg-bg-card rounded-xl px-4 py-3 border border-border-subtle shadow-xl">
-            <p className="text-text-primary font-semibold tabular-nums text-sm">
-              {tooltipData.year}
+          <p className="text-text-primary font-semibold tabular-nums text-sm">
+            {tooltip.data.year}
+          </p>
+          <div className="mt-1.5 space-y-1">
+            <p className="text-xs">
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-1.5"
+                style={{ backgroundColor: COLORS.top10.fill }}
+              />
+              <span className="text-text-secondary">Top 10%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.top10.toFixed(1)}%
+              </span>
             </p>
-            <div className="mt-1.5 space-y-1">
-              <p className="text-xs">
-                <span
-                  className="inline-block w-2 h-2 rounded-full mr-1.5"
-                  style={{ backgroundColor: COLORS.top10.fill }}
-                />
-                <span className="text-text-secondary">Top 10%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.top10.toFixed(1)}%
-                </span>
-              </p>
-              <p className="text-xs">
-                <span
-                  className="inline-block w-2 h-2 rounded-full mr-1.5"
-                  style={{ backgroundColor: COLORS.top1Line.stroke }}
-                />
-                <span className="text-text-secondary">Top 1%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.top1.toFixed(1)}%
-                </span>
-              </p>
-              <p className="text-xs">
-                <span
-                  className="inline-block w-2 h-2 rounded-full mr-1.5"
-                  style={{ backgroundColor: COLORS.middle40.fill }}
-                />
-                <span className="text-text-secondary">Middle 40%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.middle40.toFixed(1)}%
-                </span>
-              </p>
-              <p className="text-xs">
-                <span
-                  className="inline-block w-2 h-2 rounded-full mr-1.5"
-                  style={{ backgroundColor: COLORS.bottom50.fill }}
-                />
-                <span className="text-text-secondary">Bottom 50%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.bottom50.toFixed(1)}%
-                </span>
-              </p>
-            </div>
+            <p className="text-xs">
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-1.5"
+                style={{ backgroundColor: COLORS.top1Line.stroke }}
+              />
+              <span className="text-text-secondary">Top 1%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.top1.toFixed(1)}%
+              </span>
+            </p>
+            <p className="text-xs">
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-1.5"
+                style={{ backgroundColor: COLORS.middle40.fill }}
+              />
+              <span className="text-text-secondary">Middle 40%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.middle40.toFixed(1)}%
+              </span>
+            </p>
+            <p className="text-xs">
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-1.5"
+                style={{ backgroundColor: COLORS.bottom50.fill }}
+              />
+              <span className="text-text-secondary">Bottom 50%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.bottom50.toFixed(1)}%
+              </span>
+            </p>
           </div>
-        </TooltipWithBounds>
+        </ChartTooltip>
       )}
     </motion.div>
   );

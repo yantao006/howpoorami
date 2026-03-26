@@ -19,15 +19,15 @@ export default function Navigation() {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-12 sm:h-14 flex items-center justify-between gap-2">
         <Link
           href="/"
-          className="font-[family-name:var(--font-heading)] text-lg font-bold text-text-primary hover:text-accent-periwinkle transition-colors"
+          className="font-[family-name:var(--font-heading)] text-sm sm:text-lg font-bold text-text-primary hover:text-accent-periwinkle transition-colors whitespace-nowrap shrink-0"
         >
           How Poor Am I?
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -36,7 +36,7 @@ export default function Navigation() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={`
-                  px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
+                  px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap
                   ${
                     isActive
                       ? "bg-accent-periwinkle/15 text-accent-periwinkle"
@@ -53,7 +53,7 @@ export default function Navigation() {
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="ml-2 p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-bg-card transition-all duration-200"
+            className="ml-1 sm:ml-2 p-1.5 sm:p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-bg-card transition-all duration-200"
           >
             {theme === "dark" ? (
               <svg

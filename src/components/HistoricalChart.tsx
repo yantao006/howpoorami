@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { Group } from "@visx/group";
 import { LinePath, AreaClosed, Bar, Line } from "@visx/shape";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { LinearGradient } from "@visx/gradient";
 import { curveMonotoneX } from "@visx/curve";
-import { useTooltip, TooltipWithBounds } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
+import ChartTooltip from "@/components/ChartTooltip";
 import { type CountryData } from "@/data/wealth-data";
 
 interface HistoricalChartProps {
@@ -61,14 +61,11 @@ export default function HistoricalChart({
     [innerHeight]
   );
 
-  const {
-    tooltipData,
-    tooltipLeft,
-    tooltipTop,
-    tooltipOpen,
-    showTooltip,
-    hideTooltip,
-  } = useTooltip<{ year: number; top1: number; top10: number; bottom50: number }>();
+  const [tooltip, setTooltip] = useState<{
+    data: { year: number; top1: number; top10: number; bottom50: number };
+    left: number;
+    top: number;
+  } | null>(null);
 
   const handleTooltip = useCallback(
     (event: React.TouchEvent<SVGRectElement> | React.MouseEvent<SVGRectElement>) => {
@@ -85,24 +82,21 @@ export default function HistoricalChart({
         0
       );
 
-      const tooltipY = Math.min(
-        Math.max(MARGIN.top, coords.y),
-        MARGIN.top + innerHeight
-      );
-
-      showTooltip({
-        tooltipData: {
+      setTooltip({
+        data: {
           year: country.historicalWealthTop1[closestIdx].year,
           top1: country.historicalWealthTop1[closestIdx].share,
           top10: country.historicalWealthTop10[closestIdx]?.share ?? 0,
           bottom50: country.historicalWealthBottom50[closestIdx]?.share ?? 0,
         },
-        tooltipLeft: xScale(country.historicalWealthTop1[closestIdx].year) + MARGIN.left,
-        tooltipTop: tooltipY,
+        left: xScale(country.historicalWealthTop1[closestIdx].year) + MARGIN.left,
+        top: Math.min(Math.max(MARGIN.top, coords.y), MARGIN.top + innerHeight),
       });
     },
-    [country, xScale, showTooltip]
+    [country, xScale, innerHeight]
   );
+
+  const hideTooltip = useCallback(() => setTooltip(null), []);
 
   if (width < 10) return null;
 
@@ -203,10 +197,10 @@ export default function HistoricalChart({
             onMouseLeave={hideTooltip}
           />
 
-          {tooltipOpen && tooltipData && (
+          {tooltip && (
             <Line
-              from={{ x: xScale(tooltipData.year), y: 0 }}
-              to={{ x: xScale(tooltipData.year), y: innerHeight }}
+              from={{ x: xScale(tooltip.data.year), y: 0 }}
+              to={{ x: xScale(tooltip.data.year), y: innerHeight }}
               stroke="var(--text-muted)"
               strokeWidth={1}
               strokeDasharray="3,3"
@@ -266,43 +260,40 @@ export default function HistoricalChart({
         ))}
       </div>
 
-      {tooltipOpen && tooltipData && (
-        <TooltipWithBounds
-          left={(tooltipLeft ?? 0) + 12}
-          top={(tooltipTop ?? 0) - 12}
-          className="!bg-transparent !p-0"
-          unstyled
-          style={{ pointerEvents: "none" }}
+      {tooltip && (
+        <ChartTooltip
+          left={tooltip.left}
+          top={tooltip.top}
+          containerWidth={width}
+          containerHeight={height}
         >
-          <div className="bg-bg-card rounded-xl px-4 py-3 border border-border-subtle shadow-xl">
-            <p className="text-text-primary font-semibold tabular-nums text-sm">
-              {tooltipData.year}
+          <p className="text-text-primary font-semibold tabular-nums text-sm">
+            {tooltip.data.year}
+          </p>
+          <div className="mt-1.5 space-y-1">
+            <p className="text-xs">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#c9a87c] mr-1.5" />
+              <span className="text-text-secondary">Top 10%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.top10.toFixed(1)}%
+              </span>
             </p>
-            <div className="mt-1.5 space-y-1">
-              <p className="text-xs">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#c9a87c] mr-1.5" />
-                <span className="text-text-secondary">Top 10%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.top10.toFixed(1)}%
-                </span>
-              </p>
-              <p className="text-xs">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#d4878f] mr-1.5" />
-                <span className="text-text-secondary">Top 1%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.top1.toFixed(1)}%
-                </span>
-              </p>
-              <p className="text-xs">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#7eb8a8] mr-1.5" />
-                <span className="text-text-secondary">Bottom 50%: </span>
-                <span className="text-text-primary font-medium tabular-nums">
-                  {tooltipData.bottom50.toFixed(1)}%
-                </span>
-              </p>
-            </div>
+            <p className="text-xs">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#d4878f] mr-1.5" />
+              <span className="text-text-secondary">Top 1%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.top1.toFixed(1)}%
+              </span>
+            </p>
+            <p className="text-xs">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#7eb8a8] mr-1.5" />
+              <span className="text-text-secondary">Bottom 50%: </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltip.data.bottom50.toFixed(1)}%
+              </span>
+            </p>
           </div>
-        </TooltipWithBounds>
+        </ChartTooltip>
       )}
     </div>
   );

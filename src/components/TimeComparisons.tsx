@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   getRelevantComparisons,
   type ComparisonResult,
 } from "@/data/time-comparisons";
-import { YEARS_TO_MATCH_LINES } from "@/data/comedic-lines";
+import { getYearsToMatchLine } from "@/data/comedic-lines";
 import { formatNumber } from "@/lib/format";
 
 // ---------------------------------------------------------------------------
@@ -16,13 +16,6 @@ import { formatNumber } from "@/lib/format";
 interface TimeComparisonsProps {
   readonly yearsToMatch: number;
   readonly billionaireName: string;
-}
-
-interface ComedyCard {
-  readonly text: string;
-  readonly emoji: string;
-  readonly accent: string;
-  readonly border: string;
 }
 
 const CATEGORY_ACCENT: Record<string, string> = {
@@ -43,97 +36,16 @@ const CATEGORY_BORDER: Record<string, string> = {
   pop_culture: "border-accent-rose/20",
 };
 
-/** Emojis to rotate through for the comedic grid cards */
-const CARD_EMOJIS = [
-  "\u{1F4B8}", // money with wings
-  "\u{1F525}", // fire
-  "\u{1F916}", // robot
-  "\u{1F3B0}", // slot machine
-  "\u{1F4A1}", // light bulb
-  "\u{1F30D}", // globe
-  "\u{23F3}",  // hourglass
-  "\u{1F4CA}", // chart
-  "\u{1F947}", // medal
-  "\u{1F3AF}", // dart
-  "\u{1F6A7}", // construction
-  "\u{2620}\uFE0F", // skull and crossbones
-] as const;
-
-const CARD_ACCENTS = [
-  { accent: "text-accent-rose", border: "border-accent-rose/20" },
-  { accent: "text-accent-amber", border: "border-accent-amber/20" },
-  { accent: "text-accent-periwinkle", border: "border-accent-periwinkle/20" },
-  { accent: "text-accent-sage", border: "border-accent-sage/20" },
-  { accent: "text-accent-lavender", border: "border-accent-lavender/20" },
-  { accent: "text-accent-rose", border: "border-accent-rose/20" },
-  { accent: "text-accent-amber", border: "border-accent-amber/20" },
-  { accent: "text-accent-periwinkle", border: "border-accent-periwinkle/20" },
-] as const;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Simple seeded pseudo-random number generator (mulberry32).
- * Deterministic for a given seed so the same years always shows the same cards.
- */
-function seededRandom(seed: number): () => number {
-  let s = seed | 0;
-  return () => {
-    s = (s + 0x6d2b79f5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Pick n unique random items from an array using a seeded RNG */
-function pickRandom<T>(arr: readonly T[], n: number, rng: () => number): T[] {
-  const copy = [...arr];
-  const result: T[] = [];
-  for (let i = 0; i < n && copy.length > 0; i++) {
-    const idx = Math.floor(rng() * copy.length);
-    result.push(copy[idx]);
-    copy.splice(idx, 1);
-  }
-  return result;
-}
-
-function getComedyCards(
-  years: number,
-  billionaireName: string,
-  count: number,
-): readonly ComedyCard[] {
-  const formattedYears = formatNumber(years);
-  const rng = seededRandom(Math.floor(years));
-
-  // Find matching tier
-  const tier = YEARS_TO_MATCH_LINES.find(
-    (t) => years >= t.min && years < t.max,
-  ) ?? YEARS_TO_MATCH_LINES[YEARS_TO_MATCH_LINES.length - 1];
-
-  // Pick unique lines
-  const lines = pickRandom(tier.lines, count, rng);
-
-  return lines.map((line, i) => ({
-    text: line
-      .replace(/\{name\}/g, billionaireName)
-      .replace(/\{years\}/g, formattedYears),
-    emoji: CARD_EMOJIS[i % CARD_EMOJIS.length],
-    accent: CARD_ACCENTS[i % CARD_ACCENTS.length].accent,
-    border: CARD_ACCENTS[i % CARD_ACCENTS.length].border,
-  }));
-}
-
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
 function LifetimeHighlight({
   comparison,
+  comedicQuote,
 }: {
   readonly comparison: ComparisonResult;
+  readonly comedicQuote: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-30px" });
@@ -153,21 +65,29 @@ function LifetimeHighlight({
         {comparison.formatted}
       </p>
       <p className="text-text-muted text-sm sm:text-base">
-        {comparison.ref.label}
+        {comparison.ref.label} ({comparison.ref.years} years)
       </p>
+      {comedicQuote && (
+        <p className="text-text-muted text-sm italic mt-5 pt-5 border-t border-border-subtle/50 max-w-lg mx-auto">
+          {comedicQuote}
+        </p>
+      )}
     </motion.div>
   );
 }
 
-function ComedyGridCard({
-  card,
+function ComparisonCard({
+  comparison,
   delay,
 }: {
-  readonly card: ComedyCard;
+  readonly comparison: ComparisonResult;
   readonly delay: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-30px" });
+
+  const accent = CATEGORY_ACCENT[comparison.ref.category] ?? "text-text-primary";
+  const border = CATEGORY_BORDER[comparison.ref.category] ?? "border-border-subtle";
 
   return (
     <motion.div
@@ -175,16 +95,17 @@ function ComedyGridCard({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay, ease: "easeOut" }}
-      className={`bg-bg-card border ${card.border} rounded-2xl p-5 sm:p-6 flex items-start gap-4`}
+      className={`bg-bg-card border ${border} rounded-2xl p-5 sm:p-6 text-center`}
     >
-      <span className="text-2xl sm:text-3xl shrink-0 mt-0.5">
-        {card.emoji}
+      <span className="text-3xl sm:text-4xl mb-3 block">
+        {comparison.ref.emoji}
       </span>
-      <div className="min-w-0">
-        <p className={`text-sm sm:text-base leading-relaxed ${card.accent}`}>
-          {card.text}
-        </p>
-      </div>
+      <p className={`text-lg sm:text-xl font-bold ${accent} mb-2`}>
+        {comparison.formatted}
+      </p>
+      <p className="text-text-muted text-xs sm:text-sm">
+        {comparison.ref.label}
+      </p>
     </motion.div>
   );
 }
@@ -193,40 +114,47 @@ function ComedyGridCard({
 // Main component
 // ---------------------------------------------------------------------------
 
-const GRID_CARD_COUNT = 8;
-
 export default function TimeComparisons({
   yearsToMatch,
   billionaireName,
 }: TimeComparisonsProps) {
   const comparisons = getRelevantComparisons(yearsToMatch, billionaireName);
 
-  // Always show the lifetime highlight
+  // Always show the lifetime highlight separately
   const lifetimeComparison = comparisons.find(
     (c) => c.ref.id === "human-lifetime",
   );
 
-  // Generate 8 comedic grid cards from YEARS_TO_MATCH_LINES
-  const comedyCards = useMemo(
-    () => getComedyCards(yearsToMatch, billionaireName, GRID_CARD_COUNT),
-    [yearsToMatch, billionaireName],
+  // The 6 grid cards are everything except the lifetime highlight
+  const gridCards = comparisons
+    .filter((c) => c.ref.id !== "human-lifetime")
+    .slice(0, 6);
+
+  // Get a comedic quote to put inside the lifetime card
+  const comedicQuote = getYearsToMatchLine(
+    yearsToMatch,
+    billionaireName,
+    formatNumber(yearsToMatch),
   );
 
-  if (comparisons.length === 0 && comedyCards.length === 0) {
+  if (comparisons.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-8">
       {lifetimeComparison && (
-        <LifetimeHighlight comparison={lifetimeComparison} />
+        <LifetimeHighlight
+          comparison={lifetimeComparison}
+          comedicQuote={comedicQuote}
+        />
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        {comedyCards.map((card, index) => (
-          <ComedyGridCard
-            key={`comedy-${index}`}
-            card={card}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {gridCards.map((comparison, index) => (
+          <ComparisonCard
+            key={comparison.ref.id}
+            comparison={comparison}
             delay={index * 0.08}
           />
         ))}

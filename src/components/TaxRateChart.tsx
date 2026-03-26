@@ -182,7 +182,7 @@ export default function TaxRateChart({
             textAnchor="middle"
             fill="var(--text-muted)"
             fontSize={10}
-            fontFamily="var(--font-raleway)"
+            fontFamily="var(--font-body)"
           >
             Nominal top rate {rates.nominalTopRate}%
           </text>
@@ -218,7 +218,7 @@ export default function TaxRateChart({
                   fill={entry.color}
                   fontSize={12}
                   fontWeight={600}
-                  fontFamily="var(--font-raleway)"
+                  fontFamily="var(--font-body)"
                   initial={{ opacity: 0, x: 0 }}
                   animate={{ opacity: 1, x: barWidth + 6 }}
                   transition={{
@@ -270,7 +270,7 @@ export default function TaxRateChart({
                   fill="#e8636b"
                   fontSize={10}
                   fontWeight={600}
-                  fontFamily="var(--font-raleway)"
+                  fontFamily="var(--font-body)"
                 >
                   -{regressivityGap}%
                 </text>
@@ -290,7 +290,7 @@ export default function TaxRateChart({
               fill: "var(--text-secondary)",
               fontSize: 11,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
             label="Effective tax rate"
             labelOffset={30}
@@ -298,7 +298,7 @@ export default function TaxRateChart({
               fill: "var(--text-secondary)",
               fontSize: 12,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
           <AxisLeft
@@ -309,7 +309,7 @@ export default function TaxRateChart({
               fill: "var(--text-secondary)",
               fontSize: 11,
               textAnchor: "end",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
         </Group>

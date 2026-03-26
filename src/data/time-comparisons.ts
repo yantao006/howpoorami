@@ -68,6 +68,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
     wittyTemplateBelow:
       "Not even one full dog life — just {n} of those precious years",
   },
+  {
+    id: "generations",
+    label: "One human generation",
+    years: 25,
+    emoji: "👶",
+    category: "human",
+    wittyTemplate:
+      "That's {n} generations — your descendants would still be paying it off",
+    wittyTemplateBelow:
+      "Less than a single generation — just {n} of raising a child",
+  },
+  {
+    id: "retirement-savings",
+    label: "Average time saving for retirement",
+    years: 40,
+    emoji: "🏦",
+    category: "human",
+    wittyTemplate:
+      "You'd have to save for retirement {n} times over — without ever actually retiring",
+    wittyTemplateBelow:
+      "Not even one full retirement fund — just {n} of the way",
+  },
 
   // ---------------------------------------------------------------------------
   // Historical (serious, sobering)
@@ -82,6 +104,17 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "You'd have to build the Great Pyramid {n} times over",
     wittyTemplateBelow:
       "Not even one pyramid — just {n} of the way through construction",
+  },
+  {
+    id: "us-independence",
+    label: "Time since US independence",
+    years: 250,
+    emoji: "🇺🇸",
+    category: "historical",
+    wittyTemplate:
+      "America could declare independence {n} times and still owe you overtime",
+    wittyTemplateBelow:
+      "Just {n} of the American experiment",
   },
   {
     id: "industrial-revolution",
@@ -106,6 +139,17 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "Only {n} of a single Roman Empire — not even the good part",
   },
   {
+    id: "viking-age",
+    label: "The entire Viking Age",
+    years: 300,
+    emoji: "⚔️",
+    category: "historical",
+    wittyTemplate:
+      "The Vikings could raid, settle, and fade {n} times over",
+    wittyTemplateBelow:
+      "Not even one Viking Age — just {n} of the pillaging",
+  },
+  {
     id: "renaissance",
     label: "Time since the Renaissance",
     years: 600,
@@ -115,6 +159,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "Da Vinci could have painted the Mona Lisa {n} Renaissance-lengths ago",
     wittyTemplateBelow:
       "Just {n} of the time since the Renaissance — barely a brushstroke",
+  },
+  {
+    id: "genghis-khan",
+    label: "Time since Genghis Khan's empire",
+    years: 800,
+    emoji: "🐎",
+    category: "historical",
+    wittyTemplate:
+      "Genghis Khan could conquer the known world {n} times",
+    wittyTemplateBelow:
+      "Only {n} of the time since the Mongol Empire — barely a skirmish",
+  },
+  {
+    id: "magna-carta",
+    label: "Time since the Magna Carta",
+    years: 810,
+    emoji: "📋",
+    category: "historical",
+    wittyTemplate:
+      "The Magna Carta could be signed {n} times — human rights still pending",
+    wittyTemplateBelow:
+      "Just {n} of the time since we first tried limiting power",
   },
   {
     id: "cleopatra",
@@ -139,6 +205,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "Just {n} of the time since the Greeks tried voting",
   },
   {
+    id: "great-wall",
+    label: "Time to build the Great Wall of China",
+    years: 2000,
+    emoji: "🧱",
+    category: "historical",
+    wittyTemplate:
+      "The Great Wall could be built {n} times — brick by brick, dynasty by dynasty",
+    wittyTemplateBelow:
+      "Just {n} of the construction of humanity's greatest wall",
+  },
+  {
+    id: "stonehenge",
+    label: "Time since Stonehenge was built",
+    years: 5000,
+    emoji: "🪨",
+    category: "historical",
+    wittyTemplate:
+      "Stonehenge could be dragged into position {n} times over",
+    wittyTemplateBelow:
+      "Only {n} of the time since those mysterious stones were placed",
+  },
+  {
     id: "recorded-history",
     label: "All of recorded human history",
     years: 5000,
@@ -148,6 +236,39 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "That's {n} times all of recorded human history — every war, every invention, every empire",
     wittyTemplateBelow:
       "A mere {n} of everything humanity has ever written down",
+  },
+  {
+    id: "troy-fell",
+    label: "Time since the fall of Troy",
+    years: 3200,
+    emoji: "🏇",
+    category: "historical",
+    wittyTemplate:
+      "Troy could fall {n} times — the Trojan Horse is getting tired",
+    wittyTemplateBelow:
+      "Just {n} of the time since the Trojans made a bad decision about a horse",
+  },
+  {
+    id: "ottoman-empire",
+    label: "Duration of the Ottoman Empire",
+    years: 600,
+    emoji: "🌙",
+    category: "historical",
+    wittyTemplate:
+      "The Ottoman Empire could rise and fall {n} times over",
+    wittyTemplateBelow:
+      "Not even one Ottoman Empire — just {n} of six centuries of power",
+  },
+  {
+    id: "black-death",
+    label: "Time since the Black Death",
+    years: 680,
+    emoji: "☠️",
+    category: "historical",
+    wittyTemplate:
+      "The Black Death could sweep through Europe {n} times",
+    wittyTemplateBelow:
+      "Just {n} of the time since the plague — at least that ended",
   },
 
   // ---------------------------------------------------------------------------
@@ -186,6 +307,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
     wittyTemplateBelow:
       "Just {n} of the time since the Buddha — still meditating",
   },
+  {
+    id: "torah-written",
+    label: "Time since the Torah was written",
+    years: 3400,
+    emoji: "✡️",
+    category: "religious",
+    wittyTemplate:
+      "The Torah could be written {n} times — the commandments still apply",
+    wittyTemplateBelow:
+      "Just {n} of the time since the oldest scripture was penned",
+  },
+  {
+    id: "hinduism-origins",
+    label: "Time since the Vedas were composed",
+    years: 3500,
+    emoji: "🕉️",
+    category: "religious",
+    wittyTemplate:
+      "The Vedas could be composed and sung {n} times over",
+    wittyTemplateBelow:
+      "Only {n} of the span since humanity's oldest living religion began",
+  },
 
   // ---------------------------------------------------------------------------
   // Scientific
@@ -202,6 +345,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "Just {n} of the time since we stopped being hunter-gatherers",
   },
   {
+    id: "wheel-invented",
+    label: "Time since the wheel was invented",
+    years: 5500,
+    emoji: "☸️",
+    category: "scientific",
+    wittyTemplate:
+      "The wheel could be invented {n} times — and it'd still go round",
+    wittyTemplateBelow:
+      "Just {n} of the time since our most basic invention",
+  },
+  {
+    id: "last-ice-age",
+    label: "Time since the last Ice Age ended",
+    years: 11_700,
+    emoji: "🧊",
+    category: "scientific",
+    wittyTemplate:
+      "The Ice Age could end {n} times — the glaciers keep coming back",
+    wittyTemplateBelow:
+      "Just {n} of the time since the glaciers melted",
+  },
+  {
     id: "first-humans",
     label: "Time since first humans",
     years: 300_000,
@@ -213,6 +378,17 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "Only {n} of the time humans have existed — still basically newborns",
   },
   {
+    id: "first-fire",
+    label: "Time since humans controlled fire",
+    years: 400_000,
+    emoji: "🔥",
+    category: "scientific",
+    wittyTemplate:
+      "Humans could discover fire {n} times over — still couldn't melt this wealth gap",
+    wittyTemplateBelow:
+      "Just {n} of the time since our ancestors first made a campfire",
+  },
+  {
     id: "dinosaurs-died",
     label: "Time since the dinosaurs died",
     years: 66_000_000,
@@ -222,6 +398,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "The dinosaurs could go extinct {n} times and still not cover it",
     wittyTemplateBelow:
       "Just {n} of the time since the asteroid — the T-Rex would laugh",
+  },
+  {
+    id: "first-mammals",
+    label: "Time since the first mammals",
+    years: 200_000_000,
+    emoji: "🐾",
+    category: "scientific",
+    wittyTemplate:
+      "Mammals could evolve from tiny shrews to elephants {n} times",
+    wittyTemplateBelow:
+      "Only {n} of the time since tiny rodent-things became... us",
+  },
+  {
+    id: "first-life",
+    label: "Time since life began on Earth",
+    years: 3_800_000_000,
+    emoji: "🦠",
+    category: "scientific",
+    wittyTemplate:
+      "Life itself could begin and evolve {n} times — from bacteria to billionaires",
+    wittyTemplateBelow:
+      "A fraction of the time since the first single-celled organism wiggled",
   },
   {
     id: "age-of-earth",
@@ -247,7 +445,7 @@ const TIME_REFERENCES: readonly TimeReference[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // Comedic (but makes a serious point)
+  // Pop culture / Comedic (but makes a serious point)
   // ---------------------------------------------------------------------------
   {
     id: "lotr-extended",
@@ -259,6 +457,50 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "You could rewatch all of Lord of the Rings Extended Edition {n} times (bring snacks)",
     wittyTemplateBelow:
       "Not even one full LOTR marathon — just {n} of the way to Mordor",
+  },
+  {
+    id: "moon-landing",
+    label: "Time since the Moon landing",
+    years: 57,
+    emoji: "🚀",
+    category: "pop_culture",
+    wittyTemplate:
+      "Humanity could go to the Moon and back {n} times — still can't close this gap",
+    wittyTemplateBelow:
+      "Just {n} of the time since one small step for man",
+  },
+  {
+    id: "internet-invented",
+    label: "Time since the internet was invented",
+    years: 35,
+    emoji: "🌐",
+    category: "pop_culture",
+    wittyTemplate:
+      "The internet could be invented {n} times — and every page would say 'this is unfair'",
+    wittyTemplateBelow:
+      "Less than one internet-age — just {n} of the time since dial-up",
+  },
+  {
+    id: "iphone-release",
+    label: "Time since the first iPhone",
+    years: 19,
+    emoji: "📱",
+    category: "pop_culture",
+    wittyTemplate:
+      "Apple could release {n} iPhone-lifetimes' worth of products",
+    wittyTemplateBelow:
+      "The iPhone hasn't even existed long enough — just {n} of the smartphone era",
+  },
+  {
+    id: "titanic-sank",
+    label: "Time since the Titanic sank",
+    years: 114,
+    emoji: "🚢",
+    category: "pop_culture",
+    wittyTemplate:
+      "The Titanic could sink {n} times — and the wealth gap would still be unsinkable",
+    wittyTemplateBelow:
+      "Just {n} of the time since the 'unsinkable' ship met an iceberg",
   },
   {
     id: "phd-duration",
@@ -283,6 +525,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "You can't even finish Netflix — only {n} of the catalog",
   },
   {
+    id: "world-cup-cycle",
+    label: "FIFA World Cup cycles",
+    years: 4,
+    emoji: "⚽",
+    category: "pop_culture",
+    wittyTemplate:
+      "That's {n} World Cup cycles — enough football to fill several afterlives",
+    wittyTemplateBelow:
+      "Not even one World Cup cycle — just {n} of the beautiful game",
+  },
+  {
+    id: "olympics-cycle",
+    label: "Olympic Games cycles",
+    years: 4,
+    emoji: "🏅",
+    category: "pop_culture",
+    wittyTemplate:
+      "You could watch {n} Olympic Games — and the wealth gap would win gold every time",
+    wittyTemplateBelow:
+      "Not even one Olympiad — just {n} of the wait between games",
+  },
+  {
     id: "blockbuster-closed",
     label: "Time since the last Blockbuster closed",
     years: 12,
@@ -303,6 +567,28 @@ const TIME_REFERENCES: readonly TimeReference[] = [
       "You'd have to count to one billion {n} times — no breaks, no sleep, just numbers",
     wittyTemplateBelow:
       "You can't even count to a billion once — only {n} of the way there",
+  },
+  {
+    id: "walk-around-earth",
+    label: "Time to walk around the Earth",
+    years: 1.5,
+    emoji: "🚶",
+    category: "comedic",
+    wittyTemplate:
+      "You could walk around the entire Earth {n} times — and still not reach their bank balance",
+    wittyTemplateBelow:
+      "You can't even walk around the planet once — just {n} of the trip",
+  },
+  {
+    id: "mars-mission",
+    label: "Round trip to Mars",
+    years: 2.5,
+    emoji: "🪐",
+    category: "pop_culture",
+    wittyTemplate:
+      "You could fly to Mars and back {n} times — {name} could probably afford the rocket",
+    wittyTemplateBelow:
+      "Not even one Mars mission — just {n} of the interplanetary commute",
   },
 ] as const;
 
@@ -393,7 +679,7 @@ export function getRelevantComparisons(
   years: number,
   billionaireName: string,
 ): readonly ComparisonResult[] {
-  const TARGET_COUNT = 8;
+  const TARGET_COUNT = 7; // 6 grid cards + 1 human-lifetime (shown separately)
 
   const scored = TIME_REFERENCES.map((ref) => {
     const multiplier = years / ref.years;
@@ -403,11 +689,20 @@ export function getRelevantComparisons(
   // Sort by impact descending, pick top entries ensuring category diversity
   const sortedByImpact = [...scored].sort((a, b) => b.impact - a.impact);
 
+  // Always include human-lifetime (it gets special treatment in TimeComparisons)
+  const lifetime = scored.find((e) => e.ref.id === "human-lifetime");
+
   const picked: typeof scored = [];
   const categoryCounts: Partial<Record<TimeReference["category"], number>> = {};
 
+  if (lifetime) {
+    picked.push(lifetime);
+    categoryCounts[lifetime.ref.category] = 1;
+  }
+
   for (const entry of sortedByImpact) {
     if (picked.length >= TARGET_COUNT) break;
+    if (entry.ref.id === "human-lifetime") continue; // already added
 
     const catCount = categoryCounts[entry.ref.category] ?? 0;
     // Allow at most 2 per category to keep variety

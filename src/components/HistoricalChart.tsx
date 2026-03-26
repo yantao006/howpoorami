@@ -221,7 +221,7 @@ export default function HistoricalChart({
               fill: "var(--text-secondary)",
               fontSize: 12,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
           <AxisLeft
@@ -234,7 +234,7 @@ export default function HistoricalChart({
               fill: "var(--text-secondary)",
               fontSize: 12,
               textAnchor: "end",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
             label="Share of total wealth"
             labelOffset={45}
@@ -242,7 +242,7 @@ export default function HistoricalChart({
               fill: "var(--text-secondary)",
               fontSize: 13,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
         </Group>

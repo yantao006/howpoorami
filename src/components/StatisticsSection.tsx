@@ -52,13 +52,10 @@ function StatCard({ label, children, sublabel, delay = 0, accent = "periwinkle" 
 export default function StatisticsSection({ country }: StatisticsSectionProps) {
   const meanToMedianRatio = country.meanWealthPerAdult / country.medianWealthPerAdult;
 
-  const medianDailyIncome = country.medianIncome / 365;
-  const avgTop1Wealth =
-    (country.wealthShares.top1 / 100) *
-    country.meanWealthPerAdult *
-    (country.population * 1_000_000 * 0.78) /
-    (country.population * 1_000_000 * 0.78 * 0.01);
-  const yearsToEarnTop1 = Math.round(avgTop1Wealth / medianDailyIncome / 365);
+  // Average wealth of a top 1% member = (their share of total wealth) / (1% of adults)
+  // Simplifies to: (top1% / 100) * meanWealthPerAdult / 0.01 = top1% * meanWealthPerAdult
+  const avgTop1Wealth = country.wealthShares.top1 * country.meanWealthPerAdult;
+  const yearsToEarnTop1 = Math.round(avgTop1Wealth / country.medianIncome);
 
   return (
     <div className="space-y-16">
@@ -67,7 +64,7 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="font-[family-name:var(--font-bitter)] text-2xl sm:text-3xl text-center mb-10 text-text-primary"
+          className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-10 text-text-primary"
         >
           The Numbers That Define Inequality
         </motion.h3>
@@ -105,7 +102,7 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
         <p className="text-text-secondary text-lg sm:text-xl mb-4">
           A median income earner in {country.name} would need to work for
         </p>
-        <p className="text-5xl sm:text-6xl lg:text-7xl font-bold text-accent-amber font-[family-name:var(--font-bitter)]">
+        <p className="text-5xl sm:text-6xl lg:text-7xl font-bold text-accent-amber font-[family-name:var(--font-heading)]">
           <AnimatedCounter end={yearsToEarnTop1} duration={2.5} /> years
         </p>
         <p className="text-text-secondary text-lg sm:text-xl mt-4">
@@ -123,7 +120,7 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="font-[family-name:var(--font-bitter)] text-2xl sm:text-3xl text-center mb-10 text-text-primary"
+          className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-10 text-text-primary"
         >
           Income vs. Wealth: The Double Gap
         </motion.h3>
@@ -170,7 +167,7 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
         viewport={{ once: true }}
         className="text-center"
       >
-        <h3 className="font-[family-name:var(--font-bitter)] text-2xl sm:text-3xl mb-8 text-text-primary">
+        <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl mb-8 text-text-primary">
           The Global Picture
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

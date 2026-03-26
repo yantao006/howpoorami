@@ -21,11 +21,19 @@ export default function AnimatedCounter({
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const hasAnimated = useRef(false);
+  const hasBeenInView = useRef(false);
+  const prevEnd = useRef(end);
+
+  // Track when first comes into view
+  if (isInView && !hasBeenInView.current) {
+    hasBeenInView.current = true;
+  }
 
   useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
-    hasAnimated.current = true;
+    if (!hasBeenInView.current) return;
+
+    const from = prevEnd.current !== end ? count : 0;
+    prevEnd.current = end;
 
     const startTime = performance.now();
     const durationMs = duration * 1000;
@@ -36,7 +44,7 @@ export default function AnimatedCounter({
 
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(eased * end);
+      setCount(from + eased * (end - from));
 
       if (progress < 1) {
         requestAnimationFrame(animate);
@@ -44,7 +52,7 @@ export default function AnimatedCounter({
     }
 
     requestAnimationFrame(animate);
-  }, [isInView, end, duration]);
+  }, [isInView, end, duration]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <motion.span

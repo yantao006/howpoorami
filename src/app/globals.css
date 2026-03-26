@@ -63,8 +63,8 @@
   --color-accent-periwinkle: var(--accent-periwinkle);
   --color-accent-lavender: var(--accent-lavender);
   --color-border-subtle: var(--border-subtle);
-  --font-sans: var(--font-raleway);
-  --font-serif: var(--font-bitter);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-heading);
 }
 
 /* ==========================================================================
@@ -77,7 +77,7 @@ html {
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-raleway), system-ui, sans-serif;
+  font-family: var(--font-body), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

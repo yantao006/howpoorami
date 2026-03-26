@@ -1,376 +1,336 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { PURCHASING_POWER } from "@/data/purchasing-power";
+import { useMemo, useCallback } from "react";
+import { Group } from "@visx/group";
+import { LinePath, Line } from "@visx/shape";
+import { scaleLinear } from "@visx/scale";
+import { AxisBottom, AxisLeft } from "@visx/axis";
+import { curveMonotoneX } from "@visx/curve";
+import { useTooltip, TooltipWithBounds } from "@visx/tooltip";
+import { localPoint } from "@visx/event";
+import {
+  PURCHASING_POWER,
+  ECONOMIC_SOURCES,
+  type EconomicDataPoint,
+} from "@/data/purchasing-power";
 
 interface PurchasingPowerChartProps {
   readonly countryCode: string;
+  readonly width: number;
+  readonly height: number;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { delay: i * 0.05, duration: 0.3, ease: "easeOut" as const },
-  }),
-  exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } },
-};
-
-function formatPrice(value: number, symbol: string): string {
-  if (value >= 1_000_000) return `${symbol}${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${symbol}${value.toLocaleString("en", { maximumFractionDigits: 0 })}`;
-  return `${symbol}${value.toFixed(2)}`;
+interface TooltipPayload {
+  readonly year: number;
+  readonly wageIndex: number;
+  readonly cpiIndex: number;
+  readonly housePriceIndex: number;
 }
 
-function formatHours(hours: number): string {
-  if (hours >= 8760) return `${(hours / 8760).toFixed(1)} years`;
-  if (hours >= 2000) return `${(hours / 2000).toFixed(1)} work-years`;
-  if (hours >= 168) return `${Math.round(hours / 8)} work-days`;
-  if (hours >= 1) return `${hours.toFixed(1)} hrs`;
-  return `${Math.round(hours * 60)} min`;
-}
+const MARGIN = { top: 50, right: 30, bottom: 55, left: 60 };
+
+const LINES = [
+  {
+    key: "wageIndex" as const,
+    label: "Avg. Wages (real)",
+    color: "#7eb8a8",
+    dash: undefined,
+  },
+  {
+    key: "cpiIndex" as const,
+    label: "Consumer Prices",
+    color: "#c9a87c",
+    dash: undefined,
+  },
+  {
+    key: "housePriceIndex" as const,
+    label: "House Prices (real)",
+    color: "#d4878f",
+    dash: undefined,
+  },
+] as const;
 
 export default function PurchasingPowerChart({
   countryCode,
+  width,
+  height,
 }: PurchasingPowerChartProps) {
   const data = PURCHASING_POWER[countryCode];
 
-  const years = useMemo(() => {
-    if (!data) return [];
-    return data.timeline.map((t) => t.year);
-  }, [data]);
+  const { tooltipData, tooltipLeft, tooltipTop, showTooltip, hideTooltip } =
+    useTooltip<TooltipPayload>();
 
-  const earliestYear = years[0] ?? 1970;
-  const latestYear = years[years.length - 1] ?? 2023;
+  const innerWidth = width - MARGIN.left - MARGIN.right;
+  const innerHeight = height - MARGIN.top - MARGIN.bottom;
 
-  const [selectedYear, setSelectedYear] = useState(latestYear);
-
-  const closestSnapshot = useMemo(() => {
-    if (!data) return undefined;
-    let closest = data.timeline[0];
-    for (const t of data.timeline) {
-      if (Math.abs(t.year - selectedYear) < Math.abs(closest.year - selectedYear)) {
-        closest = t;
-      }
-    }
-    return closest;
-  }, [data, selectedYear]);
-
-  /** Compute hours of work at minimum wage to buy each item, across all years */
-  const hoursOverTime = useMemo(() => {
-    if (!data) return [];
-
-    // Exclude min_wage from the items list (it's the denominator)
-    const itemBaskets = data.baskets.filter((b) => b.id !== "min_wage");
-
-    return itemBaskets.map((basket) => {
-      const points = data.timeline
-        .filter((t) => t.items.min_wage > 0 && t.items[basket.id] !== undefined)
-        .map((t) => ({
-          year: t.year,
-          price: t.items[basket.id],
-          wage: t.items.min_wage,
-          hours: t.items[basket.id] / t.items.min_wage,
-        }));
-
-      const earliest = points[0];
-      const latest = points[points.length - 1];
-      const change =
-        earliest && latest && earliest.hours > 0
-          ? ((latest.hours - earliest.hours) / earliest.hours) * 100
-          : 0;
-
-      return {
-        id: basket.id,
-        emoji: basket.emoji,
-        label: basket.label,
-        unit: basket.unit,
-        points,
-        change,
-      };
+  const xScale = useMemo(() => {
+    if (!data) return scaleLinear({ domain: [1995, 2023], range: [0, 1] });
+    const years = data.series.map((d) => d.year);
+    return scaleLinear({
+      domain: [Math.min(...years), Math.max(...years)],
+      range: [0, innerWidth],
     });
-  }, [data]);
+  }, [data, innerWidth]);
 
-  /** Current year's item data */
-  const currentItems = useMemo(() => {
-    if (!data || !closestSnapshot) return [];
-    const wage = closestSnapshot.items.min_wage;
-    if (wage <= 0) return [];
+  const yScale = useMemo(() => {
+    if (!data) return scaleLinear({ domain: [0, 200], range: [1, 0] });
+    const allValues = data.series.flatMap((d) => [
+      d.wageIndex,
+      d.cpiIndex,
+      d.housePriceIndex,
+    ]);
+    const maxVal = Math.max(...allValues);
+    const minVal = Math.min(...allValues);
+    const padding = (maxVal - minVal) * 0.1;
+    return scaleLinear({
+      domain: [Math.max(0, Math.floor((minVal - padding) / 10) * 10), Math.ceil((maxVal + padding) / 10) * 10],
+      range: [innerHeight, 0],
+      nice: true,
+    });
+  }, [data, innerHeight]);
 
-    return data.baskets
-      .filter((b) => b.id !== "min_wage")
-      .map((basket) => {
-        const price = closestSnapshot.items[basket.id];
-        if (price === undefined || price <= 0) return null;
-        return {
-          id: basket.id,
-          emoji: basket.emoji,
-          label: basket.label,
-          unit: basket.unit,
-          price,
-          wage,
-          hours: price / wage,
-        };
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null);
-  }, [data, closestSnapshot]);
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent<SVGRectElement>) => {
+      if (!data) return;
+      const point = localPoint(event);
+      if (!point) return;
 
-  if (!data) {
+      const x0 = xScale.invert(point.x - MARGIN.left);
+      // Find closest data point
+      let closest = data.series[0];
+      for (const d of data.series) {
+        if (Math.abs(d.year - x0) < Math.abs(closest.year - x0)) {
+          closest = d;
+        }
+      }
+
+      showTooltip({
+        tooltipData: {
+          year: closest.year,
+          wageIndex: closest.wageIndex,
+          cpiIndex: closest.cpiIndex,
+          housePriceIndex: closest.housePriceIndex,
+        },
+        tooltipLeft: xScale(closest.year) + MARGIN.left,
+        tooltipTop: point.y,
+      });
+    },
+    [data, xScale, showTooltip],
+  );
+
+  if (!data || width < 10 || height < 10) {
     return (
       <div className="rounded-xl border border-border-subtle bg-bg-card p-8 text-center">
         <p className="text-text-secondary text-lg">
-          No purchasing power data available for this country.
+          Economic trend data is not available for this country.
         </p>
         <p className="text-text-muted mt-2 text-sm">
-          Data is currently available for US, GB, FR, DE, and NL.
+          Data is currently available for the US, UK, France, Germany, and the
+          Netherlands.
         </p>
       </div>
     );
   }
 
-  const hasMinWageData = data.timeline.some((t) => t.items.min_wage > 0);
-
   return (
-    <div className="space-y-12">
-      {/* Part 1: Hours of Work Over Time */}
-      {hasMinWageData && (
-        <section>
-          <h3 className="text-text-primary mb-1 text-xl font-semibold">
-            How Many Hours of Work?
-          </h3>
-          <p className="text-text-muted mb-6 text-sm">
-            Hours at minimum wage to afford each item — then vs now (
-            {data.currencySymbol})
-          </p>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {hoursOverTime
-              .filter((item) => item.points.length >= 2)
-              .map((item, i) => {
-                const earliest = item.points[0];
-                const latest = item.points[item.points.length - 1];
-                const worsened = item.change > 0;
-
-                return (
-                  <motion.div
-                    key={item.id}
-                    custom={i}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="rounded-xl border border-border-subtle bg-bg-card p-4"
-                  >
-                    <div className="mb-3 flex items-center gap-2">
-                      <span className="text-2xl" role="img" aria-label={item.label}>
-                        {item.emoji}
-                      </span>
-                      <span className="text-text-primary text-sm font-medium">
-                        {item.label}
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline justify-between mb-2">
-                      <div className="text-text-muted text-xs">
-                        <span className="block">{earliest.year}</span>
-                        <span className="text-text-secondary font-semibold text-base tabular-nums">
-                          {formatHours(earliest.hours)}
-                        </span>
-                        <span className="block text-[10px]">
-                          at {formatPrice(earliest.wage, data.currencySymbol)}/hr
-                        </span>
-                      </div>
-                      <div className="text-text-muted text-lg px-2">→</div>
-                      <div className="text-text-muted text-xs text-right">
-                        <span className="block">{latest.year}</span>
-                        <span
-                          className={`font-semibold text-base tabular-nums ${
-                            worsened ? "text-accent-rose" : "text-accent-sage"
-                          }`}
-                        >
-                          {formatHours(latest.hours)}
-                        </span>
-                        <span className="block text-[10px]">
-                          at {formatPrice(latest.wage, data.currencySymbol)}/hr
-                        </span>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`text-xs font-bold ${
-                        worsened ? "text-accent-rose" : "text-accent-sage"
-                      }`}
-                    >
-                      {worsened ? "↑" : "↓"}{" "}
-                      {Math.abs(item.change).toFixed(0)}%{" "}
-                      {worsened ? "more work needed" : "less work needed"}
-                    </div>
-
-                    <div className="text-text-muted mt-1 text-[10px]">
-                      {item.unit}
-                    </div>
-                  </motion.div>
-                );
-              })}
-          </div>
-        </section>
-      )}
-
-      {/* Part 2: Interactive Year Slider */}
-      {hasMinWageData && (
-        <section>
-          <h3 className="text-text-primary mb-1 text-xl font-semibold">
-            Work Hours by Year
-          </h3>
-          <p className="text-text-muted mb-6 text-sm">
-            Slide to see how long you&apos;d need to work at minimum wage to
-            buy everyday items.
-          </p>
-
-          {/* Slider */}
-          <div className="mb-8">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-text-muted text-sm">{earliestYear}</span>
-              <motion.span
-                key={closestSnapshot?.year}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-lg font-bold text-accent-periwinkle"
-              >
-                {closestSnapshot?.year}
-              </motion.span>
-              <span className="text-text-muted text-sm">{latestYear}</span>
-            </div>
-
-            <input
-              type="range"
-              min={earliestYear}
-              max={latestYear}
-              step={1}
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-bg-card-hover accent-accent-periwinkle outline-none"
-              aria-label="Select year"
+    <div className="relative">
+      {/* Legend */}
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        {LINES.map((line) => (
+          <div key={line.key} className="flex items-center gap-2">
+            <div
+              className="h-0.5 w-5 rounded"
+              style={{ backgroundColor: line.color }}
             />
-
-            {/* Year markers */}
-            <div className="mt-1 flex justify-between">
-              {years.map((year) => (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => setSelectedYear(year)}
-                  className={`text-[10px] transition-colors ${
-                    closestSnapshot?.year === year
-                      ? "font-bold text-accent-periwinkle"
-                      : "text-text-muted hover:text-text-secondary"
-                  }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
+            <span className="text-text-secondary text-xs">{line.label}</span>
           </div>
-
-          {/* Items grid */}
-          <AnimatePresence mode="popLayout">
-            {currentItems.length === 0 ? (
-              <motion.p
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-text-muted py-8 text-center text-sm"
-              >
-                No minimum wage data available for {closestSnapshot?.year}.
-              </motion.p>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {currentItems.map((item, i) => {
-                  const maxHours = Math.max(
-                    ...currentItems.map((it) => it.hours)
-                  );
-                  const barPct = Math.min(
-                    (item.hours / maxHours) * 100,
-                    100
-                  );
-
-                  return (
-                    <motion.div
-                      key={item.id}
-                      custom={i}
-                      variants={cardVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      layout
-                      className="rounded-xl border border-border-subtle bg-bg-card p-4"
-                    >
-                      <div className="mb-2 flex items-center gap-2">
-                        <span
-                          className="text-2xl"
-                          role="img"
-                          aria-label={item.label}
-                        >
-                          {item.emoji}
-                        </span>
-                        <span className="text-text-primary text-sm font-medium">
-                          {item.label}
-                        </span>
-                      </div>
-
-                      <motion.div
-                        key={`${item.id}-${closestSnapshot?.year}`}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                        className="mb-1 text-2xl font-bold text-accent-periwinkle"
-                      >
-                        {formatHours(item.hours)}
-                      </motion.div>
-
-                      <div className="text-text-muted mb-2 text-xs">
-                        {formatPrice(item.price, data.currencySymbol)} at{" "}
-                        {formatPrice(item.wage, data.currencySymbol)}/hr
-                      </div>
-
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-bg-card-hover">
-                        <motion.div
-                          className="h-full rounded-full bg-accent-periwinkle/60"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${barPct}%` }}
-                          transition={{
-                            duration: 0.4,
-                            delay: i * 0.03,
-                            ease: "easeOut",
-                          }}
-                        />
-                      </div>
-                      <div className="text-text-muted mt-1 text-[10px]">
-                        {item.unit}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </AnimatePresence>
-        </section>
-      )}
-
-      {/* Fallback if no min wage data */}
-      {!hasMinWageData && (
-        <div className="rounded-xl border border-border-subtle bg-bg-card p-8 text-center">
-          <p className="text-text-secondary text-lg">
-            Minimum wage data not available for this country.
-          </p>
-          <p className="text-text-muted mt-2 text-sm">
-            Hours-of-work comparison requires historical minimum wage data.
-          </p>
+        ))}
+        <div className="flex items-center gap-2">
+          <div className="h-0.5 w-5 border-t border-dashed border-text-muted" />
+          <span className="text-text-secondary text-xs">Base (2000)</span>
         </div>
+      </div>
+
+      <svg width={width} height={height}>
+        <Group left={MARGIN.left} top={MARGIN.top}>
+          {/* Grid lines */}
+          {yScale.ticks(5).map((tick) => (
+            <Line
+              key={tick}
+              from={{ x: 0, y: yScale(tick) }}
+              to={{ x: innerWidth, y: yScale(tick) }}
+              stroke="var(--color-border-subtle)"
+              strokeWidth={1}
+              strokeOpacity={0.5}
+            />
+          ))}
+
+          {/* Base line at 100 */}
+          <Line
+            from={{ x: 0, y: yScale(100) }}
+            to={{ x: innerWidth, y: yScale(100) }}
+            stroke="var(--color-text-muted)"
+            strokeWidth={1}
+            strokeDasharray="6,4"
+            strokeOpacity={0.7}
+          />
+          <text
+            x={innerWidth + 4}
+            y={yScale(100)}
+            dy="0.35em"
+            fontSize={10}
+            fill="var(--color-text-muted)"
+          >
+            100
+          </text>
+
+          {/* Data lines */}
+          {LINES.map((line) => (
+            <LinePath<EconomicDataPoint>
+              key={line.key}
+              data={data.series as EconomicDataPoint[]}
+              x={(d) => xScale(d.year)}
+              y={(d) => yScale(d[line.key])}
+              stroke={line.color}
+              strokeWidth={2.5}
+              curve={curveMonotoneX}
+            />
+          ))}
+
+          {/* Data points */}
+          {LINES.map((line) =>
+            data.series.map((d) => (
+              <circle
+                key={`${line.key}-${d.year}`}
+                cx={xScale(d.year)}
+                cy={yScale(d[line.key])}
+                r={3.5}
+                fill={line.color}
+                stroke="var(--color-bg-primary)"
+                strokeWidth={1.5}
+              />
+            )),
+          )}
+
+          {/* Tooltip hover line */}
+          {tooltipData && (
+            <Line
+              from={{ x: xScale(tooltipData.year), y: 0 }}
+              to={{ x: xScale(tooltipData.year), y: innerHeight }}
+              stroke="var(--color-text-muted)"
+              strokeWidth={1}
+              strokeDasharray="3,3"
+              pointerEvents="none"
+            />
+          )}
+
+          {/* Axes */}
+          <AxisBottom
+            top={innerHeight}
+            scale={xScale}
+            tickValues={data.series.map((d) => d.year)}
+            tickFormat={(v) => String(v)}
+            stroke="var(--color-border-subtle)"
+            tickStroke="var(--color-border-subtle)"
+            tickLabelProps={() => ({
+              fill: "var(--color-text-muted)",
+              fontSize: 11,
+              textAnchor: "middle" as const,
+              dy: "0.25em",
+            })}
+          />
+          <AxisLeft
+            scale={yScale}
+            numTicks={5}
+            stroke="var(--color-border-subtle)"
+            tickStroke="var(--color-border-subtle)"
+            tickFormat={(v) => String(v)}
+            tickLabelProps={() => ({
+              fill: "var(--color-text-muted)",
+              fontSize: 11,
+              textAnchor: "end" as const,
+              dx: "-0.5em",
+              dy: "0.35em",
+            })}
+          />
+
+          {/* Invisible overlay for mouse events */}
+          <rect
+            width={innerWidth}
+            height={innerHeight}
+            fill="transparent"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={hideTooltip}
+          />
+        </Group>
+      </svg>
+
+      {/* Tooltip */}
+      {tooltipData && (
+        <TooltipWithBounds
+          left={tooltipLeft}
+          top={tooltipTop}
+          className="!bg-bg-card !border !border-border-subtle !rounded-lg !shadow-lg !px-3 !py-2"
+          unstyled
+        >
+          <p className="text-text-primary text-sm font-semibold mb-1.5">
+            {tooltipData.year}
+          </p>
+          {LINES.map((line) => (
+            <div
+              key={line.key}
+              className="flex items-center justify-between gap-4 text-xs"
+            >
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ backgroundColor: line.color }}
+                />
+                <span className="text-text-secondary">{line.label}</span>
+              </span>
+              <span className="text-text-primary font-medium tabular-nums">
+                {tooltipData[line.key].toFixed(1)}
+              </span>
+            </div>
+          ))}
+          <p className="text-text-muted text-[10px] mt-1.5 border-t border-border-subtle pt-1">
+            Indexed: 2000 = 100
+          </p>
+        </TooltipWithBounds>
       )}
+
+      {/* Sources */}
+      <div className="mt-4 space-y-0.5 text-center">
+        <p className="text-text-muted text-[10px]">
+          Wages:{" "}
+          <a
+            href={ECONOMIC_SOURCES.wages.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-periwinkle hover:underline"
+          >
+            {ECONOMIC_SOURCES.wages.name}
+          </a>
+          {" · "}CPI:{" "}
+          <a
+            href={ECONOMIC_SOURCES.cpi.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-periwinkle hover:underline"
+          >
+            {ECONOMIC_SOURCES.cpi.name}
+          </a>
+          {" · "}House prices:{" "}
+          <a
+            href={ECONOMIC_SOURCES.housePrices.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-periwinkle hover:underline"
+          >
+            {ECONOMIC_SOURCES.housePrices.name}
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

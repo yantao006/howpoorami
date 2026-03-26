@@ -63,7 +63,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center mb-8"
           >
-            <h1 className="font-[family-name:var(--font-bitter)] text-4xl sm:text-5xl lg:text-7xl font-bold text-text-primary leading-tight">
+            <h1 className="font-[family-name:var(--font-heading)] text-4xl sm:text-5xl lg:text-7xl font-bold text-text-primary leading-tight">
               How Poor Am I?
             </h1>
             <p className="text-text-secondary text-lg sm:text-xl mt-4 max-w-2xl mx-auto">
@@ -188,7 +188,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-10"
           >
-            <h2 className="font-[family-name:var(--font-bitter)] text-3xl sm:text-4xl font-bold text-text-primary">
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
               The Scale of Concentration
             </h2>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
@@ -233,7 +233,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-10"
             >
-              <h2 className="font-[family-name:var(--font-bitter)] text-3xl sm:text-4xl font-bold text-text-primary">
+              <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
                 Who Actually Pays?
               </h2>
               <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
@@ -273,7 +273,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-10"
           >
-            <h2 className="font-[family-name:var(--font-bitter)] text-3xl sm:text-4xl font-bold text-text-primary">
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
               A Century of Change
             </h2>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
@@ -301,7 +301,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* What Your Money Actually Buys */}
+      {/* Wages vs. Cost of Living */}
       {hasPurchasingPowerData && (
         <section className="px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-6xl mx-auto">
@@ -311,16 +311,31 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-10"
             >
-              <h2 className="font-[family-name:var(--font-bitter)] text-3xl sm:text-4xl font-bold text-text-primary">
-                What Your Money Actually Buys
+              <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
+                Are Wages Keeping Up?
               </h2>
               <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
-                While the top accumulates more wealth, everyday purchasing power has eroded
-                dramatically. Here&apos;s what the same money buys now versus decades ago.
+                Wages, consumer prices, and house prices — all indexed to 2000.
+                When the lines diverge, someone is falling behind.
               </p>
             </motion.div>
 
-            <PurchasingPowerChart countryCode={selectedCountry} />
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
+            >
+              <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
+                {({ width, height }) => (
+                  <PurchasingPowerChart
+                    countryCode={selectedCountry}
+                    width={width}
+                    height={height}
+                  />
+                )}
+              </ResponsiveChart>
+            </motion.div>
           </div>
         </section>
       )}

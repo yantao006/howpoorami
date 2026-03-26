@@ -298,7 +298,7 @@ export default function HistoricalEvolutionChart({
                   transform={`rotate(-45, ${xPos}, -6)`}
                   fill="var(--text-secondary)"
                   fontSize={10}
-                  fontFamily="var(--font-raleway)"
+                  fontFamily="var(--font-body)"
                   textAnchor="start"
                 >
                   {evt.label}
@@ -344,7 +344,7 @@ export default function HistoricalEvolutionChart({
               fill: "var(--text-secondary)",
               fontSize: 12,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
           <AxisLeft
@@ -357,7 +357,7 @@ export default function HistoricalEvolutionChart({
               fill: "var(--text-secondary)",
               fontSize: 12,
               textAnchor: "end",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
             label="Share of total wealth"
             labelOffset={45}
@@ -365,7 +365,7 @@ export default function HistoricalEvolutionChart({
               fill: "var(--text-secondary)",
               fontSize: 13,
               textAnchor: "middle",
-              fontFamily: "var(--font-raleway)",
+              fontFamily: "var(--font-body)",
             }}
           />
         </Group>

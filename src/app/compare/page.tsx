@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { ALL_COUNTRY_MAP, type AllCountryCode } from "@/data/countries-extended";
 import { RICHEST_BY_COUNTRY } from "@/data/billionaires";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import { getYearsToMatchLine } from "@/data/comedic-lines";
 import CountrySelector from "@/components/CountrySelector";
 import CurrencySelector from "@/components/CurrencySelector";
 import FormattedNumber from "@/components/FormattedNumber";
@@ -52,25 +51,11 @@ export default function ComparePage() {
     [richest, incomeToUse]
   );
 
-  const lifetimes = useMemo(
-    () => Math.round(yearsToMatch / 80),
-    [yearsToMatch]
-  );
-
   const secondsPerDollar = useMemo(() => {
     if (!richest) return 0;
     const secondsInYear = 365.25 * 24 * 3600;
     return richest.netWorth / secondsInYear;
   }, [richest]);
-
-  const comedicLine = useMemo(() => {
-    if (!richest) return "";
-    return getYearsToMatchLine(
-      yearsToMatch,
-      richest.name,
-      formatNumber(yearsToMatch),
-    );
-  }, [yearsToMatch, richest]);
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9]/g, "");
@@ -82,7 +67,7 @@ export default function ComparePage() {
       <main className="min-h-screen pt-14">
         <section className="min-h-screen flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-12">
           <div className="max-w-4xl mx-auto w-full text-center">
-            <h1 className="font-[family-name:var(--font-bitter)] text-4xl sm:text-5xl lg:text-6xl text-text-primary leading-tight mb-8">
+            <h1 className="font-[family-name:var(--font-heading)] text-4xl sm:text-5xl lg:text-6xl text-text-primary leading-tight mb-8">
               How Long Would It Take?
             </h1>
             <CountrySelector selected={selectedCountry} onSelect={handleCountrySelect} />
@@ -108,7 +93,7 @@ export default function ComparePage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-10"
           >
-            <h1 className="font-[family-name:var(--font-bitter)] text-4xl sm:text-5xl lg:text-6xl text-text-primary leading-tight">
+            <h1 className="font-[family-name:var(--font-heading)] text-4xl sm:text-5xl lg:text-6xl text-text-primary leading-tight">
               How Long Would It Take?
             </h1>
             <p className="text-text-secondary text-lg sm:text-xl mt-4 max-w-2xl mx-auto">
@@ -205,7 +190,7 @@ export default function ComparePage() {
             <p className="text-text-secondary text-lg sm:text-xl mb-4">
               At {formatCurrency(incomeToUse, country.currency)}/year, you would need
             </p>
-            <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-accent-rose font-[family-name:var(--font-bitter)]">
+            <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-accent-rose font-[family-name:var(--font-heading)]">
               <FormattedNumber value={yearsToMatch} />
             </div>
             <p className="text-text-secondary text-xl sm:text-2xl mt-2">
@@ -215,17 +200,6 @@ export default function ComparePage() {
               to match {richest.name}&apos;s wealth
             </p>
 
-            {comedicLine && (
-              <p className="text-text-muted text-sm italic mt-6 max-w-lg mx-auto">
-                {comedicLine}
-              </p>
-            )}
-
-            <div className="mt-6 pt-6 border-t border-border-subtle/50">
-              <p className="text-text-muted text-sm">
-                That&apos;s roughly <span className="text-accent-amber font-semibold">{formatNumber(lifetimes)} human lifetimes</span> (at 80 years each)
-              </p>
-            </div>
           </motion.div>
 
           {/* Time comparisons — the fun part */}
@@ -235,7 +209,7 @@ export default function ComparePage() {
             viewport={{ once: true }}
             className="mb-16"
           >
-            <h3 className="font-[family-name:var(--font-bitter)] text-2xl sm:text-3xl text-center mb-8 text-text-primary">
+            <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-8 text-text-primary">
               To Put That In Perspective...
             </h3>
             <TimeComparisons yearsToMatch={yearsToMatch} billionaireName={richest.name} />

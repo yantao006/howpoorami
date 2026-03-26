@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Raleway, Bitter } from "next/font/google";
+import { Playfair_Display, Fira_Code } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const raleway = Raleway({
-  variable: "--font-raleway",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const bitter = Bitter({
-  variable: "--font-bitter",
+const playfairDisplay = Playfair_Display({
+  variable: "--font-heading",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "700"],
+});
+
+const firaCode = Fira_Code({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -84,7 +85,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${raleway.variable} ${bitter.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} ${firaCode.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

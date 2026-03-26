@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { type CountryData, findPercentile } from "@/data/wealth-data";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 
 interface WealthInputProps {
   readonly country: CountryData;
@@ -71,8 +71,8 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
 
   const displayValue = useMemo(() => {
     if (inputValue.length === 0) return "";
-    return formatCurrency(parseInt(inputValue, 10));
-  }, [inputValue]);
+    return formatCurrency(parseInt(inputValue, 10), country.currency);
+  }, [inputValue, country.currency]);
 
   const comedic = useMemo(() => {
     if (percentile === null) return null;
@@ -112,8 +112,8 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
         className="block text-sm text-text-secondary mb-2 text-center"
       >
         {mode === "income"
-          ? "Enter your annual income (USD) to see where you stand"
-          : "Enter your net wealth (USD) to see where you stand"}
+          ? `Enter your annual income (${country.currency}) to see where you stand`
+          : `Enter your net wealth (${country.currency}) to see where you stand`}
       </label>
       <div className="relative">
         <input
@@ -122,7 +122,7 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
           inputMode="numeric"
           value={displayValue}
           onChange={handleChange}
-          placeholder="$0"
+          placeholder={`${getCurrencySymbol(country.currency)}0`}
           className="
             w-full px-6 py-4 rounded-2xl text-center text-2xl font-medium tabular-nums
             bg-bg-card border border-border-subtle
@@ -162,7 +162,7 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
 
           {percentile < 50 && (
             <p className="text-text-muted text-xs mt-2">
-              Below the median wealth of {formatCurrency(country.medianWealthPerAdult)}
+              Below the median wealth of {formatCurrency(country.medianWealthPerAdult, country.currency)}
             </p>
           )}
           {percentile >= 99 && (

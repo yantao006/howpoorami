@@ -293,12 +293,27 @@ export default function WealthHoardingChart({
         </Group>
       </svg>
 
-      {/* Population dot comparison */}
-      <div className="flex justify-center">
-        <PopulationDots
-          topCount={topPeopleCount}
-          bottomCount={bottomPeopleCount}
-        />
+      {/* Legend — always readable, even for tiny segments */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 mt-4">
+        {rectangles.map((rect) => (
+          <div key={rect.key} className="flex items-center gap-2 min-w-0">
+            <span
+              className="inline-block w-3 h-3 rounded-sm shrink-0"
+              style={{ backgroundColor: rect.color }}
+            />
+            <div className="min-w-0">
+              <span className="text-text-primary text-sm font-medium">
+                {rect.label}
+              </span>
+              <span className="text-text-secondary text-sm ml-1.5 tabular-nums">
+                {rect.wealthShare.toFixed(1)}%
+              </span>
+              <span className="text-text-muted text-xs ml-1">
+                ({formatPeopleCount(rect.peopleCount)})
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Callout text */}

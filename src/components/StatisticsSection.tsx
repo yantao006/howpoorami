@@ -83,10 +83,10 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
             <AnimatedCounter end={country.giniWealth} decimals={2} />
           </StatCard>
           <StatCard label="Mean wealth per adult" accent="amber" delay={0.3} sublabel="Skewed upward by the ultra-wealthy">
-            {formatCurrency(country.meanWealthPerAdult, true)}
+            {formatCurrency(country.meanWealthPerAdult, country.currency, true)}
           </StatCard>
           <StatCard label="Median wealth per adult" accent="periwinkle" delay={0.4} sublabel="What the typical person actually has">
-            {formatCurrency(country.medianWealthPerAdult, true)}
+            {formatCurrency(country.medianWealthPerAdult, country.currency, true)}
           </StatCard>
           <StatCard label="Mean / Median ratio" accent="rose" delay={0.5} sublabel="Higher = more skewed distribution">
             <AnimatedCounter end={meanToMedianRatio} suffix="x" decimals={1} />
@@ -112,8 +112,8 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           to accumulate the average wealth of the top 1%
         </p>
         <p className="text-text-muted text-sm mt-6">
-          Based on median income of {formatCurrency(country.medianIncome)}/year vs. average
-          top 1% wealth of {formatCurrency(avgTop1Wealth, true)}
+          Based on median income of {formatCurrency(country.medianIncome, country.currency)}/year vs. average
+          top 1% wealth of {formatCurrency(avgTop1Wealth, country.currency, true)}
         </p>
       </motion.div>
 

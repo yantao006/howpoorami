@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ALL_COUNTRY_MAP, type AllCountryCode } from "@/data/countries-extended";
 import { RICHEST_BY_COUNTRY } from "@/data/billionaires";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySymbol } from "@/lib/format";
 import CountrySelector from "@/components/CountrySelector";
 import FormattedNumber from "@/components/FormattedNumber";
 import TimeComparisons from "@/components/TimeComparisons";
@@ -35,8 +35,8 @@ export default function ComparePage() {
 
   const displaySalary = useMemo(() => {
     if (!salaryValue) return "";
-    return formatCurrency(salaryValue);
-  }, [salaryValue]);
+    return formatCurrency(salaryValue, country.currency);
+  }, [salaryValue, country.currency]);
 
   const incomeToUse = salaryValue ?? country.medianIncome;
 
@@ -126,7 +126,7 @@ export default function ComparePage() {
                   {richest.name}
                 </h2>
                 <p className="text-accent-amber text-xl sm:text-2xl font-semibold mt-1 tabular-nums">
-                  {formatCurrency(richest.netWorth, true)}
+                  {formatCurrency(richest.netWorth, "USD", true)}
                 </p>
                 <p className="text-text-muted text-sm mt-1">{richest.source}</p>
               </div>
@@ -144,7 +144,7 @@ export default function ComparePage() {
               htmlFor="salary-input"
               className="block text-sm text-text-secondary mb-2 text-center"
             >
-              Enter your annual income (USD) — or we&apos;ll use the median
+              Enter your annual income ({country.currency}) — or we&apos;ll use the median
             </label>
             <input
               id="salary-input"
@@ -152,7 +152,7 @@ export default function ComparePage() {
               inputMode="numeric"
               value={displaySalary}
               onChange={handleSalaryChange}
-              placeholder={formatCurrency(country.medianIncome)}
+              placeholder={formatCurrency(country.medianIncome, country.currency)}
               className="
                 w-full px-6 py-4 rounded-2xl text-center text-2xl font-medium tabular-nums
                 bg-bg-card border border-border-subtle
@@ -162,7 +162,7 @@ export default function ComparePage() {
               "
             />
             <p className="text-text-muted text-xs text-center mt-2">
-              {!salaryValue && `Using median income: ${formatCurrency(country.medianIncome)}/year`}
+              {!salaryValue && `Using median income: ${formatCurrency(country.medianIncome, country.currency)}/year`}
               {salaryValue && "Your data stays in your browser."}
             </p>
           </motion.div>
@@ -175,7 +175,7 @@ export default function ComparePage() {
             className="bg-gradient-to-br from-accent-rose/8 to-accent-amber/8 border border-accent-rose/15 rounded-3xl p-8 sm:p-12 text-center mb-8"
           >
             <p className="text-text-secondary text-lg sm:text-xl mb-4">
-              At {formatCurrency(incomeToUse)}/year, you would need
+              At {formatCurrency(incomeToUse, country.currency)}/year, you would need
             </p>
             <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-accent-rose font-[family-name:var(--font-bitter)]">
               <FormattedNumber value={yearsToMatch} />
@@ -216,15 +216,15 @@ export default function ComparePage() {
           >
             <ComparisonCard
               label={`${richest.name} earns per second`}
-              value={`${formatCurrency(secondsPerDollar)}`}
+              value={`${formatCurrency(secondsPerDollar, "USD")}`}
               sublabel="If their wealth grew at 8%/year"
               accent="amber"
               delay={0}
             />
             <ComparisonCard
               label="Your daily earnings"
-              value={formatCurrency(incomeToUse / 365)}
-              sublabel={`vs. ${richest.name}'s ${formatCurrency(richest.netWorth * 0.08 / 365, true)}/day`}
+              value={formatCurrency(incomeToUse / 365, country.currency)}
+              sublabel={`vs. ${richest.name}'s ${formatCurrency(richest.netWorth * 0.08 / 365, "USD", true)}/day`}
               accent="sage"
               delay={0.1}
             />
@@ -237,7 +237,7 @@ export default function ComparePage() {
             />
             <ComparisonCard
               label="If they gave you $1M"
-              value={`${formatCurrency(incomeToUse * (1_000_000 / richest.netWorth))}`}
+              value={`${formatCurrency(incomeToUse * (1_000_000 / richest.netWorth), country.currency)}`}
               sublabel={`Would feel like losing this from your annual income`}
               accent="periwinkle"
               delay={0.3}

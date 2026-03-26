@@ -61,7 +61,6 @@ export default function Home() {
             </h1>
             <p className="text-text-secondary text-lg sm:text-xl mt-4 max-w-2xl mx-auto">
               Enter your income or wealth and discover where you really stand.
-              Spoiler: it&apos;s probably worse than you think.
             </p>
           </motion.div>
 

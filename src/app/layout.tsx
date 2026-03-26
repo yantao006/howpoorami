@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "How Poor Am I? — See Where You Stand",
     description:
-      "Think you're middle class? Enter your income and find out where you really stand in the wealth distribution. Spoiler: it's probably worse than you think.",
+      "Think you're middle class? Enter your income and find out where you really stand in the wealth distribution. Interactive data for 30+ countries.",
     siteName: "How Poor Am I?",
     locale: "en_US",
   },
@@ -88,7 +88,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="canonical" href="https://howpoorami.com" />
+        <link rel="canonical" href="https://howpoorami.org" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script
           type="application/ld+json"

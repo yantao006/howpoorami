@@ -19,6 +19,7 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://howpoorami.org"),
   title: {
     default: "How Poor Am I? — See Where You Stand in Global Wealth",
     template: "%s | How Poor Am I?",
@@ -40,7 +41,14 @@ export const metadata: Metadata = {
     "billionaire wealth",
     "top 1 percent",
     "wealth concentration",
+    "wealth inequality by country",
+    "income distribution",
+    "billionaire comparison",
+    "median income comparison",
   ],
+  alternates: {
+    canonical: "https://howpoorami.org",
+  },
   openGraph: {
     type: "website",
     title: "How Poor Am I? — See Where You Stand",
@@ -48,6 +56,7 @@ export const metadata: Metadata = {
       "Think you're middle class? Enter your income and find out where you really stand in the wealth distribution. Interactive data for 30+ countries.",
     siteName: "How Poor Am I?",
     locale: "en_US",
+    url: "https://howpoorami.org",
   },
   twitter: {
     card: "summary_large_image",
@@ -58,6 +67,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -89,7 +105,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="canonical" href="https://howpoorami.org" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script
           type="application/ld+json"

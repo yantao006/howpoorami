@@ -21,7 +21,7 @@ interface WealthClassEntry {
   readonly color: string;
 }
 
-const MARGIN = { top: 20, right: 80, bottom: 50, left: 120 };
+const MARGIN = { top: 20, right: 80, bottom: 50, left: 90 };
 
 // Paul Tol qualitative palette — colorblind-safe
 const BAR_COLORS: Record<string, string> = {
@@ -49,7 +49,7 @@ function buildEntries(rates: TaxRateByClass): ReadonlyArray<WealthClassEntry> {
   return WEALTH_CLASS_CONFIG.map((cfg) => ({
     label: cfg.label,
     key: cfg.key,
-    rate: rates[cfg.key] as number,
+    rate: Number(rates[cfg.key]),
     color: BAR_COLORS[cfg.label],
   }));
 }
@@ -154,7 +154,7 @@ export default function TaxRateChart({
         </p>
       )}
 
-      <svg width={width} height={height}>
+      <svg width={width} height={height} role="img" aria-label={`Effective tax rates by wealth class for ${countryCode}`}>
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Vertical grid lines */}
           {xScale.ticks(6).map((tick) => (

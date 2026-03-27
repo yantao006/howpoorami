@@ -1,0 +1,189 @@
+{
+  "_meta": {
+    "description": "Effective tax rates by wealth/income class",
+    "sources": [
+      "Saez & Zucman (2019), The Triumph of Injustice",
+      "OECD Tax Database 2024",
+      "EU Tax Observatory, Global Tax Evasion Report 2024",
+      "Advani, Chamberlain & Summers (2023)",
+      "Landais, Saez & Zucman (2020)"
+    ],
+    "methodology": "Effective rate = total taxes paid (income, payroll, corporate, property, estate, consumption) / total pre-tax economic income"
+  },
+  "US": {
+    "bottom50": 24.2,
+    "middle40": 28.0,
+    "top10to1": 30.4,
+    "top1to01": 29.8,
+    "top01to001": 26.8,
+    "top001": 23.0,
+    "nominalTopRate": 37.0,
+    "source": "Saez & Zucman (2019), The Triumph of Injustice; updated with IRS microdata through 2018",
+    "year": 2018
+  },
+  "GB": {
+    "bottom50": 31.5,
+    "middle40": 33.8,
+    "top10to1": 35.2,
+    "top1to01": 33.5,
+    "top01to001": 29.0,
+    "top001": 26.5,
+    "nominalTopRate": 45.0,
+    "source": "Advani, Chamberlain & Summers (2023); HMRC Survey of Personal Incomes; ONS household data",
+    "year": 2022
+  },
+  "FR": {
+    "bottom50": 37.0,
+    "middle40": 40.5,
+    "top10to1": 42.8,
+    "top1to01": 41.0,
+    "top01to001": 36.5,
+    "top001": 34.0,
+    "nominalTopRate": 45.0,
+    "source": "Landais, Saez & Zucman (2020); WID.world France series; EU Tax Observatory (2024)",
+    "year": 2022
+  },
+  "DE": {
+    "bottom50": 34.0,
+    "middle40": 38.5,
+    "top10to1": 40.2,
+    "top1to01": 38.0,
+    "top01to001": 33.5,
+    "top001": 30.8,
+    "nominalTopRate": 45.0,
+    "source": "Bach, Beznoska & Steiner (2020), DIW Berlin; Bundesfinanzministerium Datensammlung; OECD 2024",
+    "year": 2021
+  },
+  "NL": {
+    "bottom50": 33.0,
+    "middle40": 37.0,
+    "top10to1": 39.5,
+    "top1to01": 37.0,
+    "top01to001": 31.5,
+    "top001": 28.0,
+    "nominalTopRate": 49.5,
+    "source": "CPB Netherlands Bureau; CBS income statistics; EU Tax Observatory (2024)",
+    "year": 2022
+  },
+  "SE": {
+    "bottom50": 38.0,
+    "middle40": 44.5,
+    "top10to1": 46.0,
+    "top1to01": 43.5,
+    "top01to001": 39.0,
+    "top001": 36.0,
+    "nominalTopRate": 52.3,
+    "source": "Waldenstr\u00f6m (2020), IFN Stockholm; SCB tax statistics; WID.world Sweden series",
+    "year": 2021
+  },
+  "NO": {
+    "bottom50": 36.5,
+    "middle40": 42.0,
+    "top10to1": 43.8,
+    "top1to01": 41.0,
+    "top01to001": 37.5,
+    "top001": 34.5,
+    "nominalTopRate": 47.4,
+    "source": "Alstads\u00e6ter, Johannesen & Zucman (2019); SSB tax statistics; WID.world Norway series",
+    "year": 2021
+  },
+  "DK": {
+    "bottom50": 39.0,
+    "middle40": 45.0,
+    "top10to1": 47.5,
+    "top1to01": 44.8,
+    "top01to001": 40.5,
+    "top001": 37.5,
+    "nominalTopRate": 55.9,
+    "source": "Danish Ministry of Taxation; OECD Tax Database 2024; WID.world Denmark series",
+    "year": 2022
+  },
+  "CH": {
+    "bottom50": 26.5,
+    "middle40": 29.0,
+    "top10to1": 30.5,
+    "top1to01": 27.8,
+    "top01to001": 24.0,
+    "top001": 21.5,
+    "nominalTopRate": 40.0,
+    "source": "Swiss Federal Tax Administration; Br\u00fclhart et al. (2022); OECD Tax Database 2024",
+    "year": 2022
+  },
+  "JP": {
+    "bottom50": 22.0,
+    "middle40": 26.5,
+    "top10to1": 29.0,
+    "top1to01": 27.5,
+    "top01to001": 24.0,
+    "top001": 21.0,
+    "nominalTopRate": 55.9,
+    "source": "National Tax Agency statistics; Moriguchi & Saez (2008, updated); OECD Tax Database 2024",
+    "year": 2022
+  },
+  "CA": {
+    "bottom50": 24.5,
+    "middle40": 29.5,
+    "top10to1": 32.8,
+    "top1to01": 31.5,
+    "top01to001": 28.0,
+    "top001": 25.5,
+    "nominalTopRate": 53.5,
+    "source": "Statistics Canada; PBO Distributional Analysis 2023; OECD Tax Database 2024",
+    "year": 2022
+  },
+  "AU": {
+    "bottom50": 23.5,
+    "middle40": 28.5,
+    "top10to1": 32.0,
+    "top1to01": 30.5,
+    "top01to001": 27.0,
+    "top001": 24.0,
+    "nominalTopRate": 45.0,
+    "source": "ATO Taxation Statistics; Leigh (2009, updated); Grattan Institute distributional analysis",
+    "year": 2022
+  },
+  "IT": {
+    "bottom50": 33.0,
+    "middle40": 38.0,
+    "top10to1": 40.5,
+    "top1to01": 38.5,
+    "top01to001": 34.0,
+    "top001": 30.5,
+    "nominalTopRate": 43.0,
+    "source": "Ministero dell'Economia; Acciari & Morelli (2023); EU Tax Observatory (2024)",
+    "year": 2022
+  },
+  "ES": {
+    "bottom50": 30.0,
+    "middle40": 34.5,
+    "top10to1": 37.0,
+    "top1to01": 35.0,
+    "top01to001": 30.5,
+    "top001": 27.5,
+    "nominalTopRate": 47.0,
+    "source": "Agencia Tributaria; Alvaredo & Saez (2009, updated); EU Tax Observatory (2024)",
+    "year": 2022
+  },
+  "BR": {
+    "bottom50": 28.0,
+    "middle40": 27.5,
+    "top10to1": 26.0,
+    "top1to01": 22.5,
+    "top01to001": 18.0,
+    "top001": 14.0,
+    "nominalTopRate": 27.5,
+    "source": "Receita Federal; Morgan (2017), WID.world; Gobetti & Orair (2017)",
+    "year": 2021
+  },
+  "ZA": {
+    "bottom50": 18.0,
+    "middle40": 24.5,
+    "top10to1": 29.0,
+    "top1to01": 27.5,
+    "top01to001": 23.5,
+    "top001": 20.0,
+    "nominalTopRate": 45.0,
+    "source": "SARS Tax Statistics; Chatterjee, Czajka & Gethin (2022), WID.world; National Treasury",
+    "year": 2021
+  }
+}

@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "update:billionaires": "node scripts/update-billionaires.mjs",
-    "update:economic": "node scripts/update-economic-data.mjs",
-    "update:data": "node scripts/update-billionaires.mjs && node scripts/update-economic-data.mjs"
+    "data:fetch": "node scripts/fetch-all-data.mjs"
   },
   "dependencies": {
     "@visx/axis": "^3.12.0",

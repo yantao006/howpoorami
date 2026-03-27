@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { type CountryData, findPercentile } from "@/data/wealth-data";
 import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 import { getPercentileLine } from "@/data/comedic-lines";
@@ -16,11 +16,17 @@ function getComedicResponse(percentile: number, countryName: string): string {
   return getPercentileLine(percentile, countryName);
 }
 
+/**
+ * Rough income-to-wealth estimate using wealth-to-income multipliers.
+ * Based on patterns from the Federal Reserve Survey of Consumer Finances (SCF):
+ * lower-income households have lower savings rates and fewer assets, while
+ * higher-income households accumulate disproportionately more wealth through
+ * investments, property, and compounding returns. These are broad approximations
+ * — actual wealth varies enormously by age, debt, housing market, and behavior.
+ */
 function estimateWealthFromIncome(annualIncome: number, country: CountryData): number {
-  // Rough wealth-to-income ratio based on typical savings and assets
-  // Lower incomes save less, higher incomes accumulate more
   const medianIncome = country.medianIncome;
-  const incomeRatio = annualIncome / medianIncome;
+  const incomeRatio = annualIncome / (medianIncome > 0 ? medianIncome : 1);
 
   if (incomeRatio <= 0.5) return annualIncome * 0.5;
   if (incomeRatio <= 1) return annualIncome * 2;
@@ -33,6 +39,13 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
   const [inputValue, setInputValue] = useState("");
   const [percentile, setPercentile] = useState<number | null>(null);
   const [mode, setMode] = useState<InputMode>("income");
+
+  // Reset state when country changes
+  useEffect(() => {
+    setInputValue("");
+    setPercentile(null);
+    onPercentileChange(null);
+  }, [country.code, onPercentileChange]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,7 +183,8 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
         Your data stays in your browser. Nothing is stored or sent anywhere.
         {mode === "income" && (
           <span className="block mt-1">
-            Income is converted to estimated wealth using typical savings patterns.
+            Income is converted to estimated wealth using approximate multipliers
+            based on Federal Reserve SCF data. For accuracy, use &quot;Net Wealth&quot; mode.
           </span>
         )}
       </p>

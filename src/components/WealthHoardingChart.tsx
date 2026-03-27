@@ -94,11 +94,15 @@ function buildRectangles(
   const totalArea = innerWidth * innerHeight;
 
   // Calculate widths proportional to wealth share, laid out horizontally
-  const totalShare = SEGMENT_KEYS.reduce((sum, k) => sum + shares[k], 0);
+  // Clamp negative shares (real: bottom 50% can have negative net wealth) to 0 for display
+  const clampedShares = Object.fromEntries(
+    SEGMENT_KEYS.map((k) => [k, Math.max(0, shares[k])])
+  ) as Record<string, number>;
+  const totalShare = SEGMENT_KEYS.reduce((sum, k) => sum + clampedShares[k], 0);
 
   let currentX = 0;
   return SEGMENT_KEYS.map((key) => {
-    const fraction = shares[key] / totalShare;
+    const fraction = totalShare > 0 ? clampedShares[key] / totalShare : 0;
     const rectWidth = fraction * innerWidth;
     const rect: RectData = {
       key,
@@ -224,7 +228,7 @@ export default function WealthHoardingChart({
 
   return (
     <div className="relative">
-      <svg width={width} height={height}>
+      <svg width={width} height={height} role="img" aria-label={`Wealth concentration by population group for ${country.name}`}>
         <Group left={MARGIN.left} top={MARGIN.top}>
           <AnimatePresence mode="wait">
             {rectangles.map((rect) => {

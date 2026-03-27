@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "description": "Economic indicators indexed to 2000 = 100",
+    "sources": {
+      "wages": "OECD Average Annual Wages (AV_AN_WAGE), USD constant prices constant PPP",
+      "cpi": "World Bank Consumer Price Index (FP.CPI.TOTL)",
+      "housePrices": "BIS Residential Property Prices via FRED, real CPI-deflated"
+    },
+    "generatedBy": "scripts/update-economic-data.mjs"
+  },
+  "US": {
+    "series": [
+      { "year": 1995, "wageIndex": 87.1, "cpiIndex": 88.5, "housePriceIndex": 86.6 },
+      { "year": 2000, "wageIndex": 100, "cpiIndex": 100, "housePriceIndex": 100 },
+      { "year": 2005, "wageIndex": 104.7, "cpiIndex": 113.4, "housePriceIndex": 148.9 },
+      { "year": 2010, "wageIndex": 110, "cpiIndex": 126.6, "housePriceIndex": 106.7 },
+      { "year": 2015, "wageIndex": 115.2, "cpiIndex": 137.6, "housePriceIndex": 119.8 },
+      { "year": 2020, "wageIndex": 127.5, "cpiIndex": 150.3, "housePriceIndex": 140.5 },
+      { "year": 2023, "wageIndex": 126.4, "cpiIndex": 176.9, "housePriceIndex": 164.8 }
+    ]
+  },
+  "GB": {
+    "series": [
+      { "year": 1995, "wageIndex": 86.3, "cpiIndex": 90.7, "housePriceIndex": 71.3 },
+      { "year": 2000, "wageIndex": 100, "cpiIndex": 100, "housePriceIndex": 100 },
+      { "year": 2005, "wageIndex": 112.9, "cpiIndex": 108.2, "housePriceIndex": 163.9 },
+      { "year": 2010, "wageIndex": 116.4, "cpiIndex": 122.7, "housePriceIndex": 159.4 },
+      { "year": 2015, "wageIndex": 116.3, "cpiIndex": 136.2, "housePriceIndex": 160.9 },
+      { "year": 2020, "wageIndex": 118.7, "cpiIndex": 148.3, "housePriceIndex": 179.1 },
+      { "year": 2023, "wageIndex": 119.4, "cpiIndex": 175.2, "housePriceIndex": 184.3 }
+    ]
+  },
+  "FR": {
+    "series": [
+      { "year": 1995, "wageIndex": 94.6, "cpiIndex": 94.2, "housePriceIndex": 91.5 },
+      { "year": 2000, "wageIndex": 100, "cpiIndex": 100, "housePriceIndex": 100 },
+      { "year": 2005, "wageIndex": 107.2, "cpiIndex": 109.9, "housePriceIndex": 152.5 },
+      { "year": 2010, "wageIndex": 114.3, "cpiIndex": 118.5, "housePriceIndex": 171 },
+      { "year": 2015, "wageIndex": 117.7, "cpiIndex": 125.1, "housePriceIndex": 166.2 },
+      { "year": 2020, "wageIndex": 115.7, "cpiIndex": 131, "housePriceIndex": 181.2 },
+      { "year": 2023, "wageIndex": 118.7, "cpiIndex": 147, "housePriceIndex": 190.2 }
+    ]
+  },
+  "DE": {
+    "series": [
+      { "year": 1995, "wageIndex": 96.2, "cpiIndex": 93.9, "housePriceIndex": 110.1 },
+      { "year": 2000, "wageIndex": 100, "cpiIndex": 100, "housePriceIndex": 100 },
+      { "year": 2005, "wageIndex": 102, "cpiIndex": 107.9, "housePriceIndex": 89.3 },
+      { "year": 2010, "wageIndex": 103.1, "cpiIndex": 116.7, "housePriceIndex": 83.5 },
+      { "year": 2015, "wageIndex": 111.9, "cpiIndex": 125.1, "housePriceIndex": 90.7 },
+      { "year": 2020, "wageIndex": 117.5, "cpiIndex": 131.9, "housePriceIndex": 116.3 },
+      { "year": 2023, "wageIndex": 114.7, "cpiIndex": 153.9, "housePriceIndex": 116 }
+    ]
+  },
+  "NL": {
+    "series": [
+      { "year": 1995, "wageIndex": 99, "cpiIndex": 90.1, "housePriceIndex": 61.6 },
+      { "year": 2000, "wageIndex": 100, "cpiIndex": 100, "housePriceIndex": 100 },
+      { "year": 2005, "wageIndex": 104.1, "cpiIndex": 113.1, "housePriceIndex": 121.3 },
+      { "year": 2010, "wageIndex": 110.2, "cpiIndex": 122, "housePriceIndex": 120.1 },
+      { "year": 2015, "wageIndex": 111.3, "cpiIndex": 133.2, "housePriceIndex": 97.1 },
+      { "year": 2020, "wageIndex": 111.3, "cpiIndex": 143.2, "housePriceIndex": 127.8 },
+      { "year": 2023, "wageIndex": 103.4, "cpiIndex": 168, "housePriceIndex": 144.1 }
+    ]
+  }
+}

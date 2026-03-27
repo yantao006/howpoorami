@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ALL_COUNTRY_MAP, type AllCountryCode } from "@/data/countries-extended";
+import { ALL_COUNTRY_MAP, type AllCountryCode, isAllCountryCode } from "@/data/countries-extended";
 import { TAX_RATES } from "@/data/tax-rates";
 import { PURCHASING_POWER } from "@/data/purchasing-power";
 import CountrySelector from "@/components/CountrySelector";
@@ -48,8 +48,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
   }, []);
 
   const handleCountrySelect = useCallback((code: string) => {
-    setSelectedCountry(code as AllCountryCode);
-    setUserPercentile(null);
+    if (isAllCountryCode(code)) {
+      setSelectedCountry(code);
+      setUserPercentile(null);
+    }
   }, []);
 
   const hasTaxData = selectedCountry in TAX_RATES;
@@ -135,7 +137,8 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               </div>
               <div className="hidden sm:block text-right">
                 <p className="text-text-muted text-xs">
-                  Hover over each group for details
+                  <span className="hidden md:inline">Hover over</span>
+                  <span className="md:hidden">Tap</span> each group for details
                 </p>
                 <p className="text-text-muted text-xs">
                   Zoom in to see the top
@@ -145,8 +148,6 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
 
             <WealthDistributionChart
               country={country}
-              width={0}
-              height={0}
               userPercentile={userPercentile}
             />
           </motion.div>
@@ -290,7 +291,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
+            className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6 overflow-visible"
           >
             <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
               {({ width, height }) => (

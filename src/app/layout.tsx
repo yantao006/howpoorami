@@ -57,12 +57,21 @@ export const metadata: Metadata = {
     siteName: "How Poor Am I?",
     locale: "en_US",
     url: "https://howpoorami.org",
+    images: [
+      {
+        url: "https://howpoorami.org/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "How Poor Am I? — See where you stand in the global wealth distribution",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "How Poor Am I? — The Wealth Gap Visualized",
     description:
       "Enter your income or wealth and see where you stand. Interactive wealth inequality data for 30+ countries.",
+    images: ["https://howpoorami.org/og-image.png"],
   },
   robots: {
     index: true,

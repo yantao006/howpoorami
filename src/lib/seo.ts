@@ -1,9 +1,9 @@
-import { ALL_COUNTRY_MAP, type AllCountryCode } from "@/data/countries-extended";
+import { ALL_COUNTRY_MAP, type AllCountryCode, isAllCountryCode } from "@/data/countries-extended";
 
 /** All country codes that get their own page (excludes GLOBAL) */
 export const SEO_COUNTRY_CODES: readonly AllCountryCode[] = Object.keys(ALL_COUNTRY_MAP).filter(
-  (c) => c !== "GLOBAL"
-) as AllCountryCode[];
+  (c): c is AllCountryCode => c !== "GLOBAL" && isAllCountryCode(c)
+);
 
 export const SITE_URL = "https://howpoorami.org";
 
@@ -28,8 +28,8 @@ export function getAllCountrySeo(): readonly CountrySeoData[] {
 
 export function resolveCountryCode(slug: string): AllCountryCode | null {
   const upper = slug.toUpperCase();
-  if (upper in ALL_COUNTRY_MAP && upper !== "GLOBAL") {
-    return upper as AllCountryCode;
+  if (upper !== "GLOBAL" && isAllCountryCode(upper)) {
+    return upper;
   }
   return null;
 }

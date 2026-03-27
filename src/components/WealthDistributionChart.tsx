@@ -7,8 +7,6 @@ import { DETAILED_SHARES, type DetailedWealthShares } from "@/data/billionaires"
 
 interface WealthDistributionChartProps {
   readonly country: CountryData;
-  readonly width: number;
-  readonly height: number;
   readonly userPercentile: number | null;
 }
 
@@ -68,6 +66,7 @@ function formatPeopleCount(count: number): string {
 }
 
 function formatPerPerson(wealthShare: number, populationPercent: number): string {
+  if (wealthShare <= 0) return "net debt";
   const ratio = wealthShare / populationPercent;
   if (ratio >= 100) return `${Math.round(ratio)}x`;
   if (ratio >= 10) return `${ratio.toFixed(0)}x`;
@@ -151,7 +150,8 @@ export default function WealthDistributionChart({
       <div className="space-y-3">
         <AnimatePresence mode="popLayout">
           {segments.map((seg, i) => {
-            const wealthBarPct = (seg.wealthShare / maxWealth) * 100;
+            const clampedWealth = Math.max(0, seg.wealthShare);
+            const wealthBarPct = maxWealth > 0 ? (clampedWealth / maxWealth) * 100 : 0;
             const popBarPct = (seg.populationPercent / maxPop) * 100;
             const peopleCount = Math.round(populationAdults * 1_000_000 * (seg.populationPercent / 100));
             const perPersonMultiple = formatPerPerson(seg.wealthShare, seg.populationPercent);

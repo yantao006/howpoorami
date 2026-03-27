@@ -9,7 +9,7 @@ import { curveMonotoneX } from "@visx/curve";
 import { localPoint } from "@visx/event";
 import ChartTooltip from "@/components/ChartTooltip";
 import { motion } from "framer-motion";
-import { type CountryData, type CountryCode } from "@/data/wealth-data";
+import { type CountryData } from "@/data/wealth-data";
 
 interface HistoricalEvolutionChartProps {
   readonly country: CountryData;
@@ -41,7 +41,7 @@ interface TooltipPayload {
   readonly top1: number;
 }
 
-const MARGIN = { top: 40, right: 30, bottom: 60, left: 65 };
+const MARGIN = { top: 80, right: 30, bottom: 60, left: 65 };
 
 // Paul Tol qualitative palette — colorblind-safe
 const COLORS = {
@@ -87,7 +87,7 @@ const DEFAULT_EVENTS: readonly EventMarker[] = [
   { year: 2008, label: "Financial crisis" },
 ] as const;
 
-function getEventsForCountry(code: CountryCode): readonly EventMarker[] {
+function getEventsForCountry(code: string): readonly EventMarker[] {
   return COUNTRY_EVENTS[code] ?? DEFAULT_EVENTS;
 }
 
@@ -211,7 +211,7 @@ export default function HistoricalEvolutionChart({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <svg width={width} height={height}>
+      <svg width={width} height={height} role="img" aria-label={`Historical wealth distribution evolution for ${country.name}`} style={{ overflow: "visible" }}>
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Grid lines */}
           {[20, 40, 60, 80].map((tick) => (
@@ -294,8 +294,8 @@ export default function HistoricalEvolutionChart({
                 {/* Label rotated -45 degrees */}
                 <text
                   x={xPos}
-                  y={-6}
-                  transform={`rotate(-45, ${xPos}, -6)`}
+                  y={-10}
+                  transform={`rotate(-45, ${xPos}, -10)`}
                   fill="var(--text-secondary)"
                   fontSize={10}
                   fontFamily="var(--font-body)"

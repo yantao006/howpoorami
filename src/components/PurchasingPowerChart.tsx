@@ -156,7 +156,7 @@ export default function PurchasingPowerChart({
         </div>
       </div>
 
-      <svg width={width} height={height}>
+      <svg width={width} height={height} role="img" aria-label="Wages vs. cost of living and house prices indexed to year 2000">
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Grid lines */}
           {yScale.ticks(5).map((tick) => (

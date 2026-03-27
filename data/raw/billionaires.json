@@ -1,0 +1,194 @@
+{
+  "_meta": {
+    "description": "Richest person per country",
+    "source": "Forbes Real-Time Billionaires via komed3/rtb-api (MIT)",
+    "url": "https://github.com/komed3/rtb-api",
+    "generatedBy": "scripts/update-billionaires.mjs"
+  },
+  "US": {
+    "name": "Elon Musk",
+    "netWorth": 839618478000,
+    "source": "Tesla, SpaceX",
+    "photoDescription": "CEO of Tesla"
+  },
+  "GB": {
+    "name": "Michael Platt",
+    "netWorth": 20901000000,
+    "source": "Hedge funds",
+    "photoDescription": "Founder  of BlueCrest Capital Management"
+  },
+  "FR": {
+    "name": "Bernard Arnault & family",
+    "netWorth": 164146411000,
+    "source": "LVMH",
+    "photoDescription": "Chairman and CEO of LVMH Louis Vuitton Moet Hennessy"
+  },
+  "DE": {
+    "name": "Dieter Schwarz",
+    "netWorth": 67164898000,
+    "source": "Retail",
+    "photoDescription": "Dieter Schwarz"
+  },
+  "NL": {
+    "name": "Charlene de Carvalho-Heineken & family",
+    "netWorth": 17655442000,
+    "source": "Heineken",
+    "photoDescription": "Charlene de Carvalho-Heineken & family"
+  },
+  "CA": {
+    "name": "Changpeng Zhao",
+    "netWorth": 63672794000,
+    "source": "Cryptocurrency exchange",
+    "photoDescription": "Changpeng Zhao"
+  },
+  "AU": {
+    "name": "Gina Rinehart",
+    "netWorth": 25472591000,
+    "source": "Mining",
+    "photoDescription": "Executive Chairman of Hancock Prospecting"
+  },
+  "JP": {
+    "name": "Tadashi Yanai & family",
+    "netWorth": 60782475000,
+    "source": "Fashion retail",
+    "photoDescription": "Tadashi Yanai & family"
+  },
+  "KR": {
+    "name": "Jay Y. Lee",
+    "netWorth": 27031516000,
+    "source": "Samsung",
+    "photoDescription": "Jay Y. Lee"
+  },
+  "CN": {
+    "name": "Zhang Yiming",
+    "netWorth": 69300000000,
+    "source": "TikTok",
+    "photoDescription": "Zhang Yiming"
+  },
+  "IN": {
+    "name": "Mukesh Ambani",
+    "netWorth": 97289460000,
+    "source": "Diversified",
+    "photoDescription": "Chairman and managing director of Reliance Industries"
+  },
+  "BR": {
+    "name": "Eduardo Saverin",
+    "netWorth": 36180453000,
+    "source": "Facebook",
+    "photoDescription": "Cofounder of Meta Platforms"
+  },
+  "MX": {
+    "name": "Carlos Slim Helu & family",
+    "netWorth": 123651568000,
+    "source": "Telecom",
+    "photoDescription": "Honorary Chairman of America Movil"
+  },
+  "ZA": {
+    "name": "Johann Rupert & family",
+    "netWorth": 15311206000,
+    "source": "Luxury goods",
+    "photoDescription": "Johann Rupert & family"
+  },
+  "SE": {
+    "name": "Stefan Persson",
+    "netWorth": 23614233000,
+    "source": "H&M",
+    "photoDescription": "Chairman of Hennes & Mauritz Unsponsored ADR"
+  },
+  "NO": {
+    "name": "Torstein Hagen",
+    "netWorth": 17491062000,
+    "source": "Cruises",
+    "photoDescription": "Torstein Hagen"
+  },
+  "DK": {
+    "name": "Anders Holch Povlsen",
+    "netWorth": 16824508000,
+    "source": "Fashion retail",
+    "photoDescription": "Anders Holch Povlsen"
+  },
+  "FI": {
+    "name": "Antti Herlin",
+    "netWorth": 4796162000,
+    "source": "Elevators, escalators",
+    "photoDescription": "Antti Herlin"
+  },
+  "CH": {
+    "name": "Gianluigi Aponte",
+    "netWorth": 44516699000,
+    "source": "Shipping",
+    "photoDescription": "Gianluigi Aponte"
+  },
+  "IT": {
+    "name": "Giovanni Ferrero",
+    "netWorth": 48752066000,
+    "source": "Nutella, chocolates",
+    "photoDescription": "Giovanni Ferrero"
+  },
+  "ES": {
+    "name": "Amancio Ortega",
+    "netWorth": 141982122000,
+    "source": "Zara",
+    "photoDescription": "Amancio Ortega"
+  },
+  "SG": {
+    "name": "Jason Chang",
+    "netWorth": 13678013000,
+    "source": "Electronics",
+    "photoDescription": "Jason Chang"
+  },
+  "IE": {
+    "name": "John Collison",
+    "netWorth": 17490000000,
+    "source": "Payment software",
+    "photoDescription": "Cofounder of Stripe"
+  },
+  "NZ": {
+    "name": "Graeme Hart",
+    "netWorth": 10168683000,
+    "source": "Packaging",
+    "photoDescription": "Graeme Hart"
+  },
+  "CL": {
+    "name": "Iris Fontbona & family",
+    "netWorth": 51482751000,
+    "source": "Mining",
+    "photoDescription": "Iris Fontbona & family"
+  },
+  "AT": {
+    "name": "Mark Mateschitz",
+    "netWorth": 45786305000,
+    "source": "Red Bull",
+    "photoDescription": "Mark Mateschitz"
+  },
+  "BE": {
+    "name": "Eric Wittouck",
+    "netWorth": 9000000000,
+    "source": "Investments",
+    "photoDescription": "Eric Wittouck"
+  },
+  "PL": {
+    "name": "Michal Solowow",
+    "netWorth": 5916093000,
+    "source": "Investments",
+    "photoDescription": "Michal Solowow"
+  },
+  "PT": {
+    "name": "Maria Fernanda Amorim & family",
+    "netWorth": 7802649000,
+    "source": "Energy, investments",
+    "photoDescription": "Maria Fernanda Amorim & family"
+  },
+  "CZ": {
+    "name": "Renata Kellnerova & family",
+    "netWorth": 20188156000,
+    "source": "Finance, telecommunications",
+    "photoDescription": "Renata Kellnerova & family"
+  },
+  "GLOBAL": {
+    "name": "Elon Musk",
+    "netWorth": 839618478000,
+    "source": "Tesla, SpaceX",
+    "photoDescription": "World's richest person"
+  }
+}

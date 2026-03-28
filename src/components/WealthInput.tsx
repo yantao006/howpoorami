@@ -176,6 +176,53 @@ export default function WealthInput({ country, onPercentileChange }: WealthInput
               You are in the top 1%
             </p>
           )}
+
+          {/* Share buttons */}
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <span className="text-text-muted text-xs">Share:</span>
+            <button
+              type="button"
+              onClick={() => {
+                const text = `I'm wealthier than ${percentile.toFixed(1)}% of the population in ${country.name}. Where do you stand?`;
+                const url = `https://howpoorami.org/${country.code.toLowerCase()}`;
+                window.open(
+                  `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-bg-card border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent-periwinkle/30 transition-all cursor-pointer"
+              aria-label="Share on X"
+            >
+              X / Twitter
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const text = `I'm wealthier than ${percentile.toFixed(1)}% of the population in ${country.name}. Where do you stand? https://howpoorami.org/${country.code.toLowerCase()}`;
+                window.open(
+                  `https://wa.me/?text=${encodeURIComponent(text)}`,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-bg-card border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent-periwinkle/30 transition-all cursor-pointer"
+              aria-label="Share on WhatsApp"
+            >
+              WhatsApp
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const url = `https://howpoorami.org/${country.code.toLowerCase()}`;
+                navigator.clipboard.writeText(url);
+              }}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-bg-card border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent-periwinkle/30 transition-all cursor-pointer"
+              aria-label="Copy link"
+            >
+              Copy link
+            </button>
+          </div>
         </div>
       )}
 

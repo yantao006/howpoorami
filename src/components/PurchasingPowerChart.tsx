@@ -24,7 +24,7 @@ interface TooltipPayload {
   readonly year: number;
   readonly wageIndex: number;
   readonly cpiIndex: number;
-  readonly housePriceIndex: number;
+  readonly housePriceIndex: number | null;
 }
 
 const MARGIN = { top: 50, right: 30, bottom: 55, left: 60 };
@@ -81,7 +81,7 @@ export default function PurchasingPowerChart({
     const allValues = data.series.flatMap((d) => [
       d.wageIndex,
       d.cpiIndex,
-      d.housePriceIndex,
+      ...(d.housePriceIndex != null ? [d.housePriceIndex] : []),
     ]);
     const maxVal = Math.max(...allValues);
     const minVal = Math.min(...allValues);
@@ -193,9 +193,9 @@ export default function PurchasingPowerChart({
           {LINES.map((line) => (
             <LinePath<EconomicDataPoint>
               key={line.key}
-              data={data.series as EconomicDataPoint[]}
+              data={data.series.filter(d => d[line.key] != null) as EconomicDataPoint[]}
               x={(d) => xScale(d.year)}
-              y={(d) => yScale(d[line.key])}
+              y={(d) => yScale(d[line.key] as number)}
               stroke={line.color}
               strokeWidth={2.5}
               curve={curveMonotoneX}
@@ -204,17 +204,19 @@ export default function PurchasingPowerChart({
 
           {/* Data points */}
           {LINES.map((line) =>
-            data.series.map((d) => (
-              <circle
-                key={`${line.key}-${d.year}`}
-                cx={xScale(d.year)}
-                cy={yScale(d[line.key])}
-                r={3.5}
-                fill={line.color}
-                stroke="var(--color-bg-primary)"
-                strokeWidth={1.5}
-              />
-            )),
+            data.series
+              .filter(d => d[line.key] != null)
+              .map((d) => (
+                <circle
+                  key={`${line.key}-${d.year}`}
+                  cx={xScale(d.year)}
+                  cy={yScale(d[line.key] as number)}
+                  r={3.5}
+                  fill={line.color}
+                  stroke="var(--color-bg-primary)"
+                  strokeWidth={1.5}
+                />
+              )),
           )}
 
           {/* Tooltip hover line */}
@@ -281,23 +283,27 @@ export default function PurchasingPowerChart({
           <p className="text-text-primary text-sm font-semibold mb-1.5">
             {tooltip.data.year}
           </p>
-          {LINES.map((line) => (
-            <div
-              key={line.key}
-              className="flex items-center justify-between gap-4 text-xs"
-            >
-              <span className="flex items-center gap-1.5">
-                <span
-                  className="inline-block h-2 w-2 rounded-full"
-                  style={{ backgroundColor: line.color }}
-                />
-                <span className="text-text-secondary">{line.label}</span>
-              </span>
-              <span className="text-text-primary font-medium tabular-nums">
-                {tooltip.data[line.key].toFixed(1)}
-              </span>
-            </div>
-          ))}
+          {LINES.map((line) => {
+            const value = tooltip.data[line.key];
+            if (value == null) return null;
+            return (
+              <div
+                key={line.key}
+                className="flex items-center justify-between gap-4 text-xs"
+              >
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-2 w-2 rounded-full"
+                    style={{ backgroundColor: line.color }}
+                  />
+                  <span className="text-text-secondary">{line.label}</span>
+                </span>
+                <span className="text-text-primary font-medium tabular-nums">
+                  {value.toFixed(1)}
+                </span>
+              </div>
+            );
+          })}
           <p className="text-text-muted text-[10px] mt-1.5 border-t border-border-subtle pt-1">
             100 = year 2000 level
           </p>

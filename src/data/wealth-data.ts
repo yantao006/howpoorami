@@ -213,29 +213,56 @@ export function generateLorenzCurve(country: CountryData): readonly LorenzPoint[
   ];
 }
 
+/**
+ * Estimate percentile position given a wealth amount in USD.
+ *
+ * Uses a piecewise linear interpolation across wealth distribution segments:
+ * bottom 50% → middle 40% → next 9% → top 1% → top 0.1% → top 0.01%
+ *
+ * Returns a value between 0 and 99.99.
+ */
 export function findPercentile(wealthUSD: number, country: CountryData): number {
   const totalWealth = country.meanWealthPerAdult * country.population * 1_000_000;
-  const avgBottom50 = (totalWealth * country.wealthShares.bottom50 / 100) / (country.population * 1_000_000 * 0.5);
-  const avgMiddle40 = (totalWealth * country.wealthShares.middle40 / 100) / (country.population * 1_000_000 * 0.4);
-  const avgTop10 = (totalWealth * country.wealthShares.top10 / 100) / (country.population * 1_000_000 * 0.1);
-  const avgTop1 = (totalWealth * country.wealthShares.top1 / 100) / (country.population * 1_000_000 * 0.01);
+  const adults = country.population * 1_000_000;
 
-  if (wealthUSD <= avgBottom50) {
-    return avgBottom50 > 0 ? Math.min(50, (wealthUSD / avgBottom50) * 50) : 0;
+  // Helper: average wealth per adult within a segment
+  const segAvg = (sharePercent: number, popFraction: number) =>
+    (totalWealth * sharePercent / 100) / (adults * popFraction);
+
+  const avgBottom50 = segAvg(country.wealthShares.bottom50, 0.5);
+  const avgMiddle40 = segAvg(country.wealthShares.middle40, 0.4);
+  const top9Share = country.wealthShares.top10 - country.wealthShares.top1;
+  const avgNext9 = segAvg(top9Share, 0.09);
+  const avgTop1 = segAvg(country.wealthShares.top1, 0.01);
+  // Estimate sub-percentile averages (top 0.1% ≈ 55% of top 1% wealth, top 0.01% ≈ 17%)
+  const avgTop01 = segAvg(country.wealthShares.top1 * 0.55, 0.001);
+  const avgTop001 = segAvg(country.wealthShares.top1 * 0.17, 0.0001);
+
+  // Piecewise linear segments: [threshold, percentileStart, percentileWidth]
+  const segments: [number, number, number][] = [
+    [avgBottom50, 0, 50],
+    [avgMiddle40, 50, 40],
+    [avgNext9, 90, 9],
+    [avgTop1, 99, 0.9],
+    [avgTop01, 99.9, 0.09],
+    [avgTop001, 99.99, 0],
+  ];
+
+  let prevThreshold = 0;
+  for (const [threshold, pctStart, pctWidth] of segments) {
+    if (threshold <= prevThreshold) {
+      prevThreshold = threshold;
+      continue;
+    }
+    if (wealthUSD <= threshold) {
+      const range = threshold - prevThreshold;
+      const fraction = range > 0 ? (wealthUSD - prevThreshold) / range : 0;
+      return Math.min(pctStart + fraction * pctWidth, 99.99);
+    }
+    prevThreshold = threshold;
   }
-  if (wealthUSD <= avgMiddle40) {
-    const range = avgMiddle40 - avgBottom50;
-    return range > 0 ? 50 + ((wealthUSD - avgBottom50) / range) * 40 : 50;
-  }
-  if (wealthUSD <= avgTop10) {
-    const range = avgTop10 - avgMiddle40;
-    return range > 0 ? 90 + ((wealthUSD - avgMiddle40) / range) * 9 : 90;
-  }
-  if (wealthUSD <= avgTop1) {
-    const range = avgTop1 - avgTop10;
-    return range > 0 ? 99 + ((wealthUSD - avgTop10) / range) * 0.9 : 99;
-  }
-  return 99.9;
+
+  return 99.99;
 }
 
 // ─── Global statistics ───────────────────────────────────────────────────────

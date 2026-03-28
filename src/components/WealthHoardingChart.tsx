@@ -137,6 +137,7 @@ function PopulationDots({
   readonly bottomCount: number;
 }) {
   // Show the ratio visually: 1 dot for top 0.01%, proportional dots for bottom 50%
+  if (topCount === 0 || bottomCount === 0) return null;
   const ratio = Math.round(bottomCount / topCount);
   // Cap displayed dots for readability
   const displayDots = Math.min(ratio, 50);

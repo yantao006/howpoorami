@@ -76,6 +76,7 @@ function formatPerPerson(wealthShare: number, populationPercent: number): string
 
 export default function WealthDistributionChart({
   country,
+  userPercentile,
 }: WealthDistributionChartProps) {
   const [zoom, setZoom] = useState<ZoomLevel>("overview");
   const [expandedLabels, setExpandedLabels] = useState<ReadonlySet<string>>(new Set());
@@ -92,6 +93,17 @@ export default function WealthDistributionChart({
     top001: country.wealthShares.top1 * 0.17,
   };
   const segments = useMemo(() => getSegments(shares, zoom), [shares, zoom]);
+
+  // Determine which segment the user falls into based on their percentile
+  const userSegmentLabel = useMemo(() => {
+    if (userPercentile == null) return null;
+    if (userPercentile < 50) return "Bottom 50%";
+    if (userPercentile < 90) return "Middle 40%";
+    if (userPercentile < 99) return "Top 10–1%";
+    if (userPercentile < 99.9) return "Top 1–0.1%";
+    if (userPercentile < 99.99) return "Top 0.1–0.01%";
+    return "Top 0.01%";
+  }, [userPercentile]);
 
   const populationAdults = country.population * 0.78;
 
@@ -156,6 +168,7 @@ export default function WealthDistributionChart({
             const peopleCount = Math.round(populationAdults * 1_000_000 * (seg.populationPercent / 100));
             const perPersonMultiple = formatPerPerson(seg.wealthShare, seg.populationPercent);
             const isExpanded = expandedLabels.has(seg.label);
+            const isUserSegment = seg.label === userSegmentLabel;
 
             return (
               <motion.div
@@ -167,9 +180,11 @@ export default function WealthDistributionChart({
                 transition={{ duration: 0.3, delay: i * 0.04 }}
                 className={`
                   rounded-xl border transition-all duration-200
-                  ${isExpanded
-                    ? "border-border-subtle bg-bg-card/80 shadow-lg"
-                    : "border-border-subtle/50 bg-bg-card/40 hover:bg-bg-card/60"
+                  ${isUserSegment
+                    ? "border-accent-periwinkle/50 bg-accent-periwinkle/5 ring-1 ring-accent-periwinkle/20"
+                    : isExpanded
+                      ? "border-border-subtle bg-bg-card/80 shadow-lg"
+                      : "border-border-subtle/50 bg-bg-card/40 hover:bg-bg-card/60"
                   }
                 `}
               >
@@ -185,6 +200,11 @@ export default function WealthDistributionChart({
                       <span className="text-text-primary text-sm font-semibold">
                         {seg.label}
                       </span>
+                      {isUserSegment && (
+                        <span className="text-accent-periwinkle text-[10px] font-semibold bg-accent-periwinkle/10 px-1.5 py-0.5 rounded-full">
+                          You are here
+                        </span>
+                      )}
                       <span className="text-text-muted text-xs hidden sm:inline">
                         {formatPeopleCount(peopleCount)}
                       </span>

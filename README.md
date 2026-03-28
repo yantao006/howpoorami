@@ -1,41 +1,38 @@
 # How Poor Am I?
 
-An interactive wealth and income inequality visualization. Enter your income or net wealth and see where you really stand in the global wealth distribution.
+> An interactive wealth inequality visualizer. Enter your income or net wealth and discover where you really stand — globally and in 30+ countries.
 
-**Live site:** [howpoorami.org](https://howpoorami.org)
+**[Live Demo: howpoorami.org](https://howpoorami.org)**
 
-## Features
+## What It Does
 
-- **Wealth Percentile Calculator** -- Enter your income or net wealth and instantly see your percentile ranking within your country's wealth distribution.
-- **30+ Countries** -- Covers major economies with data from authoritative sources. Auto-detects your country via geolocation.
-- **Billionaire Comparison** (/compare) -- See how long it would take to earn what a billionaire has, with perspective comparisons and time context.
-- **Purchasing Power Over Time** -- See how many hours of work at minimum wage it takes to afford everyday items, and how that's changed over decades.
-- **Wealth Concentration** -- Visualize how wealth is distributed across population segments, from the bottom 50% to the top 0.01%.
-- **Interactive Charts** -- Historical evolution (1980-2023), income share bars, tax rate comparisons, and more.
-- **Dark / Light Mode** -- Toggle between themes with smooth transitions. Persists your preference and respects system settings.
-- **Privacy First** -- All calculations run client-side. No data is stored or sent anywhere.
+- **Wealth Percentile Calculator** — Enter your income or net wealth and see your percentile ranking (top X%) with sub-percentile precision up to 99.99%
+- **30+ Countries** — US, UK, France, Germany, Netherlands, Japan, China, India, Brazil, and 21 more. Auto-detects your country via geolocation
+- **Wealth Concentration** — See how the top 0.01% compares to the bottom 50% with area-proportional rectangles
+- **Historical Evolution** — Stacked area charts showing how wealth concentration changed from 1900 to 2024, with policy event markers
+- **Tax Regressivity** — Effective tax rates by wealth class reveal who really pays (and who doesn't)
+- **Purchasing Power** — Wages vs. CPI vs. house prices indexed to 2000 — see where the gap opened
+- **Billionaire Comparison** — How long would it take you to earn what the richest person in your country has?
+- **Privacy First** — All calculations run client-side. No data is stored or sent anywhere.
 
-## Tech Stack
+## Data Pipeline
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, static export)
-- **Language:** TypeScript
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) with CSS custom properties for theming
-- **Charts:** [visx](https://airbnb.io/visx/) (low-level composable visualization primitives)
-- **Animations:** [Framer Motion](https://www.framer.com/motion/)
-- **Fonts:** [Bitter](https://fonts.google.com/specimen/Bitter) (headings) + [Raleway](https://fonts.google.com/specimen/Raleway) (body) via `next/font`
+All data comes from public, authoritative APIs. No hardcoded values — TypeScript files import raw JSON and transform it at build time.
 
-## Data Sources
+```
+pnpm data:fetch                  # Download from APIs → data/raw/*.json
+pnpm build                       # TS imports JSON → transforms → static HTML
+```
 
-All data files live in `src/data/` with inline source citations:
+| Source | Data | Raw File |
+|--------|------|----------|
+| [WID.world](https://wid.world) | Wealth shares, income shares, historical series, Gini | `data/raw/wid-*.json` |
+| [Forbes RTB](https://github.com/komed3/rtb-api) | Billionaires per country | `data/raw/billionaires.json` |
+| [OECD](https://data-explorer.oecd.org) | Average wages (PPP) | `data/raw/purchasing-power.json` |
+| [World Bank](https://data.worldbank.org) | Consumer Price Index | `data/raw/purchasing-power.json` |
+| [FRED](https://fred.stlouisfed.org) | House price indices | `data/raw/purchasing-power.json` |
 
-| File | Description | Primary Sources |
-|------|-------------|-----------------|
-| `wealth-data.ts` | Wealth/income distribution, Gini coefficients, population for 30+ countries | [WID.world](https://wid.world), [OECD](https://www.oecd.org), [SWIID](https://fsolt.org/swiid/) |
-| `billionaires.ts` | Top billionaire per country with net worth (March 2026) | [Bloomberg Billionaires Index](https://www.bloomberg.com/billionaires/), [Forbes](https://www.forbes.com/real-time-billionaires/) |
-| `tax-rates.ts` | Income tax, wealth tax, capital gains, and notable policies per country | OECD Tax Database, national tax authority publications |
-| `purchasing-power.ts` | Historical prices and minimum wages for US, UK, FR, DE, NL | BLS, ONS, Eurostat, national statistics offices |
-| `time-comparisons.ts` | Historical time periods and cultural milestones for wealth context | Various historical references |
-| `countries-extended.ts` | Country metadata: codes, names, flags, currencies, regions | ISO 3166, World Bank |
+See [DATA_SOURCES.md](DATA_SOURCES.md) for full provenance and [METHODOLOGY.md](METHODOLOGY.md) for calculation details.
 
 ## Getting Started
 
@@ -44,23 +41,47 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view.
+Open [http://localhost:3000](http://localhost:3000).
+
+To refresh external data:
+
+```bash
+pnpm data:fetch               # Fetch all sources
+pnpm data:fetch --skip-wid    # Skip WID.world (slow)
+pnpm build                    # Rebuild with new data
+```
+
+## Tech Stack
+
+- **[Next.js 16](https://nextjs.org/)** — App Router, static export (`output: "export"`)
+- **TypeScript** — Strict mode
+- **[Tailwind CSS v4](https://tailwindcss.com/)** — CSS custom properties for dark/light theming
+- **[visx](https://airbnb.io/visx/)** — Low-level composable SVG chart primitives
+- **[Framer Motion](https://www.framer.com/motion/)** — Scroll-triggered animations
 
 ## Deployment
 
-The site is deployed on **Cloudflare Pages** (free tier):
+Deployed on **Cloudflare Pages** (free tier):
 
-1. Connect your GitHub repo in the [Cloudflare Dashboard](https://dash.cloudflare.com/) under **Workers & Pages > Create > Pages > Connect to Git**
-2. Set build configuration:
-   - **Build command:** `pnpm build`
-   - **Build output directory:** `out`
-   - **Node.js version:** 20+
-3. Add your custom domain (`howpoorami.org`) under **Custom domains**
-4. Every push to `main` triggers an automatic deploy
+1. Connect GitHub repo in Cloudflare Dashboard
+2. Build command: `pnpm build` / Output directory: `out`
+3. Every push to `main` auto-deploys
 
 ## Contributing
 
-Contributions welcome! If you find inaccurate data, please open an issue with a link to the authoritative source.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Data corrections, new countries, and bug fixes are all welcome.
+
+## Citation
+
+If you use this tool or its data pipeline in your work:
+
+```
+How Poor Am I? — Wealth Inequality Visualizer
+https://howpoorami.org
+Data: WID.world, OECD, World Bank, Forbes, FRED
+```
+
+See [CITATION.cff](CITATION.cff) for machine-readable citation.
 
 ## License
 

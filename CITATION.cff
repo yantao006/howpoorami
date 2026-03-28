@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this tool or its data in your work, please cite it as below."
+type: software
+title: "How Poor Am I? — Wealth Inequality Visualizer"
+url: "https://howpoorami.org"
+repository-code: "https://github.com/yrunhaar/howpoorami"
+license: MIT
+keywords:
+  - wealth inequality
+  - data visualization
+  - wealth distribution
+  - economic inequality
+  - WID.world
+abstract: >-
+  An interactive tool for exploring wealth and income inequality
+  across 30+ countries. Uses data from the World Inequality Database
+  (WID.world), Forbes, OECD, World Bank, and FRED to visualize
+  wealth concentration, tax regressivity, and purchasing power trends.

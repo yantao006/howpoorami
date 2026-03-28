@@ -13,7 +13,7 @@ export interface EconomicDataPoint {
   readonly year: number;
   readonly wageIndex: number;
   readonly cpiIndex: number;
-  readonly housePriceIndex: number;
+  readonly housePriceIndex: number | null;
 }
 
 export interface CountryEconomicData {
@@ -46,7 +46,7 @@ function buildPurchasingPower(): Readonly<Record<string, CountryEconomicData>> {
           year: p.year,
           wageIndex: p.wageIndex ?? 100,
           cpiIndex: p.cpiIndex ?? 100,
-          housePriceIndex: p.housePriceIndex ?? 100,
+          housePriceIndex: p.housePriceIndex ?? null,
         })),
       },
     ]);

@@ -92,24 +92,30 @@ function getEventsForCountry(code: string): readonly EventMarker[] {
 }
 
 function buildStackedData(country: CountryData): readonly StackedPoint[] {
-  return country.historicalWealthTop10.map((entry, idx) => {
-    const year = entry.year;
-    const top10 = entry.share;
-    const top1 = country.historicalWealthTop1[idx]?.share ?? 0;
-    const bottom50 = country.historicalWealthBottom50[idx]?.share ?? 0;
-    const middle40 = Math.max(0, 100 - top10 - bottom50);
+  // Build lookup maps keyed by year to avoid index-based alignment bugs
+  const top1ByYear = new Map(country.historicalWealthTop1.map(p => [p.year, p.share]));
+  const bottom50ByYear = new Map(country.historicalWealthBottom50.map(p => [p.year, p.share]));
 
-    return {
-      year,
-      bottom50,
-      middle40,
-      top10,
-      top1,
-      cumBottom50: bottom50,
-      cumMiddle40: bottom50 + middle40,
-      cumTop10: bottom50 + middle40 + top10,
-    };
-  });
+  return country.historicalWealthTop10
+    .filter(entry => top1ByYear.has(entry.year) && bottom50ByYear.has(entry.year))
+    .map(entry => {
+      const year = entry.year;
+      const top10 = entry.share;
+      const top1 = top1ByYear.get(year) ?? 0;
+      const bottom50 = bottom50ByYear.get(year) ?? 0;
+      const middle40 = Math.max(0, 100 - top10 - bottom50);
+
+      return {
+        year,
+        bottom50,
+        middle40,
+        top10,
+        top1,
+        cumBottom50: bottom50,
+        cumMiddle40: bottom50 + middle40,
+        cumTop10: bottom50 + middle40 + top10,
+      };
+    });
 }
 
 function findClosestIndex(

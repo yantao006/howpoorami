@@ -53,8 +53,8 @@ async function fetchJSON(url, headers = {}) {
 // 1. WID.world — Historical wealth shares + sub-percentile data
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const WID_API = "https://rfap9nitz6.execute-api.eu-west-1.amazonaws.com/prod";
-const WID_KEY = "rYFByOB0ioaPATwHtllMI71zLOZSK0Ic5veQonJP";
+const WID_API = process.env.WID_API_URL || "https://rfap9nitz6.execute-api.eu-west-1.amazonaws.com/prod";
+const WID_KEY = process.env.WID_API_KEY || "rYFByOB0ioaPATwHtllMI71zLOZSK0Ic5veQonJP";
 
 async function fetchWID(countries, variables) {
   const url = `${WID_API}/countries-variables?countries=${countries.join(",")}&variables=${encodeURIComponent(variables.join(","))}`;
@@ -260,11 +260,12 @@ async function fetchAllBillionaires() {
     }
   }
 
-  // Add GLOBAL (world's richest)
-  const globalSlug = Object.entries(countryStats)
-    .sort(([, a], [, b]) => b.topNetWorth - a.topNetWorth)[0];
-  if (globalSlug && result[globalSlug[0].toUpperCase()]) {
-    result.GLOBAL = { ...result[globalSlug[0].toUpperCase()] };
+  // Add GLOBAL (world's richest person across all fetched countries)
+  const richestEntry = Object.entries(result)
+    .filter(([key]) => key !== "_meta")
+    .sort(([, a], [, b]) => b.netWorth - a.netWorth)[0];
+  if (richestEntry) {
+    result.GLOBAL = { ...richestEntry[1] };
   }
 
   saveJSON("billionaires.json", result);
@@ -340,8 +341,10 @@ async function fetchFREDHousePrices() {
       for (const obs of data.observations || []) {
         if (obs.value === ".") continue;
         const year = parseInt(obs.date.substring(0, 4));
-        const quarter = parseInt(obs.date.substring(5, 7));
-        if (quarter <= 3) result[cc][year] = parseFloat(obs.value);
+        // Keep only the first observation per year (Q1) — skip if year already recorded
+        if (!(year in result[cc])) {
+          result[cc][year] = parseFloat(obs.value);
+        }
       }
     } catch (e) {
       console.log(`    ⚠ FRED ${cc}: ${e.message}`);
@@ -351,7 +354,7 @@ async function fetchFREDHousePrices() {
 }
 
 function rebaseIndex(yearValueMap, baseYear) {
-  const baseVal = yearValueMap[baseYear];
+  const baseVal = yearValueMap[String(baseYear)];
   if (!baseVal) return yearValueMap;
   const result = {};
   for (const [y, v] of Object.entries(yearValueMap)) {

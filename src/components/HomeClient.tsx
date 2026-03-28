@@ -17,6 +17,7 @@ import HistoricalEvolutionChart from "@/components/HistoricalEvolutionChart";
 import StatisticsSection from "@/components/StatisticsSection";
 import SourcesSection from "@/components/SourcesSection";
 import ResponsiveChart from "@/components/ResponsiveChart";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useGeoCountry } from "@/hooks/useGeoCountry";
 
 interface HomeClientProps {
@@ -208,15 +209,17 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
             viewport={{ once: true }}
             className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
           >
-            <ResponsiveChart aspectRatio={16 / 6} minHeight={300} maxHeight={450}>
-              {({ width, height }) => (
-                <WealthHoardingChart
-                  country={country}
-                  width={width}
-                  height={height}
-                />
-              )}
-            </ResponsiveChart>
+            <ErrorBoundary>
+              <ResponsiveChart aspectRatio={16 / 6} minHeight={300} maxHeight={450}>
+                {({ width, height }) => (
+                  <WealthHoardingChart
+                    country={country}
+                    width={width}
+                    height={height}
+                  />
+                )}
+              </ResponsiveChart>
+            </ErrorBoundary>
           </motion.div>
         </div>
       </section>
@@ -255,15 +258,17 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               viewport={{ once: true }}
               className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
             >
-              <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
-                {({ width, height }) => (
-                  <TaxRateChart
-                    countryCode={selectedCountry}
-                    width={width}
-                    height={height}
-                  />
-                )}
-              </ResponsiveChart>
+              <ErrorBoundary>
+                <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
+                  {({ width, height }) => (
+                    <TaxRateChart
+                      countryCode={selectedCountry}
+                      width={width}
+                      height={height}
+                    />
+                  )}
+                </ResponsiveChart>
+              </ErrorBoundary>
             </motion.div>
           </div>
         </section>
@@ -293,15 +298,17 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
             viewport={{ once: true }}
             className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6 overflow-visible"
           >
-            <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
-              {({ width, height }) => (
-                <HistoricalEvolutionChart
-                  country={country}
-                  width={width}
-                  height={height}
-                />
-              )}
-            </ResponsiveChart>
+            <ErrorBoundary>
+              <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
+                {({ width, height }) => (
+                  <HistoricalEvolutionChart
+                    country={country}
+                    width={width}
+                    height={height}
+                  />
+                )}
+              </ResponsiveChart>
+            </ErrorBoundary>
           </motion.div>
         </div>
       </section>
@@ -331,15 +338,17 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               viewport={{ once: true }}
               className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
             >
-              <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
-                {({ width, height }) => (
-                  <PurchasingPowerChart
-                    countryCode={selectedCountry}
-                    width={width}
-                    height={height}
-                  />
-                )}
-              </ResponsiveChart>
+              <ErrorBoundary>
+                <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
+                  {({ width, height }) => (
+                    <PurchasingPowerChart
+                      countryCode={selectedCountry}
+                      width={width}
+                      height={height}
+                    />
+                  )}
+                </ResponsiveChart>
+              </ErrorBoundary>
             </motion.div>
           </div>
         </section>

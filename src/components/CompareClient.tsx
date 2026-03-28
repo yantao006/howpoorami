@@ -113,7 +113,7 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mb-10"
+            className="relative mb-10"
           >
             <div className="flex flex-col items-center gap-3">
               <CountrySelector selected={selectedCountry} onSelect={handleCountrySelect} />

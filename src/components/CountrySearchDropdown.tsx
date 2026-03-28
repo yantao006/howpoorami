@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-
+import { createPortal } from "react-dom";
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -97,17 +96,6 @@ function groupByRegion(
 }
 
 // ---------------------------------------------------------------------------
-// Animation variants
-// ---------------------------------------------------------------------------
-
-const dropdownVariants = {
-  closed: { opacity: 0, scaleY: 0.95, y: -4 },
-  open: { opacity: 1, scaleY: 1, y: 0 },
-};
-
-const dropdownTransition = { duration: 0.18, ease: [0.4, 0, 0.2, 1] as const };
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -123,6 +111,7 @@ export default function CountrySearchDropdown({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxRef = useRef<HTMLUListElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   // Derived ------------------------------------------------------------------
 
@@ -152,6 +141,14 @@ export default function CountrySearchDropdown({
   // Callbacks ----------------------------------------------------------------
 
   const open = useCallback(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
     setIsOpen(true);
     setQuery("");
     setActiveIndex(-1);
@@ -171,16 +168,18 @@ export default function CountrySearchDropdown({
     [onSelect, close],
   );
 
-  // Click-outside ------------------------------------------------------------
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click-outside (checks both trigger container and portal dropdown) --------
 
   useEffect(() => {
     if (!isOpen) return;
 
     function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      const target = e.target as Node;
+      const inTrigger = containerRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inTrigger && !inDropdown) {
         close();
       }
     }
@@ -188,6 +187,30 @@ export default function CountrySearchDropdown({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, close]);
+
+  // Reposition dropdown on scroll / resize -----------------------------------
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function updatePosition() {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setDropdownPos({
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+        });
+      }
+    }
+
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [isOpen]);
 
   // Focus input when opened ---------------------------------------------------
 
@@ -335,90 +358,94 @@ export default function CountrySearchDropdown({
         )}
       </div>
 
-      {/* Dropdown */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={dropdownVariants}
-            transition={dropdownTransition}
-            style={{ originY: 0 }}
-            className="
-              absolute z-50 mt-2 w-full
-              rounded-xl border border-border-subtle bg-bg-card
-              shadow-lg shadow-black/20
-              overflow-hidden
-            "
-          >
-            <ul
-              ref={listboxRef}
-              id={listboxId}
-              role="listbox"
-              aria-label="Countries"
-              className="max-h-64 overflow-y-auto py-1"
+      {/* Dropdown — rendered as portal to escape stacking contexts */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          isOpen && dropdownPos ? (
+            <div
+              ref={dropdownRef}
+              style={{
+                position: "absolute",
+                top: dropdownPos.top,
+                left: dropdownPos.left,
+                width: dropdownPos.width,
+              }}
+              className="
+                z-[9999]
+                rounded-xl border border-border-subtle bg-bg-card
+                shadow-lg shadow-black/20
+                overflow-hidden
+                animate-dropdown-in
+              "
             >
-              {grouped.length === 0 && (
-                <li className="px-4 py-3 text-sm text-text-muted text-center">
-                  No countries found
-                </li>
-              )}
-              {grouped.map((group) => (
-                <li key={group.region} role="presentation">
-                  <span
-                    className="
-                      block px-4 pt-3 pb-1 text-xs font-semibold uppercase
-                      tracking-wider text-text-muted select-none
-                    "
-                    role="presentation"
-                  >
-                    {group.region}
-                  </span>
-                  <ul role="group" aria-label={group.region}>
-                    {group.items.map((country) => {
-                      const idx = flatItems.indexOf(country);
-                      const isActive = idx === activeIndex;
-                      const isSelected = country.code === selected;
+              <ul
+                ref={listboxRef}
+                id={listboxId}
+                role="listbox"
+                aria-label="Countries"
+                className="max-h-64 overflow-y-auto py-1"
+              >
+                {grouped.length === 0 && (
+                  <li className="px-4 py-3 text-sm text-text-muted text-center">
+                    No countries found
+                  </li>
+                )}
+                {grouped.map((group) => (
+                  <li key={group.region} role="presentation">
+                    <span
+                      className="
+                        block px-4 pt-3 pb-1 text-xs font-semibold uppercase
+                        tracking-wider text-text-muted select-none
+                      "
+                      role="presentation"
+                    >
+                      {group.region}
+                    </span>
+                    <ul role="group" aria-label={group.region}>
+                      {group.items.map((country) => {
+                        const idx = flatItems.indexOf(country);
+                        const isActive = idx === activeIndex;
+                        const isSelected = country.code === selected;
 
-                      return (
-                        <li
-                          key={country.code}
-                          id={`country-option-${country.code}`}
-                          role="option"
-                          data-index={idx}
-                          aria-selected={isSelected}
-                          className={`
-                            flex items-center gap-3 px-4 py-2 text-sm cursor-pointer
-                            transition-colors duration-100
-                            ${isActive ? "bg-accent-periwinkle/15 text-accent-periwinkle" : ""}
-                            ${isSelected && !isActive ? "text-accent-periwinkle" : ""}
-                            ${!isActive && !isSelected ? "text-text-secondary hover:bg-accent-periwinkle/10 hover:text-text-primary" : ""}
-                          `}
-                          onMouseEnter={() => setActiveIndex(idx)}
-                          onMouseDown={(e) => {
-                            // Prevent input blur before selection registers
-                            e.preventDefault();
-                          }}
-                          onClick={() => selectCountry(country.code)}
-                        >
-                          <span className="text-lg leading-none">
-                            {country.flag}
-                          </span>
-                          <span>{country.name}</span>
-                          {isSelected && (
-                            <CheckIcon className="ml-auto flex-shrink-0" />
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+                        return (
+                          <li
+                            key={country.code}
+                            id={`country-option-${country.code}`}
+                            role="option"
+                            data-index={idx}
+                            aria-selected={isSelected}
+                            className={`
+                              flex items-center gap-3 px-4 py-2 text-sm cursor-pointer
+                              transition-colors duration-100
+                              ${isActive ? "bg-accent-periwinkle/15 text-accent-periwinkle" : ""}
+                              ${isSelected && !isActive ? "text-accent-periwinkle" : ""}
+                              ${!isActive && !isSelected ? "text-text-secondary hover:bg-accent-periwinkle/10 hover:text-text-primary" : ""}
+                            `}
+                            onMouseEnter={() => setActiveIndex(idx)}
+                            onMouseDown={(e) => {
+                              // Prevent input blur before selection registers
+                              e.preventDefault();
+                            }}
+                            onClick={() => selectCountry(country.code)}
+                          >
+                            <span className="text-lg leading-none">
+                              {country.flag}
+                            </span>
+                            <span>{country.name}</span>
+                            {isSelected && (
+                              <CheckIcon className="ml-auto flex-shrink-0" />
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   );
 }

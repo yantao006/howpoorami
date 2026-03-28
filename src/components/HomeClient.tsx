@@ -83,7 +83,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mb-8"
+            className="relative mb-8"
           >
             <div className="flex flex-col items-center gap-3">
               <CountrySelector

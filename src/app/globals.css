@@ -142,6 +142,25 @@ main [style*="opacity"] {
 }
 
 /* ==========================================================================
+ * Dropdown portal animation
+ * ========================================================================== */
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+.animate-dropdown-in {
+  animation: dropdown-in 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top center;
+}
+
+/* ==========================================================================
  * Accessibility: Reduced motion
  * ========================================================================== */
 @media (prefers-reduced-motion: reduce) {

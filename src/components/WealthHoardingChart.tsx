@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Group } from "@visx/group";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CountryData } from "@/data/wealth-data";
 import { DETAILED_SHARES, type DetailedWealthShares } from "@/data/billionaires";
 import { formatNumber } from "@/lib/format";
+import ChartTooltip from "./ChartTooltip";
 
 interface WealthHoardingChartProps {
   readonly country: CountryData;
@@ -122,11 +123,11 @@ function buildRectangles(
 }
 
 function shouldShowLabel(rect: RectData, innerWidth: number): boolean {
-  return rect.w > innerWidth * 0.04;
+  return rect.w > innerWidth * 0.035;
 }
 
-function shouldShowDetails(rect: RectData, innerWidth: number): boolean {
-  return rect.w > innerWidth * 0.08;
+function shouldShowPercent(rect: RectData, innerWidth: number): boolean {
+  return rect.w > innerWidth * 0.055;
 }
 
 function PopulationDots({
@@ -190,6 +191,9 @@ export default function WealthHoardingChart({
   width,
   height,
 }: WealthHoardingChartProps) {
+  const [hoveredRect, setHoveredRect] = useState<RectData | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+
   // Fallback: when WID.world detailed splits are unavailable, estimate
   // sub-percentile breakdown using typical distribution ratios (55/28/17).
   // These are approximations, not sourced data.
@@ -220,6 +224,24 @@ export default function WealthHoardingChart({
     [rectangles]
   );
 
+  const handleMouseMove = useCallback(
+    (rect: RectData, e: React.MouseEvent<SVGRectElement>) => {
+      const svg = e.currentTarget.closest("svg");
+      if (!svg) return;
+      const point = svg.getBoundingClientRect();
+      setTooltipPos({
+        x: e.clientX - point.left,
+        y: e.clientY - point.top,
+      });
+      setHoveredRect(rect);
+    },
+    []
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredRect(null);
+  }, []);
+
   if (width < 10 || !shares) return null;
 
   const topPeopleCount = topGroup?.peopleCount ?? 0;
@@ -234,7 +256,7 @@ export default function WealthHoardingChart({
           <AnimatePresence mode="wait">
             {rectangles.map((rect) => {
               const showLabel = shouldShowLabel(rect, innerWidth);
-              const showDetails = shouldShowDetails(rect, innerWidth);
+              const showPercent = shouldShowPercent(rect, innerWidth);
               const textColor =
                 rect.key === "bottom50" || rect.key === "middle40" || rect.key === "next9"
                   ? "#1a1a2e"
@@ -262,7 +284,9 @@ export default function WealthHoardingChart({
                     initial={{ width: 0 }}
                     animate={{ width: rect.w }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    style={{ opacity: 0.88 }}
+                    style={{ opacity: 0.88, cursor: "pointer" }}
+                    onMouseMove={(e) => handleMouseMove(rect, e)}
+                    onMouseLeave={handleMouseLeave}
                   />
 
                   {showLabel && (
@@ -271,33 +295,19 @@ export default function WealthHoardingChart({
                       y={rect.y}
                       width={rect.w}
                       height={rect.h}
+                      style={{ pointerEvents: "none" }}
                     >
                       <div
-                        className="flex flex-col items-center justify-center h-full px-2 text-center select-none"
+                        className="flex flex-col items-center justify-center h-full px-1 text-center select-none overflow-hidden"
                         style={{ color: textColor }}
                       >
-                        <span className="font-bold text-sm leading-tight">
+                        <span className="font-semibold text-[10px] leading-tight truncate w-full">
                           {rect.label}
                         </span>
-                        <span className="font-semibold text-lg leading-tight mt-1 tabular-nums">
-                          {rect.wealthShare.toFixed(1)}%
-                        </span>
-                        {showDetails && (
-                          <>
-                            <span className="text-[11px] leading-tight mt-1.5 opacity-80">
-                              {formatPeopleCount(rect.peopleCount)}
-                            </span>
-                            {rect.key === "bottom50" && (
-                              <span className="text-[10px] leading-tight mt-1 opacity-70 italic">
-                                sharing just {rect.wealthShare.toFixed(1)}%
-                              </span>
-                            )}
-                            {rect.key === "top001" && (
-                              <span className="text-[10px] leading-tight mt-1 opacity-70 italic">
-                                of all wealth
-                              </span>
-                            )}
-                          </>
+                        {showPercent && (
+                          <span className="font-bold text-xs leading-tight mt-0.5 tabular-nums">
+                            {rect.wealthShare.toFixed(1)}%
+                          </span>
                         )}
                       </div>
                     </foreignObject>
@@ -308,6 +318,37 @@ export default function WealthHoardingChart({
           </AnimatePresence>
         </Group>
       </svg>
+
+      {/* Tooltip on hover */}
+      {hoveredRect && (
+        <ChartTooltip
+          left={tooltipPos.x}
+          top={tooltipPos.y}
+          containerWidth={width}
+          containerHeight={height}
+        >
+          <div className="text-xs space-y-1">
+            <p className="font-semibold text-text-primary flex items-center gap-1.5">
+              <span
+                className="inline-block w-2 h-2 rounded-sm shrink-0"
+                style={{ backgroundColor: hoveredRect.color }}
+              />
+              {hoveredRect.label}
+            </p>
+            <p className="text-text-secondary tabular-nums">
+              Wealth share: <span className="font-medium text-text-primary">{hoveredRect.wealthShare.toFixed(1)}%</span>
+            </p>
+            <p className="text-text-secondary">
+              {formatPeopleCount(hoveredRect.peopleCount)}
+            </p>
+            <p className="text-text-muted text-[10px]">
+              {(hoveredRect.populationFraction * 100).toFixed(
+                hoveredRect.populationFraction < 0.001 ? 2 : hoveredRect.populationFraction < 0.01 ? 1 : 0
+              )}% of the population
+            </p>
+          </div>
+        </ChartTooltip>
+      )}
 
       {/* Legend — always readable, even for tiny segments */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 mt-4">

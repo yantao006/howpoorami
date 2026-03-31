@@ -243,12 +243,12 @@ export default function HistoricalEvolutionChart({
             />
           ))}
 
-          {/* Stacked areas: bottom50 (base), then middle40, then top10 */}
+          {/* Stacked areas: top10 (back), then middle40, then bottom50 (front) */}
           <AreaClosed<StackedPoint>
             data={[...stackedData]}
             x={(d) => xScale(d.year)}
             y={(d) => yScale(d.cumTop10)}
-            y0={() => yScale(0)}
+            y0={(d) => yScale(d.cumMiddle40)}
             yScale={yScale}
             curve={curveMonotoneX}
             fill={COLORS.top10.fill}
@@ -258,7 +258,7 @@ export default function HistoricalEvolutionChart({
             data={[...stackedData]}
             x={(d) => xScale(d.year)}
             y={(d) => yScale(d.cumMiddle40)}
-            y0={() => yScale(0)}
+            y0={(d) => yScale(d.cumBottom50)}
             yScale={yScale}
             curve={curveMonotoneX}
             fill={COLORS.middle40.fill}

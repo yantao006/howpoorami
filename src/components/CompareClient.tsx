@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ALL_COUNTRY_MAP, type AllCountryCode, isAllCountryCode } from "@/data/countries-extended";
 import { RICHEST_BY_COUNTRY } from "@/data/billionaires";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -99,10 +99,11 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
   }
 
   return (
+    <LazyMotion features={domAnimation}>
     <main className="min-h-screen pt-14">
       <section className="px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-4xl mx-auto w-full">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -114,9 +115,9 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             <p className="text-text-secondary text-lg sm:text-xl mt-4 max-w-2xl mx-auto">
               Compare your income to the wealthiest person in each country.
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -125,20 +126,20 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             <div className="flex flex-col items-center gap-3">
               <CountrySelector selected={selectedCountry} onSelect={handleCountrySelect} />
               {isGlobal && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   className="flex items-center gap-2"
                 >
                   <span className="text-text-muted text-xs">Currency:</span>
                   <CurrencySelector selected={globalCurrency} onSelect={setGlobalCurrency} />
-                </motion.div>
+                </m.div>
               )}
             </div>
-          </motion.div>
+          </m.div>
 
           {/* The richest person card */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.7 }}
@@ -159,10 +160,10 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
                 <p className="text-text-muted text-sm mt-1">{richest.source}</p>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Salary input */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.6 }}
@@ -193,10 +194,10 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               {!salaryValue && `Using median income: ${formatCurrency(country.medianIncome, country.currency)}/year`}
               {salaryValue && "Your data stays in your browser."}
             </p>
-          </motion.div>
+          </m.div>
 
           {/* The big number */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.9, duration: 0.8 }}
@@ -214,10 +215,10 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             <p className="text-text-secondary text-lg sm:text-xl mt-4">
               to match {richest.name}&apos;s wealth
             </p>
-          </motion.div>
+          </m.div>
 
           {/* Time comparisons — the fun part */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -227,10 +228,10 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               To Put That In Perspective...
             </h3>
             <TimeComparisons yearsToMatch={yearsToMatch} billionaireName={richest.name} />
-          </motion.div>
+          </m.div>
 
           {/* Comparison cards */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -278,10 +279,10 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               accent="amber"
               delay={0.5}
             />
-          </motion.div>
+          </m.div>
 
           {/* Source note */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -292,11 +293,11 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               Median income data from OECD and national statistics offices.
               Wealth fluctuates daily — these are approximate figures for illustration.
             </p>
-          </motion.div>
+          </m.div>
 
           {/* Cross-link to wealth distribution page */}
           {!isGlobal && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -315,11 +316,12 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
                   Explore wealth inequality &rarr;
                 </span>
               </Link>
-            </motion.div>
+            </m.div>
           )}
         </div>
       </section>
     </main>
+    </LazyMotion>
   );
 }
 
@@ -341,7 +343,7 @@ function ComparisonCard({ label, value, sublabel, accent, delay }: ComparisonCar
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -353,6 +355,6 @@ function ComparisonCard({ label, value, sublabel, accent, delay }: ComparisonCar
         {value}
       </p>
       <p className="text-text-muted text-xs mt-2">{sublabel}</p>
-    </motion.div>
+    </m.div>
   );
 }

@@ -423,7 +423,9 @@ function ShareButtons({
     ? `${percentileRange.low.toFixed(1)}–${percentileRange.high.toFixed(1)}%`
     : `${percentile.toFixed(1)}%`;
   const shareText = `I'm wealthier than ${pText} of the population in ${countryName}. Where do you stand?`;
-  const url = `https://howpoorami.org/${countryCode.toLowerCase()}`;
+  const url = countryCode === "GLOBAL"
+    ? "https://howpoorami.org"
+    : `https://howpoorami.org/${countryCode.toLowerCase()}`;
 
   const handleCopy = useCallback(() => {
     const onSuccess = () => {

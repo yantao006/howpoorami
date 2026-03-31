@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
+import React, { Component, type ReactNode } from "react";
 
 interface Props {
   readonly children: ReactNode;
@@ -19,6 +19,12 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    if (process.env.NODE_ENV === "development") {
+      console.error("ErrorBoundary caught:", error, errorInfo);
+    }
   }
 
   render() {

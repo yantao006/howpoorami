@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { m, useInView } from "framer-motion";
 import {
   getRelevantComparisons,
   type ComparisonResult,
@@ -51,7 +51,7 @@ function LifetimeHighlight({
   const isInView = useInView(ref, { once: true, margin: "-30px" });
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -72,7 +72,7 @@ function LifetimeHighlight({
           {comedicQuote}
         </p>
       )}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -90,7 +90,7 @@ function ComparisonCard({
   const border = CATEGORY_BORDER[comparison.ref.category] ?? "border-border-subtle";
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -106,7 +106,7 @@ function ComparisonCard({
       <p className="text-text-muted text-xs sm:text-sm">
         {comparison.ref.label}
       </p>
-    </motion.div>
+    </m.div>
   );
 }
 

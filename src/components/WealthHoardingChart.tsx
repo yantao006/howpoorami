@@ -132,62 +132,6 @@ function shouldShowPercent(rect: RectData): boolean {
   return rect.w >= 60;
 }
 
-function PopulationDots({
-  topCount,
-  bottomCount,
-}: {
-  readonly topCount: number;
-  readonly bottomCount: number;
-}) {
-  // Show the ratio visually: 1 dot for top 0.01%, proportional dots for bottom 50%
-  if (topCount === 0 || bottomCount === 0) return null;
-  const ratio = Math.round(bottomCount / topCount);
-  // Cap displayed dots for readability
-  const displayDots = Math.min(ratio, 50);
-  const dotsPerRow = 10;
-  const rows = Math.ceil(displayDots / dotsPerRow);
-
-  return (
-    <div className="flex items-start gap-8 mt-4">
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex items-center justify-center">
-          <span
-            className="inline-block w-3 h-3 rounded-full"
-            style={{ backgroundColor: COLORS.top001 }}
-          />
-        </div>
-        <span className="text-text-muted text-[10px] text-center leading-tight">
-          Top 0.01%
-          <br />({formatPeopleCount(topCount)})
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center gap-1">
-        <div
-          className="flex flex-wrap gap-[2px] justify-center"
-          style={{ maxWidth: dotsPerRow * 14 }}
-        >
-          {Array.from({ length: displayDots }, (_, i) => (
-            <span
-              key={i}
-              className="inline-block w-3 h-3 rounded-full"
-              style={{ backgroundColor: COLORS.bottom50 }}
-            />
-          ))}
-        </div>
-        <span className="text-text-muted text-[10px] text-center leading-tight">
-          Bottom 50%
-          <br />({formatPeopleCount(bottomCount)})
-          <br />
-          <span className="text-text-secondary font-medium">
-            1 dot = {formatNumber(Math.round(ratio / displayDots))}x
-          </span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
 export default function WealthHoardingChart({
   country,
   width,

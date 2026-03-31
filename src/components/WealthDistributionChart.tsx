@@ -182,6 +182,8 @@ export default function WealthDistributionChart({
                 <button
                   type="button"
                   onClick={() => toggleExpand(seg.label)}
+                  aria-expanded={expandedLabels.has(seg.label)}
+                  aria-label={`${seg.label}: ${seg.wealthShare.toFixed(1)}% of wealth. Click to ${expandedLabels.has(seg.label) ? "collapse" : "expand"} details.`}
                   className="w-full text-left p-4 cursor-pointer"
                 >
                   {/* Row header */}

@@ -94,7 +94,7 @@ export default function PurchasingPowerChart({
   }, [data, innerHeight]);
 
   const handleMouseMove = useCallback(
-    (event: React.MouseEvent<SVGRectElement>) => {
+    (event: React.MouseEvent<SVGRectElement> | React.TouchEvent<SVGRectElement>) => {
       if (!data) return;
       const point = localPoint(event);
       if (!point) return;
@@ -268,6 +268,8 @@ export default function PurchasingPowerChart({
             fill="transparent"
             onMouseMove={handleMouseMove}
             onMouseLeave={hideTooltip}
+            onTouchStart={handleMouseMove}
+            onTouchEnd={hideTooltip}
           />
         </Group>
       </svg>

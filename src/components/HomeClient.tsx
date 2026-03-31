@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ALL_COUNTRY_MAP, type AllCountryCode, isAllCountryCode } from "@/data/countries-extended";
 import { RICHEST_BY_COUNTRY } from "@/data/billionaires";
 import { TAX_RATES } from "@/data/tax-rates";
@@ -97,12 +97,13 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
   const hasRichestData = selectedCountry in RICHEST_BY_COUNTRY;
 
   return (
+    <LazyMotion features={domAnimation}>
     <main className="min-h-screen pt-14">
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto w-full">
           {/* Title */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -114,10 +115,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
             <p className="text-text-secondary text-lg sm:text-xl mt-4 max-w-2xl mx-auto">
               Enter your income or wealth and discover where you really stand.
             </p>
-          </motion.div>
+          </m.div>
 
           {/* Country Selector */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -129,7 +130,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 onSelect={handleCountrySelect}
               />
               {isGlobal && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
@@ -140,13 +141,13 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                     selected={globalCurrency}
                     onSelect={setGlobalCurrency}
                   />
-                </motion.div>
+                </m.div>
               )}
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Wealth Input */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
@@ -156,10 +157,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               country={country}
               onPercentileChange={handlePercentileChange}
             />
-          </motion.div>
+          </m.div>
 
           {/* Main Chart — Wealth Distribution */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
@@ -189,10 +190,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               country={country}
               userPercentile={userPercentile}
             />
-          </motion.div>
+          </m.div>
 
           {/* Wealth Share Bars */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.6 }}
@@ -202,31 +203,31 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               Population vs. Wealth — {country.name}
             </h3>
             <WealthShareBars country={country} />
-          </motion.div>
+          </m.div>
 
           {/* Scroll indicator */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 0.6 }}
             className="text-center mt-12"
           >
             <p className="text-text-muted text-sm mb-2">Scroll to explore more</p>
-            <motion.div
+            <m.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
               className="text-text-muted text-2xl"
             >
               ↓
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         </div>
       </section>
 
       {/* The Scale of Concentration */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -239,9 +240,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               Each rectangle below represents wealth. The area shows how much each
               group actually owns. Look at who has what.
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -258,7 +259,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 )}
               </ResponsiveChart>
             </ErrorBoundary>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
@@ -273,7 +274,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {hasTaxData && (
         <section className="px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-6xl mx-auto">
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -288,9 +289,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 income, capital gains, and corporate structures are treated — the
                 system often becomes regressive at the very top.
               </p>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -307,7 +308,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                   )}
                 </ResponsiveChart>
               </ErrorBoundary>
-            </motion.div>
+            </m.div>
           </div>
         </section>
       )}
@@ -315,7 +316,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {/* Historical Trends */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -328,9 +329,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               How wealth concentration in {country.name} has evolved — and what
               policy choices drove each shift.
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -347,7 +348,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 )}
               </ResponsiveChart>
             </ErrorBoundary>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
@@ -355,7 +356,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {hasPurchasingPowerData && (
         <section className="px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-6xl mx-auto">
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -368,9 +369,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 Wages, consumer prices, and house prices — all indexed to 2000.
                 When the lines diverge, someone is falling behind.
               </p>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -387,7 +388,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                   )}
                 </ResponsiveChart>
               </ErrorBoundary>
-            </motion.div>
+            </m.div>
           </div>
         </section>
       )}
@@ -455,5 +456,6 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
         </div>
       </section>
     </main>
+    </LazyMotion>
   );
 }

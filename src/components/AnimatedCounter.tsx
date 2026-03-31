@@ -21,18 +21,9 @@ export default function AnimatedCounter({
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const hasBeenInView = useRef(false);
   const prevEnd = useRef(end);
   const rafId = useRef<number | null>(null);
   const countRef = useRef(0);
-
-  // Track when first comes into view
-  if (isInView && !hasBeenInView.current) {
-    hasBeenInView.current = true;
-  }
-
-  // Keep countRef in sync with count state
-  countRef.current = count;
 
   const cancelAnimation = useCallback(() => {
     if (rafId.current !== null) {
@@ -42,7 +33,7 @@ export default function AnimatedCounter({
   }, []);
 
   useEffect(() => {
-    if (!hasBeenInView.current) return;
+    if (!isInView) return;
 
     cancelAnimation();
 
@@ -58,7 +49,9 @@ export default function AnimatedCounter({
 
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(from + eased * (end - from));
+      const newCount = from + eased * (end - from);
+      countRef.current = newCount;
+      setCount(newCount);
 
       if (progress < 1) {
         rafId.current = requestAnimationFrame(animate);

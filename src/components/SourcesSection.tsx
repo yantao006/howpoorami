@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { DATA_SOURCES } from "@/data/wealth-data";
 
 export default function SourcesSection() {
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
@@ -23,7 +23,7 @@ export default function SourcesSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {DATA_SOURCES.map((source, i) => (
-          <motion.div
+          <m.div
             key={source.name}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +52,7 @@ export default function SourcesSection() {
                 Accessed: {source.accessed}
               </p>
             )}
-          </motion.div>
+          </m.div>
         ))}
       </div>
 
@@ -76,6 +76,6 @@ export default function SourcesSection() {
           Built with publicly available data. No personal data is collected or stored.
         </p>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

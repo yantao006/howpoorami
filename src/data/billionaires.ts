@@ -47,9 +47,38 @@ type RawDetailedShare = {
   top001: number;
 };
 
+// ─── Runtime validation ─────────────────────────────────────────────────────
+
+function validateBillionaireData(data: unknown): data is Record<string, RawBillionaire> {
+  if (typeof data !== "object" || data === null) return false;
+  const values = Object.entries(data).filter(([k]) => k !== "_meta");
+  if (values.length === 0) return false;
+  const [, first] = values[0];
+  return (
+    typeof first === "object" && first !== null &&
+    typeof (first as RawBillionaire).name === "string" &&
+    typeof (first as RawBillionaire).netWorth === "number"
+  );
+}
+
+function validateDetailedSharesData(data: unknown): data is Record<string, RawDetailedShare> {
+  if (typeof data !== "object" || data === null) return false;
+  const values = Object.entries(data).filter(([k]) => k !== "_meta");
+  if (values.length === 0) return false;
+  const [, first] = values[0];
+  return (
+    typeof first === "object" && first !== null &&
+    typeof (first as RawDetailedShare).bottom50 === "number" &&
+    typeof (first as RawDetailedShare).top001 === "number"
+  );
+}
+
 // ─── Transform and export ────────────────────────────────────────────────────
 
 function buildBillionaireMap(): Readonly<Record<string, BillionaireData>> {
+  if (!validateBillionaireData(rawBillionaires)) {
+    throw new Error("billionaires.json has an invalid shape: expected Record<string, { name: string, netWorth: number, ... }>");
+  }
   const entries = Object.entries(rawBillionaires as unknown as Record<string, RawBillionaire>)
     .filter(([key]) => key !== "_meta")
     .map(([cc, data]) => [
@@ -66,6 +95,9 @@ function buildBillionaireMap(): Readonly<Record<string, BillionaireData>> {
 }
 
 function buildDetailedSharesMap(): Readonly<Record<string, DetailedWealthShares>> {
+  if (!validateDetailedSharesData(rawDetailedShares)) {
+    throw new Error("wid-detailed-shares.json has an invalid shape: expected Record<string, { bottom50: number, ..., top001: number }>");
+  }
   const entries = Object.entries(rawDetailedShares as unknown as Record<string, RawDetailedShare>)
     .filter(([key]) => key !== "_meta")
     .map(([cc, data]) => [

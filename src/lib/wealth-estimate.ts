@@ -133,22 +133,33 @@ const MARITAL_MULTIPLIERS: Record<string, number> = {
 
 // ── Factor counting ────────────────────────────────────────────────
 
-/** All trackable factor keys with their "filled" test. */
-function isFactorFilled(factors: IncomeFactors, key: keyof IncomeFactors): boolean {
+/**
+ * Factor keys that contribute to MAX_FACTORS.
+ *
+ * Boolean toggle keys (hasProperty, hasMortgage, hasDebts, hasInvestments,
+ * hasRetirement) are excluded because they are covered by their associated
+ * value key (propertyValue, mortgageRemaining, debtLevel, investmentValue,
+ * retirementValue). Only hasInheritance is kept because it has no value field.
+ */
+const ALL_FACTOR_KEYS = [
+  "age", "householdSize", "propertyValue",
+  "mortgageRemaining", "debtLevel",
+  "savingsRate", "investmentValue",
+  "retirementValue", "hasInheritance",
+  "yearsWorked", "educationLevel", "employmentType", "maritalStatus",
+] as const;
+
+/** Test whether a tracked factor key is "filled" by the user. */
+function isFactorFilled(factors: IncomeFactors, key: (typeof ALL_FACTOR_KEYS)[number]): boolean {
   switch (key) {
     case "age": return factors.age.length > 0;
     case "householdSize": return factors.householdSize.length > 0;
-    case "hasProperty": return factors.hasProperty && factors.propertyValue.length > 0;
-    case "propertyValue": return factors.propertyValue.length > 0;
-    case "hasMortgage": return factors.hasMortgage && factors.mortgageRemaining.length > 0;
-    case "mortgageRemaining": return factors.mortgageRemaining.length > 0;
-    case "hasDebts": return factors.hasDebts && factors.debtLevel.length > 0;
-    case "debtLevel": return factors.debtLevel.length > 0;
+    case "propertyValue": return factors.hasProperty && factors.propertyValue.length > 0;
+    case "mortgageRemaining": return factors.hasMortgage && factors.mortgageRemaining.length > 0;
+    case "debtLevel": return factors.hasDebts && factors.debtLevel.length > 0;
     case "savingsRate": return factors.savingsRate !== "moderate";
-    case "hasInvestments": return factors.hasInvestments && factors.investmentValue.length > 0;
-    case "investmentValue": return factors.investmentValue.length > 0;
-    case "hasRetirement": return factors.hasRetirement && factors.retirementValue.length > 0;
-    case "retirementValue": return factors.retirementValue.length > 0;
+    case "investmentValue": return factors.hasInvestments && factors.investmentValue.length > 0;
+    case "retirementValue": return factors.hasRetirement && factors.retirementValue.length > 0;
     case "hasInheritance": return factors.hasInheritance;
     case "yearsWorked": return factors.yearsWorked.length > 0;
     case "educationLevel": return factors.educationLevel.length > 0;
@@ -157,14 +168,6 @@ function isFactorFilled(factors: IncomeFactors, key: keyof IncomeFactors): boole
     default: return false;
   }
 }
-
-const ALL_FACTOR_KEYS = [
-  "age", "householdSize", "hasProperty", "propertyValue",
-  "hasMortgage", "mortgageRemaining", "hasDebts", "debtLevel",
-  "savingsRate", "hasInvestments", "investmentValue",
-  "hasRetirement", "retirementValue", "hasInheritance",
-  "yearsWorked", "educationLevel", "employmentType", "maritalStatus",
-] as const;
 
 export const MAX_FACTORS = ALL_FACTOR_KEYS.length;
 

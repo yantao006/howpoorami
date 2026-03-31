@@ -154,22 +154,19 @@ describe("countFilledFactors", () => {
     expect(countFilledFactors(factors)).toBe(1);
   });
 
-  it("does not count boolean-only fields without their associated value", () => {
-    // hasProperty alone is not filled; needs propertyValue too.
-    const factors = makeFactors({ hasProperty: true });
-    // hasProperty requires propertyValue.length > 0 to be counted.
-    // propertyValue is empty, so hasProperty does not count.
-    const count = countFilledFactors(factors);
-    expect(count).toBe(0);
+  it("does not count value keys when their boolean toggle is false", () => {
+    // propertyValue alone without hasProperty=true should not count.
+    const factors = makeFactors({ propertyValue: "200000" });
+    expect(countFilledFactors(factors)).toBe(0);
   });
 
-  it("counts boolean + value pairs when both present", () => {
+  it("counts value key when boolean toggle is true and value is provided", () => {
     const factors = makeFactors({
       hasProperty: true,
       propertyValue: "200000",
     });
-    // hasProperty counted (true + propertyValue filled), propertyValue also counted.
-    expect(countFilledFactors(factors)).toBe(2);
+    // Only propertyValue is tracked (hasProperty is not a separate factor).
+    expect(countFilledFactors(factors)).toBe(1);
   });
 
   it("counts hasInheritance as filled when true (no associated value needed)", () => {

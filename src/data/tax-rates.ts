@@ -31,9 +31,26 @@ type RawTaxEntry = {
   nominalTopRate: number; source: string; year: number;
 };
 
+// ─── Runtime validation ─────────────────────────────────────────────────────
+
+function validateTaxRateData(data: unknown): data is Record<string, RawTaxEntry> {
+  if (typeof data !== "object" || data === null) return false;
+  const values = Object.entries(data).filter(([k]) => k !== "_meta");
+  if (values.length === 0) return false;
+  const [, first] = values[0];
+  return (
+    typeof first === "object" && first !== null &&
+    typeof (first as RawTaxEntry).bottom50 === "number" &&
+    typeof (first as RawTaxEntry).year === "number"
+  );
+}
+
 // ─── Transform and export ────────────────────────────────────────────────────
 
 function buildTaxRates(): Readonly<Record<TaxRateCountryCode, TaxRateByClass>> {
+  if (!validateTaxRateData(rawTaxRates)) {
+    throw new Error("tax-rates.json has an invalid shape: expected Record<string, { bottom50: number, ..., year: number }>");
+  }
   const entries = Object.entries(rawTaxRates as unknown as Record<string, RawTaxEntry>)
     .filter(([key]) => key !== "_meta")
     .map(([cc, data]) => [cc, { ...data }]);

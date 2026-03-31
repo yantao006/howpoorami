@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ALL_COUNTRY_MAP, type AllCountryCode, isAllCountryCode } from "@/data/countries-extended";
 import { RICHEST_BY_COUNTRY } from "@/data/billionaires";
+import { getCountryEconomics } from "@/data/country-economics";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import CountrySelector from "@/components/CountrySelector";
 import CurrencySelector from "@/components/CurrencySelector";
@@ -12,11 +13,7 @@ import FormattedNumber from "@/components/FormattedNumber";
 import TimeComparisons from "@/components/TimeComparisons";
 import { useGeoCountry } from "@/hooks/useGeoCountry";
 
-// US-specific financial constants used for comparison cards.
-// Ideally these should be localized per country.
 const ANNUAL_RETURN_RATE = 0.08; // 8% assumed annual return on wealth
-const AVG_US_HOME_PRICE = 350_000; // Average US home price in USD
-const US_PER_CAPITA_HEALTHCARE = 12_530; // US per-capita healthcare spending in USD
 
 interface CompareClientProps {
   readonly initialCountry?: AllCountryCode;
@@ -46,6 +43,7 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
     ? { ...rawCountry, currency: globalCurrency }
     : rawCountry;
   const richest = RICHEST_BY_COUNTRY[selectedCountry] ?? null;
+  const economics = getCountryEconomics(isGlobal ? "US" : selectedCountry);
 
   const salaryValue = useMemo(() => {
     const raw = salary.replace(/[^0-9]/g, "");
@@ -267,15 +265,15 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             />
             <ComparisonCard
               label="Homes their wealth could buy"
-              value={formatNumber(Math.round(richest.netWorth / AVG_US_HOME_PRICE))}
-              sublabel={`At $${(AVG_US_HOME_PRICE / 1000).toFixed(0)}K average US home price`}
+              value={formatNumber(Math.round(richest.netWorth / economics.avgHomePrice))}
+              sublabel={`At ${formatCurrency(economics.avgHomePrice, "USD")} average home price in ${country.name}`}
               accent="lavender"
               delay={0.4}
             />
             <ComparisonCard
               label="Years of healthcare"
-              value={formatNumber(Math.round(richest.netWorth / US_PER_CAPITA_HEALTHCARE))}
-              sublabel={`At $${formatNumber(US_PER_CAPITA_HEALTHCARE)} US per-capita healthcare spending`}
+              value={formatNumber(Math.round(richest.netWorth / economics.healthcarePerCapita))}
+              sublabel={`At ${formatCurrency(economics.healthcarePerCapita, "USD")} per-capita spending in ${country.name}`}
               accent="amber"
               delay={0.5}
             />

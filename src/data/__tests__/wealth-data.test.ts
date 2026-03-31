@@ -22,30 +22,28 @@ describe("COUNTRIES", () => {
     expect(codes).toContain("NL");
   });
 
-  it.each(COUNTRIES.map((c) => [c.code, c]))(
-    "country %s has all required fields",
-    (_code, country) => {
-      const c = country as CountryData;
-      expect(c.code).toBeTruthy();
-      expect(c.name).toBeTruthy();
-      expect(c.flag).toBeTruthy();
-      expect(c.currency).toBeTruthy();
-      expect(c.population).toBeGreaterThan(0);
-      expect(c.medianIncome).toBeGreaterThan(0);
-      expect(c.medianWealthPerAdult).toBeGreaterThan(0);
-      expect(c.meanWealthPerAdult).toBeGreaterThan(0);
-      expect(c.giniWealth).toBeGreaterThan(0);
-      expect(c.giniWealth).toBeLessThanOrEqual(1);
-      expect(c.giniIncome).toBeGreaterThan(0);
-      expect(c.giniIncome).toBeLessThanOrEqual(1);
+  it.each(COUNTRIES.map((c) => ({ code: c.code, country: c })))(
+    "country $code has all required fields",
+    ({ country }) => {
+      expect(country.code).toBeTruthy();
+      expect(country.name).toBeTruthy();
+      expect(country.flag).toBeTruthy();
+      expect(country.currency).toBeTruthy();
+      expect(country.population).toBeGreaterThan(0);
+      expect(country.medianIncome).toBeGreaterThan(0);
+      expect(country.medianWealthPerAdult).toBeGreaterThan(0);
+      expect(country.meanWealthPerAdult).toBeGreaterThan(0);
+      expect(country.giniWealth).toBeGreaterThan(0);
+      expect(country.giniWealth).toBeLessThanOrEqual(1);
+      expect(country.giniIncome).toBeGreaterThan(0);
+      expect(country.giniIncome).toBeLessThanOrEqual(1);
     },
   );
 
-  it.each(COUNTRIES.map((c) => [c.code, c]))(
-    "country %s has valid wealth share distributions",
-    (_code, country) => {
-      const c = country as CountryData;
-      const { wealthShares, incomeShares } = c;
+  it.each(COUNTRIES.map((c) => ({ code: c.code, country: c })))(
+    "country $code has valid wealth share distributions",
+    ({ country }) => {
+      const { wealthShares, incomeShares } = country;
 
       // Wealth shares should sum to approximately 100.
       const wealthSum =

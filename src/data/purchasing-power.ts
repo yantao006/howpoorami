@@ -33,9 +33,25 @@ type RawEconEntry = {
   }>;
 };
 
+// ─── Runtime validation ─────────────────────────────────────────────────────
+
+function validatePurchasingPowerData(data: unknown): data is Record<string, RawEconEntry> {
+  if (typeof data !== "object" || data === null) return false;
+  const values = Object.entries(data).filter(([k]) => k !== "_meta");
+  if (values.length === 0) return false;
+  const [, first] = values[0];
+  return (
+    typeof first === "object" && first !== null &&
+    Array.isArray((first as RawEconEntry).series)
+  );
+}
+
 // ─── Transform and export ────────────────────────────────────────────────────
 
 function buildPurchasingPower(): Readonly<Record<string, CountryEconomicData>> {
+  if (!validatePurchasingPowerData(rawPurchasingPower)) {
+    throw new Error("purchasing-power.json has an invalid shape: expected Record<string, { series: Array<...> }>");
+  }
   const entries = Object.entries(rawPurchasingPower as unknown as Record<string, RawEconEntry>)
     .filter(([key]) => key !== "_meta")
     .map(([cc, data]) => [

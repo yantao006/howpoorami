@@ -386,24 +386,6 @@ function PercentilePreciseDisplay({
   );
 }
 
-function fallbackCopyToClipboard(text: string): boolean {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "absolute";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.select();
-  let success = false;
-  try {
-    success = document.execCommand("copy");
-  } catch {
-    success = false;
-  }
-  document.body.removeChild(textarea);
-  return success;
-}
-
 function ShareButtons({
   percentile,
   percentileRange,
@@ -438,15 +420,7 @@ function ShareButtons({
     };
 
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(onSuccess).catch(() => {
-        if (fallbackCopyToClipboard(url)) {
-          onSuccess();
-        } else {
-          onFailure();
-        }
-      });
-    } else if (fallbackCopyToClipboard(url)) {
-      onSuccess();
+      navigator.clipboard.writeText(url).then(onSuccess).catch(onFailure);
     } else {
       onFailure();
     }

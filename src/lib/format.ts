@@ -42,7 +42,8 @@ export function formatPercent(value: number, decimals = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 
-export function formatYears(days: number): string {
+/** Format a number of days as a human-readable duration (days or years). */
+export function formatDaysAsYears(days: number): string {
   const years = Math.floor(days / 365);
   if (years >= 1000) {
     return `${formatNumber(years)} years`;

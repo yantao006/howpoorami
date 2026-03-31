@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { type CountryData, COUNTRIES } from "@/data/wealth-data";
+import { type CountryData } from "@/data/wealth-data";
 
 interface WealthShareBarsProps {
   readonly country: CountryData;

@@ -149,10 +149,13 @@ export default function HistoricalEvolutionChart({
   const xScale = useMemo(
     () =>
       scaleLinear<number>({
-        domain: [
-          Math.min(...stackedData.map((d) => d.year)),
-          Math.max(...stackedData.map((d) => d.year)),
-        ],
+        domain:
+          stackedData.length > 0
+            ? [
+                Math.min(...stackedData.map((d) => d.year)),
+                Math.max(...stackedData.map((d) => d.year)),
+              ]
+            : [0, 1],
         range: [0, innerWidth],
       }),
     [stackedData, innerWidth]
@@ -207,6 +210,14 @@ export default function HistoricalEvolutionChart({
     const [minYear, maxYear] = xScale.domain();
     return events.filter((e) => e.year >= minYear && e.year <= maxYear);
   }, [events, xScale]);
+
+  if (stackedData.length === 0) {
+    return (
+      <div className="flex items-center justify-center text-text-muted text-sm py-12">
+        Historical data not available for {country.name}.
+      </div>
+    );
+  }
 
   if (width < 10) return null;
 

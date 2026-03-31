@@ -29,7 +29,12 @@ export default function Navigation() {
 
         <div className="flex items-center gap-0.5 sm:gap-1">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const NON_COUNTRY_PATHS = ["/about", "/faq", "/methodology", "/compare"];
+            const isActive =
+              item.href === "/"
+                ? pathname === "/" ||
+                  !NON_COUNTRY_PATHS.some((p) => pathname.startsWith(p))
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

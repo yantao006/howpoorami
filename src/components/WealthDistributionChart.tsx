@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CountryData } from "@/data/wealth-data";
-import { DETAILED_SHARES, type DetailedWealthShares } from "@/data/billionaires";
+import { getDetailedShares, type DetailedWealthShares } from "@/data/billionaires";
 
 interface WealthDistributionChartProps {
   readonly country: CountryData;
@@ -81,17 +81,7 @@ export default function WealthDistributionChart({
   const [zoom, setZoom] = useState<ZoomLevel>("overview");
   const [expandedLabels, setExpandedLabels] = useState<ReadonlySet<string>>(new Set());
 
-  // Fallback: when WID.world detailed splits are unavailable, estimate
-  // sub-percentile breakdown using typical distribution ratios (55/28/17).
-  // These are approximations, not sourced data.
-  const shares = DETAILED_SHARES[country.code] ?? {
-    bottom50: country.wealthShares.bottom50,
-    middle40: country.wealthShares.middle40,
-    next9: country.wealthShares.top10 - country.wealthShares.top1,
-    next09: country.wealthShares.top1 * 0.55,
-    next009: country.wealthShares.top1 * 0.28,
-    top001: country.wealthShares.top1 * 0.17,
-  };
+  const shares = getDetailedShares(country);
   const segments = useMemo(() => getSegments(shares, zoom), [shares, zoom]);
 
   // Determine which segment the user falls into based on their percentile

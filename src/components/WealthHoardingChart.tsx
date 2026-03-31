@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from "react";
 import { Group } from "@visx/group";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CountryData } from "@/data/wealth-data";
-import { DETAILED_SHARES, type DetailedWealthShares } from "@/data/billionaires";
+import { getDetailedShares, type DetailedWealthShares } from "@/data/billionaires";
 import { formatNumber } from "@/lib/format";
 import ChartTooltip from "./ChartTooltip";
 
@@ -196,19 +196,9 @@ export default function WealthHoardingChart({
   const [hoveredRect, setHoveredRect] = useState<RectData | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  // Fallback: when WID.world detailed splits are unavailable, estimate
-  // sub-percentile breakdown using typical distribution ratios (55/28/17).
-  // These are approximations, not sourced data.
   const shares = useMemo(
-    () => DETAILED_SHARES[country.code] ?? {
-      bottom50: country.wealthShares.bottom50,
-      middle40: country.wealthShares.middle40,
-      next9: country.wealthShares.top10 - country.wealthShares.top1,
-      next09: country.wealthShares.top1 * 0.55,
-      next009: country.wealthShares.top1 * 0.28,
-      top001: country.wealthShares.top1 * 0.17,
-    },
-    [country.code, country.wealthShares.bottom50, country.wealthShares.middle40, country.wealthShares.top10, country.wealthShares.top1, country.population],
+    () => getDetailedShares(country),
+    [country.code, country.wealthShares.bottom50, country.wealthShares.middle40, country.wealthShares.top10, country.wealthShares.top1],
   );
 
   const innerWidth = width - MARGIN.left - MARGIN.right;

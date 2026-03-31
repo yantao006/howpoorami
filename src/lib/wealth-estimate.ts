@@ -138,16 +138,16 @@ function isFactorFilled(factors: IncomeFactors, key: keyof IncomeFactors): boole
   switch (key) {
     case "age": return factors.age.length > 0;
     case "householdSize": return factors.householdSize.length > 0;
-    case "hasProperty": return factors.hasProperty;
+    case "hasProperty": return factors.hasProperty && factors.propertyValue.length > 0;
     case "propertyValue": return factors.propertyValue.length > 0;
-    case "hasMortgage": return factors.hasMortgage;
+    case "hasMortgage": return factors.hasMortgage && factors.mortgageRemaining.length > 0;
     case "mortgageRemaining": return factors.mortgageRemaining.length > 0;
-    case "hasDebts": return factors.hasDebts;
+    case "hasDebts": return factors.hasDebts && factors.debtLevel.length > 0;
     case "debtLevel": return factors.debtLevel.length > 0;
     case "savingsRate": return factors.savingsRate !== "moderate";
-    case "hasInvestments": return factors.hasInvestments;
+    case "hasInvestments": return factors.hasInvestments && factors.investmentValue.length > 0;
     case "investmentValue": return factors.investmentValue.length > 0;
-    case "hasRetirement": return factors.hasRetirement;
+    case "hasRetirement": return factors.hasRetirement && factors.retirementValue.length > 0;
     case "retirementValue": return factors.retirementValue.length > 0;
     case "hasInheritance": return factors.hasInheritance;
     case "yearsWorked": return factors.yearsWorked.length > 0;

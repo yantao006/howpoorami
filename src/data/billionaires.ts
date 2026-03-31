@@ -85,3 +85,29 @@ function buildDetailedSharesMap(): Readonly<Record<string, DetailedWealthShares>
 export const RICHEST_BY_COUNTRY: Readonly<Record<string, BillionaireData>> = buildBillionaireMap();
 
 export const DETAILED_SHARES: Readonly<Record<string, DetailedWealthShares>> = buildDetailedSharesMap();
+
+/**
+ * Get detailed wealth shares for a country, falling back to an estimated
+ * sub-percentile breakdown when WID.world data is unavailable.
+ *
+ * The fallback uses typical distribution ratios (55/28/17) to split the
+ * top-1% share into finer groups. These are approximations, not sourced data.
+ */
+export function getDetailedShares(country: {
+  readonly code: string;
+  readonly wealthShares: {
+    readonly bottom50: number;
+    readonly middle40: number;
+    readonly top10: number;
+    readonly top1: number;
+  };
+}): DetailedWealthShares {
+  return DETAILED_SHARES[country.code] ?? {
+    bottom50: country.wealthShares.bottom50,
+    middle40: country.wealthShares.middle40,
+    next9: country.wealthShares.top10 - country.wealthShares.top1,
+    next09: country.wealthShares.top1 * 0.55,
+    next009: country.wealthShares.top1 * 0.28,
+    top001: country.wealthShares.top1 * 0.17,
+  };
+}

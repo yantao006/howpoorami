@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 
 interface AnimatedCounterProps {
@@ -23,16 +23,30 @@ export default function AnimatedCounter({
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const hasBeenInView = useRef(false);
   const prevEnd = useRef(end);
+  const rafId = useRef<number | null>(null);
+  const countRef = useRef(0);
 
   // Track when first comes into view
   if (isInView && !hasBeenInView.current) {
     hasBeenInView.current = true;
   }
 
+  // Keep countRef in sync with count state
+  countRef.current = count;
+
+  const cancelAnimation = useCallback(() => {
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (!hasBeenInView.current) return;
 
-    const from = prevEnd.current !== end ? count : 0;
+    cancelAnimation();
+
+    const from = prevEnd.current !== end ? countRef.current : 0;
     prevEnd.current = end;
 
     const startTime = performance.now();
@@ -47,12 +61,16 @@ export default function AnimatedCounter({
       setCount(from + eased * (end - from));
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        rafId.current = requestAnimationFrame(animate);
+      } else {
+        rafId.current = null;
       }
     }
 
-    requestAnimationFrame(animate);
-  }, [isInView, end, duration]); // eslint-disable-line react-hooks/exhaustive-deps
+    rafId.current = requestAnimationFrame(animate);
+
+    return cancelAnimation;
+  }, [isInView, end, duration, cancelAnimation]);
 
   return (
     <motion.span

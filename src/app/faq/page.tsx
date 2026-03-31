@@ -39,7 +39,7 @@ const FAQ_ITEMS: readonly FaqItem[] = [
   {
     question: "Is my data stored or sent anywhere?",
     answer:
-      "No. Everything runs entirely in your browser. Your income, wealth, and personal details are never sent to any server. There are no cookies, no tracking scripts, and no analytics. The app works fully offline once loaded.",
+      "No. Everything runs entirely in your browser. Your income, wealth, and personal details are never sent to any server. There are no cookies, no tracking scripts, and no analytics. All calculations run in your browser — no data is sent to any server.",
   },
   {
     question: "How accurate is the income-to-wealth estimate?",

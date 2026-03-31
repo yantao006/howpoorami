@@ -132,8 +132,8 @@ export default function MethodologyPage() {
             >
               Forbes Real-Time Billionaires
             </a>{" "}
-            list to fetch the current net worth of the wealthiest individual in
-            each country.
+            list. Net worth figures are bundled into the site at build time for
+            the wealthiest individual in each country.
           </p>
           <p className="text-text-secondary leading-relaxed">
             The &quot;years to earn&quot; calculation is deliberately simple: it
@@ -184,8 +184,7 @@ export default function MethodologyPage() {
             All data is bundled at build time and served statically — no external
             API calls are made when you use the tool. Datasets are updated
             periodically as new releases become available from WID.world, OECD,
-            SWIID, and Forbes. The build date at the bottom of the page indicates
-            when the data was last refreshed.
+            SWIID, and Forbes.
           </p>
         </section>
 

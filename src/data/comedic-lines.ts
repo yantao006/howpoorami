@@ -4,6 +4,11 @@
  * Each tier has multiple variants. A random one is selected on each calculation
  * to keep the experience fresh. Lines range from dry wit to absurdist humor,
  * but always circle back to the serious point about inequality.
+ *
+ * NOTE: Lines in the lower tiers (bottom 10%, bottom 25%, etc.) contain
+ * editorial commentary intended to highlight systemic inequality. They are
+ * not direct conclusions drawn from the data and should be understood as
+ * opinionated/rhetorical rather than factual statements.
  */
 
 // ---------------------------------------------------------------------------

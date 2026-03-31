@@ -38,11 +38,13 @@ export async function generateMetadata({
       url,
       siteName: "How Poor Am I?",
       locale: "en_US",
+      images: [{ url: "https://howpoorami.org/og-image.png", width: 1200, height: 630, alt: `Billionaire comparison for ${name}` }],
     },
     twitter: {
       card: "summary_large_image",
       title: `How Long to Match the Richest in ${name}?`,
       description: `Billionaire wealth comparison for ${name}. How many lifetimes would you need?`,
+      images: [{ url: "https://howpoorami.org/og-image.png", width: 1200, height: 630, alt: `Billionaire comparison for ${name}` }],
     },
   };
 }

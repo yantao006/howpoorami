@@ -32,11 +32,13 @@ export async function generateMetadata({
       url,
       siteName: "How Poor Am I?",
       locale: "en_US",
+      images: [{ url: "https://howpoorami.org/og-image.png", width: 1200, height: 630, alt: `Wealth distribution in ${name}` }],
     },
     twitter: {
       card: "summary_large_image",
       title: `How Poor Am I in ${name}?`,
       description: `Wealth inequality visualized for ${name}. See where your income ranks.`,
+      images: [{ url: "https://howpoorami.org/og-image.png", width: 1200, height: 630, alt: `Wealth distribution in ${name}` }],
     },
   };
 }

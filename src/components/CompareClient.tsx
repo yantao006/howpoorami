@@ -12,6 +12,12 @@ import FormattedNumber from "@/components/FormattedNumber";
 import TimeComparisons from "@/components/TimeComparisons";
 import { useGeoCountry } from "@/hooks/useGeoCountry";
 
+// US-specific financial constants used for comparison cards.
+// Ideally these should be localized per country.
+const ANNUAL_RETURN_RATE = 0.08; // 8% assumed annual return on wealth
+const AVG_US_HOME_PRICE = 350_000; // Average US home price in USD
+const US_PER_CAPITA_HEALTHCARE = 12_530; // US per-capita healthcare spending in USD
+
 interface CompareClientProps {
   readonly initialCountry?: AllCountryCode;
 }
@@ -59,11 +65,11 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
     [richest, safeIncome]
   );
 
-  const secondsPerDollar = useMemo(() => {
+  const dollarsPerSecond = useMemo(() => {
     if (!richest) return 0;
     const secondsInYear = 365.25 * 24 * 3600;
-    // Approximate earning rate assuming 8% annual return on net worth
-    return (richest.netWorth * 0.08) / secondsInYear;
+    // Approximate earning rate assuming annual return on net worth
+    return (richest.netWorth * ANNUAL_RETURN_RATE) / secondsInYear;
   }, [richest]);
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,15 +238,15 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
           >
             <ComparisonCard
               label={`${richest.name} earns per second`}
-              value={`${formatCurrency(secondsPerDollar, "USD")}`}
-              sublabel="If their wealth grew at 8%/year"
+              value={`${formatCurrency(dollarsPerSecond, "USD")}`}
+              sublabel={`If their wealth grew at ${ANNUAL_RETURN_RATE * 100}%/year`}
               accent="amber"
               delay={0}
             />
             <ComparisonCard
               label="Your daily earnings"
               value={formatCurrency(safeIncome / 365, country.currency)}
-              sublabel={`vs. ${richest.name}'s ${formatCurrency(richest.netWorth * 0.08 / 365, "USD", true)}/day`}
+              sublabel={`vs. ${richest.name}'s ${formatCurrency(richest.netWorth * ANNUAL_RETURN_RATE / 365, "USD", true)}/day`}
               accent="sage"
               delay={0.1}
             />
@@ -260,15 +266,15 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
             />
             <ComparisonCard
               label="Homes their wealth could buy"
-              value={formatNumber(Math.round(richest.netWorth / 350_000))}
-              sublabel="At $350K average US home price"
+              value={formatNumber(Math.round(richest.netWorth / AVG_US_HOME_PRICE))}
+              sublabel={`At $${(AVG_US_HOME_PRICE / 1000).toFixed(0)}K average US home price`}
               accent="lavender"
               delay={0.4}
             />
             <ComparisonCard
               label="Years of healthcare"
-              value={formatNumber(Math.round(richest.netWorth / 12_530))}
-              sublabel="At US per-capita healthcare spending"
+              value={formatNumber(Math.round(richest.netWorth / US_PER_CAPITA_HEALTHCARE))}
+              sublabel={`At $${formatNumber(US_PER_CAPITA_HEALTHCARE)} US per-capita healthcare spending`}
               accent="amber"
               delay={0.5}
             />

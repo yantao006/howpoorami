@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     description:
       "At your salary, it would take millions of years. Enter your income and see for yourself.",
   },
+  alternates: {
+    canonical: "https://howpoorami.org/compare",
+  },
 };
 
 export default function CompareLayout({

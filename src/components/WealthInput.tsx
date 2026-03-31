@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { type CountryData, findPercentile } from "@/data/wealth-data";
 import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 import { getPercentileLine } from "@/data/comedic-lines";
@@ -33,26 +33,58 @@ export default function WealthInput({
     DEFAULT_INCOME_FACTORS,
   );
   const [refinePanelOpen, setRefinePanelOpen] = useState(false);
+  const refinePanelRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll refinement panel into view on mobile when opened
+  useEffect(() => {
+    if (refinePanelOpen && refinePanelRef.current) {
+      // Small delay to allow the panel animation to start
+      const timer = setTimeout(() => {
+        refinePanelRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [refinePanelOpen]);
 
   // Reset state when country changes
   useEffect(() => {
     setInputValue("");
     setPercentile(null);
     setPercentileRange(null);
+    setZeroIncomeMessage(null);
     onPercentileChange(null);
   }, [country.code, onPercentileChange]);
 
+  const [zeroIncomeMessage, setZeroIncomeMessage] = useState<string | null>(
+    null,
+  );
+
   const computeFromIncome = useCallback(
     (raw: string, factors: IncomeFactors) => {
-      if (raw.length === 0) {
+      if (raw.length === 0 || raw === "-") {
         setPercentile(null);
         setPercentileRange(null);
+        setZeroIncomeMessage(null);
         onPercentileChange(null);
         return;
       }
       const value = parseInt(raw, 10);
       if (!Number.isFinite(value)) return;
 
+      if (value === 0) {
+        setPercentile(null);
+        setPercentileRange(null);
+        setZeroIncomeMessage(
+          "Enter your annual income to see where you stand. For zero or no income, try Net Wealth mode instead.",
+        );
+        onPercentileChange(null);
+        return;
+      }
+
+      setZeroIncomeMessage(null);
       const wRange = estimateWealthRange(value, country, factors);
       const pRange = computePercentileRange(wRange, country);
 
@@ -71,12 +103,17 @@ export default function WealthInput({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value.replace(/[^0-9]/g, "");
+      const stripped = e.target.value.replace(/[^0-9-]/g, "");
+      // Allow at most one leading minus, no minus elsewhere
+      const raw =
+        stripped.length > 0 && stripped[0] === "-"
+          ? "-" + stripped.slice(1).replace(/-/g, "")
+          : stripped.replace(/-/g, "");
       setInputValue(raw);
 
       if (mode === "income") {
         computeFromIncome(raw, incomeFactors);
-      } else if (raw.length > 0) {
+      } else if (raw.length > 0 && raw !== "-") {
         const p = findPercentile(parseInt(raw, 10), country);
         setPercentile(p);
         setPercentileRange(null);
@@ -96,6 +133,7 @@ export default function WealthInput({
       setInputValue("");
       setPercentile(null);
       setPercentileRange(null);
+      setZeroIncomeMessage(null);
       setIncomeFactors(DEFAULT_INCOME_FACTORS);
       setRefinePanelOpen(false);
       onPercentileChange(null);
@@ -111,8 +149,10 @@ export default function WealthInput({
   );
 
   const displayValue = useMemo(() => {
-    if (inputValue.length === 0) return "";
-    return formatCurrency(parseInt(inputValue, 10), country.currency);
+    if (inputValue.length === 0 || inputValue === "-") return inputValue;
+    const parsed = parseInt(inputValue, 10);
+    if (!Number.isFinite(parsed)) return inputValue;
+    return formatCurrency(parsed, country.currency);
   }, [inputValue, country.currency]);
 
   const comedic = useMemo(() => {
@@ -174,12 +214,14 @@ export default function WealthInput({
 
       {/* Income refinement panel */}
       {mode === "income" && (
-        <IncomeRefinementPanel
-          factors={incomeFactors}
-          isOpen={refinePanelOpen}
-          onToggle={() => setRefinePanelOpen((o) => !o)}
-          onChange={updateFactor}
-        />
+        <div ref={refinePanelRef}>
+          <IncomeRefinementPanel
+            factors={incomeFactors}
+            isOpen={refinePanelOpen}
+            onToggle={() => setRefinePanelOpen((o) => !o)}
+            onChange={updateFactor}
+          />
+        </div>
       )}
 
       {/* Estimated wealth range */}
@@ -196,11 +238,20 @@ export default function WealthInput({
         </p>
       )}
 
+      {/* Zero income message */}
+      {zeroIncomeMessage && (
+        <p className="text-text-muted text-sm text-center mt-4 animate-fade-in">
+          {zeroIncomeMessage}
+        </p>
+      )}
+
       {/* Result */}
       {percentile !== null && (
         <div className="mt-4 text-center animate-fade-in">
           <p className="text-text-secondary text-sm">
-            In {country.name}, you are wealthier than
+            {mode === "income"
+              ? `In ${country.name}, based on estimated wealth from your income, you rank higher than`
+              : `In ${country.name}, you are wealthier than`}
           </p>
 
           {isRange && percentileRange ? (
@@ -335,6 +386,24 @@ function PercentilePreciseDisplay({
   );
 }
 
+function fallbackCopyToClipboard(text: string): boolean {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "absolute";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  let success = false;
+  try {
+    success = document.execCommand("copy");
+  } catch {
+    success = false;
+  }
+  document.body.removeChild(textarea);
+  return success;
+}
+
 function ShareButtons({
   percentile,
   percentileRange,
@@ -346,11 +415,47 @@ function ShareButtons({
   readonly countryName: string;
   readonly countryCode: string;
 }) {
+  const [copyStatus, setCopyStatus] = useState<
+    "idle" | "copied" | "failed"
+  >("idle");
+
   const pText = percentileRange
     ? `${percentileRange.low.toFixed(1)}–${percentileRange.high.toFixed(1)}%`
     : `${percentile.toFixed(1)}%`;
   const shareText = `I'm wealthier than ${pText} of the population in ${countryName}. Where do you stand?`;
   const url = `https://howpoorami.org/${countryCode.toLowerCase()}`;
+
+  const handleCopy = useCallback(() => {
+    const onSuccess = () => {
+      setCopyStatus("copied");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    };
+    const onFailure = () => {
+      setCopyStatus("failed");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    };
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(onSuccess).catch(() => {
+        if (fallbackCopyToClipboard(url)) {
+          onSuccess();
+        } else {
+          onFailure();
+        }
+      });
+    } else if (fallbackCopyToClipboard(url)) {
+      onSuccess();
+    } else {
+      onFailure();
+    }
+  }, [url]);
+
+  const copyLabel =
+    copyStatus === "copied"
+      ? "Copied!"
+      : copyStatus === "failed"
+        ? "Copy failed"
+        : "Copy link";
 
   const btnClass =
     "px-2.5 py-1 rounded-lg text-[11px] font-medium min-h-[44px] min-w-[44px] bg-bg-card border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent-periwinkle/30 transition-all cursor-pointer";
@@ -388,11 +493,17 @@ function ShareButtons({
       </button>
       <button
         type="button"
-        onClick={() => navigator.clipboard.writeText(url).catch(() => { /* silent fallback */ })}
-        className={btnClass}
+        onClick={handleCopy}
+        className={`${btnClass} ${
+          copyStatus === "copied"
+            ? "!text-accent-sage !border-accent-sage/30"
+            : copyStatus === "failed"
+              ? "!text-accent-rose !border-accent-rose/30"
+              : ""
+        }`}
         aria-label="Copy link"
       >
-        Copy link
+        {copyLabel}
       </button>
     </div>
   );

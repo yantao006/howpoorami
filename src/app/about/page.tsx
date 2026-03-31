@@ -41,9 +41,9 @@ export default function AboutPage() {
           <ul className="list-disc list-inside text-text-secondary leading-relaxed space-y-2 ml-2">
             <li>
               <strong className="text-text-primary">Wealth Percentile</strong> —
-              Enter your income, answer a few optional questions about your
-              financial situation, and see which percentile you fall into within
-              your country&apos;s wealth distribution.
+              Enter your net wealth (or income with optional refinement factors)
+              and see which percentile you fall into within your country&apos;s
+              wealth distribution.
             </li>
             <li>
               <strong className="text-text-primary">Billionaire Comparison</strong> —
@@ -137,8 +137,7 @@ export default function AboutPage() {
           <p className="text-text-secondary leading-relaxed">
             All computation happens entirely in your browser. Your income, wealth,
             and personal details are never sent to any server. There is no
-            tracking, no analytics, and no cookies. The app works fully offline
-            once loaded.
+            tracking, no analytics, and no cookies.
           </p>
         </section>
 

@@ -58,7 +58,7 @@ function LifetimeHighlight({
       transition={{ duration: 0.7, ease: "easeOut" }}
       className="bg-bg-card border border-border-subtle rounded-2xl p-8 sm:p-10 text-center"
     >
-      <span className="text-4xl sm:text-5xl mb-4 block">
+      <span className="text-4xl sm:text-5xl mb-4 block" aria-hidden="true">
         {comparison.ref.emoji}
       </span>
       <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-accent-sage mb-3">
@@ -97,7 +97,7 @@ function ComparisonCard({
       transition={{ duration: 0.6, delay, ease: "easeOut" }}
       className={`bg-bg-card border ${border} rounded-2xl p-5 sm:p-6 text-center`}
     >
-      <span className="text-3xl sm:text-4xl mb-3 block">
+      <span className="text-3xl sm:text-4xl mb-3 block" aria-hidden="true">
         {comparison.ref.emoji}
       </span>
       <p className={`text-lg sm:text-xl font-bold ${accent} mb-2`}>

@@ -6,6 +6,9 @@ const FOOTER_LINKS = [
   { href: "/methodology", label: "Methodology" },
 ] as const;
 
+/** Build date stamped at module evaluation time (static export). */
+const BUILD_DATE = new Date().toISOString().split("T")[0];
+
 export default function Footer() {
   return (
     <footer className="border-t border-border-subtle px-4 sm:px-6 lg:px-8 py-6">
@@ -38,6 +41,9 @@ export default function Footer() {
             GitHub
           </a>
         </nav>
+        <p className="text-xs text-text-muted/60 mt-3">
+          Data built {BUILD_DATE}
+        </p>
       </div>
     </footer>
   );

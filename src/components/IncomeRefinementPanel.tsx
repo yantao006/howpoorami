@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 import {
   type IncomeFactors,
   countFilledFactors,
@@ -84,7 +84,7 @@ function ToggleChip({
   variant = "neutral",
 }: {
   readonly active: boolean;
-  readonly label: string;
+  readonly label: ReactNode;
   readonly onClick: () => void;
   readonly variant?: "positive" | "negative" | "neutral";
 }) {
@@ -252,7 +252,7 @@ export default function IncomeRefinementPanel({
             {/* ── Demographics ── */}
             <fieldset>
               <SectionLegend>Demographics</SectionLegend>
-              <div className="grid grid-cols-3 gap-2 mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
                 <SmallInput
                   id="ref-age"
                   label="Age"
@@ -264,7 +264,7 @@ export default function IncomeRefinementPanel({
                   id="ref-household"
                   label="Household"
                   value={factors.householdSize}
-                  placeholder="adults"
+                  placeholder="2"
                   onChange={(v) => numChange("householdSize", v, 2)}
                 />
                 <SmallInput
@@ -357,7 +357,7 @@ export default function IncomeRefinementPanel({
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <ToggleChip
                   active={factors.hasInvestments}
-                  label="📈 Investments"
+                  label={<><span aria-hidden="true">📈 </span>Investments</>}
                   onClick={() =>
                     onChange("hasInvestments", !factors.hasInvestments)
                   }
@@ -365,7 +365,7 @@ export default function IncomeRefinementPanel({
                 />
                 <ToggleChip
                   active={factors.hasRetirement}
-                  label="🏛️ Retirement fund"
+                  label={<><span aria-hidden="true">🏛️ </span>Retirement fund</>}
                   onClick={() =>
                     onChange("hasRetirement", !factors.hasRetirement)
                   }
@@ -373,7 +373,7 @@ export default function IncomeRefinementPanel({
                 />
                 <ToggleChip
                   active={factors.hasInheritance}
-                  label="🏦 Inheritance"
+                  label={<><span aria-hidden="true">🏦 </span>Inheritance</>}
                   onClick={() =>
                     onChange("hasInheritance", !factors.hasInheritance)
                   }
@@ -415,7 +415,7 @@ export default function IncomeRefinementPanel({
                 <div className="flex flex-wrap gap-1.5">
                   <ToggleChip
                     active={factors.hasProperty}
-                    label="🏠 I own property"
+                    label={<><span aria-hidden="true">🏠 </span>I own property</>}
                     onClick={() =>
                       onChange("hasProperty", !factors.hasProperty)
                     }
@@ -423,7 +423,7 @@ export default function IncomeRefinementPanel({
                   />
                   <ToggleChip
                     active={factors.hasMortgage}
-                    label="🏗️ Mortgage"
+                    label={<><span aria-hidden="true">🏗️ </span>Mortgage</>}
                     onClick={() =>
                       onChange("hasMortgage", !factors.hasMortgage)
                     }
@@ -463,7 +463,7 @@ export default function IncomeRefinementPanel({
               <div className="space-y-2">
                 <ToggleChip
                   active={factors.hasDebts}
-                  label="💳 I have significant debts"
+                  label={<><span aria-hidden="true">💳 </span>I have significant debts</>}
                   onClick={() => onChange("hasDebts", !factors.hasDebts)}
                   variant="negative"
                 />

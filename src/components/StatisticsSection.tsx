@@ -53,8 +53,8 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
   const meanToMedianRatio = country.meanWealthPerAdult / country.medianWealthPerAdult;
 
   // Average wealth of a top 1% member = (their share of total wealth) / (1% of adults)
-  // Simplifies to: (top1% / 100) * meanWealthPerAdult / 0.01 = top1% * meanWealthPerAdult
-  const avgTop1Wealth = country.wealthShares.top1 * country.meanWealthPerAdult;
+  // = (top1% / 100) * meanWealthPerAdult / 0.01
+  const avgTop1Wealth = (country.wealthShares.top1 / 100) * country.meanWealthPerAdult / 0.01;
   const yearsToEarnTop1 = Math.round(avgTop1Wealth / country.medianIncome);
 
   return (

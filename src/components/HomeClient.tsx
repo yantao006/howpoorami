@@ -193,12 +193,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {/* The Scale of Concentration */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-10"
-          >
+          <div className="text-center mb-10">
             <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
               The Scale of Concentration
             </h2>
@@ -206,14 +201,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               Each rectangle below represents wealth. The area shows how much each
               group actually owns. Look at who has what.
             </p>
-          </m.div>
+          </div>
 
-          <m.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
-          >
+          <div className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6">
             <ErrorBoundary>
               <ResponsiveChart aspectRatio={16 / 6} minHeight={300} maxHeight={450}>
                 {({ width, height }) => (
@@ -225,7 +215,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 )}
               </ResponsiveChart>
             </ErrorBoundary>
-          </m.div>
+          </div>
         </div>
       </section>
 
@@ -240,12 +230,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {hasTaxData && (
         <section className="px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-6xl mx-auto">
-            <m.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-center mb-10"
-            >
+            <div className="text-center mb-10">
               <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
                 Who Actually Pays?
               </h2>
@@ -255,14 +240,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 income, capital gains, and corporate structures are treated — the
                 system often becomes regressive at the very top.
               </p>
-            </m.div>
+            </div>
 
-            <m.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
-            >
+            <div className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6">
               <ErrorBoundary>
                 <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
                   {({ width, height }) => (
@@ -274,7 +254,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                   )}
                 </ResponsiveChart>
               </ErrorBoundary>
-            </m.div>
+            </div>
           </div>
         </section>
       )}
@@ -282,12 +262,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {/* Historical Trends */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-10"
-          >
+          <div className="text-center mb-10">
             <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
               A Century of Change
             </h2>
@@ -295,14 +270,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               How wealth concentration in {country.name} has evolved — and what
               policy choices drove each shift.
             </p>
-          </m.div>
+          </div>
 
-          <m.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6 overflow-visible"
-          >
+          <div className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6 overflow-visible">
             <ErrorBoundary>
               <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
                 {({ width, height }) => (
@@ -314,7 +284,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 )}
               </ResponsiveChart>
             </ErrorBoundary>
-          </m.div>
+          </div>
         </div>
       </section>
 
@@ -322,12 +292,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
       {hasPurchasingPowerData && (
         <section className="px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-6xl mx-auto">
-            <m.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-center mb-10"
-            >
+            <div className="text-center mb-10">
               <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
                 Are Wages Keeping Up?
               </h2>
@@ -335,14 +300,9 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                 Wages, consumer prices, and house prices — all indexed to 2000.
                 When the lines diverge, someone is falling behind.
               </p>
-            </m.div>
+            </div>
 
-            <m.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6"
-            >
+            <div className="bg-bg-secondary/50 border border-border-subtle rounded-2xl p-4 sm:p-6">
               <ErrorBoundary>
                 <ResponsiveChart aspectRatio={16 / 9} minHeight={350} maxHeight={500}>
                   {({ width, height }) => (
@@ -354,7 +314,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
                   )}
                 </ResponsiveChart>
               </ErrorBoundary>
-            </m.div>
+            </div>
           </div>
         </section>
       )}

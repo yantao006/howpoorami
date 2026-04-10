@@ -1,16 +1,8 @@
-"use client";
-
-import { m } from "framer-motion";
 import { DATA_SOURCES } from "@/data/wealth-data";
 
 export default function SourcesSection() {
   return (
-    <m.section
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      className="border-t border-border-subtle pt-16"
-    >
+    <section className="border-t border-border-subtle pt-16">
       <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-4 text-text-primary">
         Data Sources & Methodology
       </h3>
@@ -22,13 +14,9 @@ export default function SourcesSection() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {DATA_SOURCES.map((source, i) => (
-          <m.div
+        {DATA_SOURCES.map((source) => (
+          <div
             key={source.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
             className="bg-bg-card border border-border-subtle rounded-xl p-5"
           >
             <a
@@ -52,7 +40,7 @@ export default function SourcesSection() {
                 Accessed: {source.accessed}
               </p>
             )}
-          </m.div>
+          </div>
         ))}
       </div>
 
@@ -76,6 +64,6 @@ export default function SourcesSection() {
           Built with publicly available data. No personal data is collected or stored.
         </p>
       </div>
-    </m.section>
+    </section>
   );
 }

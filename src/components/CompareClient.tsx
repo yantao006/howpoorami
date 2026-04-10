@@ -216,25 +216,15 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
           </m.div>
 
           {/* Time comparisons — the fun part */}
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="mb-16"
-          >
+          <div className="mb-16">
             <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-8 text-text-primary">
               To Put That In Perspective...
             </h3>
             <TimeComparisons yearsToMatch={yearsToMatch} billionaireName={richest.name} />
-          </m.div>
+          </div>
 
           {/* Comparison cards */}
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16"
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <ComparisonCard
               label={`${richest.name} earns per second`}
               value={`${formatCurrency(dollarsPerSecond, "USD")}`}
@@ -277,30 +267,20 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               accent="amber"
               delay={0.5}
             />
-          </m.div>
+          </div>
 
           {/* Source note */}
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="mt-16 text-center"
-          >
+          <div className="mt-16 text-center">
             <p className="text-text-muted text-xs max-w-xl mx-auto leading-relaxed">
               Net worth estimates from Forbes Real-Time Billionaires (March 2026).
               Median income data from OECD and national statistics offices.
               Wealth fluctuates daily — these are approximate figures for illustration.
             </p>
-          </m.div>
+          </div>
 
           {/* Cross-link to wealth distribution page */}
           {!isGlobal && (
-            <m.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="mt-12"
-            >
+            <div className="mt-12">
               <Link
                 href={`/${selectedCountry.toLowerCase()}`}
                 className="block bg-accent-periwinkle/8 border border-accent-periwinkle/20 rounded-2xl p-6 sm:p-8 text-center hover:bg-accent-periwinkle/12 hover:border-accent-periwinkle/30 transition-all duration-300"
@@ -314,7 +294,7 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
                   Explore wealth inequality &rarr;
                 </span>
               </Link>
-            </m.div>
+            </div>
           )}
         </div>
       </section>
@@ -331,28 +311,22 @@ interface ComparisonCardProps {
   readonly delay: number;
 }
 
-function ComparisonCard({ label, value, sublabel, accent, delay }: ComparisonCardProps) {
-  const accentColors = {
-    rose: "text-accent-rose",
-    amber: "text-accent-amber",
-    sage: "text-accent-sage",
-    periwinkle: "text-accent-periwinkle",
-    lavender: "text-accent-lavender",
-  };
+const comparisonAccentColors = {
+  rose: "text-accent-rose",
+  amber: "text-accent-amber",
+  sage: "text-accent-sage",
+  periwinkle: "text-accent-periwinkle",
+  lavender: "text-accent-lavender",
+};
 
+function ComparisonCard({ label, value, sublabel, accent }: ComparisonCardProps) {
   return (
-    <m.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay }}
-      className="bg-bg-card border border-border-subtle rounded-2xl p-6 text-center"
-    >
+    <div className="bg-bg-card border border-border-subtle rounded-2xl p-6 text-center">
       <p className="text-text-secondary text-sm mb-2">{label}</p>
-      <p className={`text-2xl sm:text-3xl font-bold ${accentColors[accent]} tabular-nums`}>
+      <p className={`text-2xl sm:text-3xl font-bold ${comparisonAccentColors[accent]} tabular-nums`}>
         {value}
       </p>
       <p className="text-text-muted text-xs mt-2">{sublabel}</p>
-    </m.div>
+    </div>
   );
 }

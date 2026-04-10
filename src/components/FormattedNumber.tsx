@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
 
 interface FormattedNumberProps {
   readonly value: number;
@@ -27,40 +26,7 @@ function splitIntoGroups(num: number): readonly DigitGroup[] {
   }));
 }
 
-function useCountUp(
-  target: number,
-  isInView: boolean,
-  durationMs: number = 2000,
-): number {
-  const [current, setCurrent] = useState(0);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
-    hasAnimated.current = true;
-
-    const startTime = performance.now();
-
-    function animate(currentTime: number) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / durationMs, 1);
-
-      // Ease out cubic for a satisfying deceleration
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCurrent(eased * target);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    }
-
-    requestAnimationFrame(animate);
-  }, [isInView, target, durationMs]);
-
-  return current;
-}
-
-function StaticFormattedNumber({
+function DigitGroups({
   value,
   className,
 }: {
@@ -91,25 +57,41 @@ function AnimatedFormattedNumber({
   readonly className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const animatedValue = useCountUp(value, isInView);
+  const [displayValue, setDisplayValue] = useState(value);
+  const hasAnimated = useRef(false);
 
-  const displayValue = isInView ? animatedValue : 0;
-  const groups = splitIntoGroups(displayValue);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || hasAnimated.current) return;
+        hasAnimated.current = true;
+        observer.disconnect();
+
+        const startTime = performance.now();
+
+        function tick(now: number) {
+          const progress = Math.min((now - startTime) / 2000, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setDisplayValue(eased * value);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+
+        setDisplayValue(0);
+        requestAnimationFrame(tick);
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [value]);
 
   return (
-    <span
-      ref={ref}
-      className={`tabular-nums inline-flex items-baseline ${className ?? ""}`}
-    >
-      {groups.map((group) => (
-        <span key={group.index} className="inline-flex items-baseline">
-          {group.index > 0 && (
-            <span className="text-text-muted mx-0.5">,</span>
-          )}
-          <span>{group.digits}</span>
-        </span>
-      ))}
+    <span ref={ref}>
+      <DigitGroups value={displayValue} className={className} />
     </span>
   );
 }
@@ -120,7 +102,7 @@ export default function FormattedNumber({
   animated = true,
 }: FormattedNumberProps) {
   if (!animated) {
-    return <StaticFormattedNumber value={value} className={className} />;
+    return <DigitGroups value={value} className={className} />;
   }
 
   return <AnimatedFormattedNumber value={value} className={className} />;

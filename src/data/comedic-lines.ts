@@ -398,7 +398,7 @@ export function getPercentileLine(
   ) ?? PERCENTILE_LINES[PERCENTILE_LINES.length - 1];
 
   // Use percentile value to pick a semi-random but consistent line
-  const index = Math.floor((percentile * 7.3) % tier.lines.length);
+  const index = Math.abs(Math.floor((percentile * 7.3) % tier.lines.length));
   return tier.lines[index].replace(/\{country\}/g, countryName);
 }
 

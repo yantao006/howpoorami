@@ -257,7 +257,7 @@ export function findPercentile(wealthUSD: number, country: CountryData): number 
     if (wealthUSD <= threshold) {
       const range = threshold - prevThreshold;
       const fraction = range > 0 ? (wealthUSD - prevThreshold) / range : 0;
-      return Math.min(pctStart + fraction * pctWidth, 99.99);
+      return Math.max(0, Math.min(pctStart + fraction * pctWidth, 99.99));
     }
     prevThreshold = threshold;
   }

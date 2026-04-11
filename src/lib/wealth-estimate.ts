@@ -15,6 +15,7 @@
  */
 
 import { type CountryData, findPercentile } from "@/data/wealth-data";
+import { toUSD } from "@/lib/currency";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -207,7 +208,13 @@ export function estimateWealthRange(
   annualIncome: number,
   country: CountryData,
   factors: IncomeFactors,
+  currencyCode = "USD",
 ): WealthRange {
+  /** Parse a factor string as a non-negative integer and convert to USD. */
+  const parseLocalToUSD = (raw: string): number => {
+    const val = parseNonNegativeInt(raw);
+    return Number.isFinite(val) ? toUSD(val, currencyCode) : NaN;
+  };
   const medianIncome = country.medianIncome > 0 ? country.medianIncome : 1;
   const incomeRatio = annualIncome / medianIncome;
 
@@ -235,7 +242,7 @@ export function estimateWealthRange(
   let propertyAddon = 0;
   let propertyMul = 1.0;
   if (factors.hasProperty) {
-    const propVal = parseNonNegativeInt(factors.propertyValue);
+    const propVal = parseLocalToUSD(factors.propertyValue);
     if (Number.isFinite(propVal) && propVal > 0) {
       propertyAddon = propVal * 0.7; // ~70% avg equity
     } else {
@@ -246,12 +253,12 @@ export function estimateWealthRange(
   // 5. Mortgage — subtracts from property equity
   let mortgageDeduction = 0;
   if (factors.hasMortgage) {
-    const mortVal = parseNonNegativeInt(factors.mortgageRemaining);
+    const mortVal = parseLocalToUSD(factors.mortgageRemaining);
     if (Number.isFinite(mortVal)) {
       mortgageDeduction = mortVal;
     } else if (factors.hasProperty) {
       // Estimate: avg mortgage is ~60% of property value
-      const propVal = parseNonNegativeInt(factors.propertyValue);
+      const propVal = parseLocalToUSD(factors.propertyValue);
       mortgageDeduction = Number.isFinite(propVal) ? propVal * 0.6 : annualIncome * 3;
     }
   }
@@ -268,7 +275,7 @@ export function estimateWealthRange(
   let investmentAddon = 0;
   let investmentMul = 1.0;
   if (factors.hasInvestments) {
-    const invVal = parseNonNegativeInt(factors.investmentValue);
+    const invVal = parseLocalToUSD(factors.investmentValue);
     if (Number.isFinite(invVal) && invVal > 0) {
       investmentAddon = invVal;
     } else {
@@ -280,7 +287,7 @@ export function estimateWealthRange(
   let retirementAddon = 0;
   let retirementMul = 1.0;
   if (factors.hasRetirement) {
-    const retVal = parseNonNegativeInt(factors.retirementValue);
+    const retVal = parseLocalToUSD(factors.retirementValue);
     if (Number.isFinite(retVal) && retVal > 0) {
       retirementAddon = retVal;
     } else {

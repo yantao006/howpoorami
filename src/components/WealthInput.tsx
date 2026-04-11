@@ -87,7 +87,7 @@ export default function WealthInput({
 
       setZeroIncomeMessage(null);
       const valueUSD = toUSD(value, country.currency);
-      const wRange = estimateWealthRange(valueUSD, country, factors);
+      const wRange = estimateWealthRange(valueUSD, country, factors, country.currency);
       const pRange = computePercentileRange(wRange, country);
 
       setPercentile(pRange.mid);
@@ -105,13 +105,16 @@ export default function WealthInput({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      // Strip everything except digits (no negatives — wealth/income ≥ 0)
-      const raw = e.target.value.replace(/[^0-9]/g, "");
+      // Strip everything except digits and leading minus (wealth can be negative)
+      const cleaned = mode === "wealth"
+        ? e.target.value.replace(/(?!^-)[^0-9]/g, "").replace(/^(-?)0+(?=\d)/, "$1")
+        : e.target.value.replace(/[^0-9]/g, "");
+      const raw = cleaned;
       setInputValue(raw);
 
       if (mode === "income") {
         computeFromIncome(raw, incomeFactors);
-      } else if (raw.length > 0) {
+      } else if (raw.length > 0 && raw !== "-") {
         const localAmount = parseInt(raw, 10);
         const usdAmount = toUSD(localAmount, country.currency);
         const p = findPercentile(usdAmount, country);
@@ -165,7 +168,7 @@ export default function WealthInput({
     const value = parseInt(inputValue, 10);
     if (!Number.isFinite(value)) return null;
     const valueUSD = toUSD(value, country.currency);
-    const rangeUSD = estimateWealthRange(valueUSD, country, incomeFactors);
+    const rangeUSD = estimateWealthRange(valueUSD, country, incomeFactors, country.currency);
     // Convert back to local currency for display
     const rate = value / valueUSD; // local per USD
     return {

@@ -103,17 +103,13 @@ export default function WealthInput({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const stripped = e.target.value.replace(/[^0-9-]/g, "");
-      // Allow at most one leading minus, no minus elsewhere
-      const raw =
-        stripped.length > 0 && stripped[0] === "-"
-          ? "-" + stripped.slice(1).replace(/-/g, "")
-          : stripped.replace(/-/g, "");
+      // Strip everything except digits (no negatives — wealth/income ≥ 0)
+      const raw = e.target.value.replace(/[^0-9]/g, "");
       setInputValue(raw);
 
       if (mode === "income") {
         computeFromIncome(raw, incomeFactors);
-      } else if (raw.length > 0 && raw !== "-") {
+      } else if (raw.length > 0) {
         const p = findPercentile(parseInt(raw, 10), country);
         setPercentile(p);
         setPercentileRange(null);

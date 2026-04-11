@@ -158,10 +158,10 @@
     "flag": "🇲🇽",
     "currency": "MXN",
     "population": 128.9,
-    "medianIncome": 6840,
-    "medianWealthPerAdult": 6026,
-    "meanWealthPerAdult": 40782,
-    "giniWealth": 0.87,
+    "medianIncome": 7500,
+    "medianWealthPerAdult": 18920,
+    "meanWealthPerAdult": 55274,
+    "giniWealth": 0.79,
     "giniIncome": 0.52
   },
   "CL": {

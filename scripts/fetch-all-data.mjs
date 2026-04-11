@@ -11,7 +11,7 @@
  *
  * Output: data/raw/*.json files (committed to repo for transparency)
  *
- * After fetching, run: node scripts/generate-data.mjs
+ * After fetching, rebuild the site: pnpm build
  */
 
 import { writeFileSync } from "node:fs";
@@ -423,7 +423,7 @@ async function main() {
   if (!SKIP_ECONOMIC) await fetchAllEconomic();
 
   console.log("\n✅ All data fetched. Raw JSON files in data/raw/");
-  console.log("   Next: node scripts/generate-data.mjs");
+  console.log("   Next: pnpm build");
 }
 
 main().catch((err) => {

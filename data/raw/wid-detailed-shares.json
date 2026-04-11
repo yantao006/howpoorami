@@ -3,7 +3,7 @@
     "description": "Sub-percentile wealth shares from WID.world (2024)",
     "source": "World Inequality Database (WID.world)",
     "variables": ["shweal_p0p50_992_j", "shweal_p90p100_992_j", "shweal_p99p100_992_j", "shweal_p99.9p100_992_j", "shweal_p99.99p100_992_j"],
-    "generatedBy": "scripts/update-wid-data.mjs"
+    "generatedBy": "scripts/fetch-all-data.mjs"
   },
   "US": { "bottom50": 1.0, "middle40": 29.5, "next9": 34.7, "next09": 16.4, "next009": 8.7, "top001": 9.7 },
   "GB": { "bottom50": 4.6, "middle40": 38.3, "next9": 35.8, "next09": 14.4, "next009": 3.5, "top001": 3.4 },

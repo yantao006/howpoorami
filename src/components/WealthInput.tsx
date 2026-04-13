@@ -52,14 +52,41 @@ export default function WealthInput({
     }
   }, [refinePanelOpen]);
 
-  // Reset state when country changes
+  // Convert input and recompute when country changes (instead of resetting)
+  const prevCurrencyRef = useRef(country.currency);
+  const prevCountryCodeRef = useRef(country.code);
   useEffect(() => {
-    setInputValue("");
-    setPercentile(null);
-    setPercentileRange(null);
-    setZeroIncomeMessage(null);
-    onPercentileChange(null);
-  }, [country.code, onPercentileChange]);
+    if (prevCountryCodeRef.current === country.code) return;
+    const prevCurrency = prevCurrencyRef.current;
+    prevCurrencyRef.current = country.currency;
+    prevCountryCodeRef.current = country.code;
+
+    if (inputValue.length === 0 || inputValue === "-") {
+      setPercentile(null);
+      setPercentileRange(null);
+      setZeroIncomeMessage(null);
+      onPercentileChange(null);
+      return;
+    }
+
+    // Convert the input value from old currency to new currency
+    const parsed = parseInt(inputValue, 10);
+    if (!Number.isFinite(parsed)) return;
+    const usd = toUSD(parsed, prevCurrency);
+    const converted = Math.round(fromUSD(usd, country.currency));
+    const newRaw = String(converted);
+    setInputValue(newRaw);
+
+    // Recompute percentile for the new country
+    if (mode === "income") {
+      // computeFromIncome will be called by the incomeFactors effect
+    } else {
+      const p = findPercentile(usd, country);
+      setPercentile(p);
+      setPercentileRange(null);
+      onPercentileChange(p);
+    }
+  }, [country.code, country.currency, inputValue, mode, onPercentileChange]);
 
   const [zeroIncomeMessage, setZeroIncomeMessage] = useState<string | null>(
     null,
@@ -203,9 +230,14 @@ export default function WealthInput({
         className="block text-sm text-text-secondary mb-2 text-center"
       >
         {mode === "income"
-          ? `Enter your annual income (${country.currency}) to see where you stand`
-          : `Enter your net wealth (${country.currency}) to see where you stand`}
+          ? `Enter your gross (pre-tax) annual income in ${country.currency}`
+          : `Enter your net wealth in ${country.currency}`}
       </label>
+      <p className="text-text-muted text-[11px] text-center mb-2">
+        {mode === "income"
+          ? "Pre-tax includes wages, capital income, and pensions before tax."
+          : "Enter YOUR personal share — if you share finances with a partner, enter half."}
+      </p>
 
       <div className="relative">
         <input
@@ -228,6 +260,15 @@ export default function WealthInput({
       {/* Income refinement panel */}
       {mode === "income" && (
         <div ref={refinePanelRef}>
+          {!refinePanelOpen && inputValue.length > 0 && inputValue !== "0" && (
+            <button
+              type="button"
+              onClick={() => setRefinePanelOpen(true)}
+              className="w-full text-center text-xs text-accent-periwinkle hover:text-accent-periwinkle/80 mt-2 mb-1 cursor-pointer transition-colors"
+            >
+              Know your assets? Add property, investments &amp; more for a tighter estimate
+            </button>
+          )}
           <IncomeRefinementPanel
             factors={incomeFactors}
             isOpen={refinePanelOpen}

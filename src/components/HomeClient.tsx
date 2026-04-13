@@ -55,7 +55,7 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
   const handleCountrySelect = useCallback((code: string) => {
     if (isAllCountryCode(code)) {
       setSelectedCountry(code);
-      setUserPercentile(null);
+      // Don't reset percentile — WealthInput will recompute via currency conversion
     }
   }, []);
 
@@ -337,6 +337,25 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
               </p>
               <span className="inline-block mt-3 text-accent-periwinkle text-sm font-medium">
                 Try the billionaire comparison &rarr;
+              </span>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Cross-link to Compare Countries page */}
+      {!isGlobal && (
+        <section className="px-4 sm:px-6 lg:px-8 py-5">
+          <div className="max-w-6xl mx-auto">
+            <Link
+              href="/compare-countries"
+              className="block bg-accent-amber/8 border border-accent-amber/20 rounded-2xl p-6 sm:p-8 text-center hover:bg-accent-amber/12 hover:border-accent-amber/30 transition-all duration-300"
+            >
+              <p className="text-text-secondary text-base sm:text-lg">
+                How would your wealth rank in a different country?
+              </p>
+              <span className="inline-block mt-3 text-accent-amber text-sm font-medium">
+                Compare across countries &rarr;
               </span>
             </Link>
           </div>

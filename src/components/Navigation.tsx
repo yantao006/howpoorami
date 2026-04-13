@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 const NAV_ITEMS = [
   { href: "/", label: "How Poor Am I?" },
   { href: "/compare", label: "How Long?" },
+  { href: "/compare-countries", label: "Compare" },
 ] as const;
 
 export default function Navigation() {

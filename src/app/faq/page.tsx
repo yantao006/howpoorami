@@ -42,6 +42,11 @@ const FAQ_ITEMS: readonly FaqItem[] = [
       "No. Everything runs entirely in your browser. Your income, wealth, and personal details are never sent to any server. There are no cookies, no tracking scripts, and no analytics. All calculations run in your browser — no data is sent to any server.",
   },
   {
+    question: "Should I enter my pre-tax or post-tax income?",
+    answer:
+      "Enter your gross (pre-tax) income. The underlying WID.world data uses pre-tax national income, which includes wages, capital income (dividends, interest, rental income), and imputed corporate profits — before any taxes or social contributions are deducted. This is typically 30-50% higher than take-home pay. If you only know your post-tax income, multiply it by roughly 1.3-1.5 depending on your country's tax rates.",
+  },
+  {
     question: "How accurate is the income-to-wealth estimate?",
     answer:
       "It is an approximation. When you enter your income instead of net wealth directly, the tool uses up to 18 factors — including age, homeownership, savings rate, and debt — to estimate your likely net wealth. A range is shown to reflect the inherent uncertainty. For the most accurate result, enter your net wealth directly.",
@@ -57,9 +62,9 @@ const FAQ_ITEMS: readonly FaqItem[] = [
       "The underlying WID.world data uses per-adult figures with the equal-split method for couples — meaning each partner in a couple is assigned half the household's total wealth. This is the standard approach in inequality research. When you enter your wealth, enter YOUR share of joint assets (typically half if you share finances with a partner). The population denominator is adults aged 20+, not total population including children.",
   },
   {
-    question: "Why are pensions and public benefits not included?",
+    question: "How should I enter pensions and retirement savings?",
     answer:
-      "The WID.world data measures personal net wealth: privately owned assets minus debts. Public pension entitlements (like Social Security in the US, or state pensions in Europe) are excluded because they are not transferable, sellable, or inheritable — you cannot liquidate them. This means countries with strong public pension systems (like the Nordics) may appear to have lower median wealth than they would if pension wealth were included. Some countries like Australia, where retirement savings go into private superannuation accounts, capture more of this in the wealth statistics. This is a known limitation of all personal wealth measurement.",
+      "If you receive annual pension income as a retiree, enter it in the main income field (gross, pre-tax). If you have a private pension pot, 401k, superannuation, or other retirement savings account, enter its current total value in the 'Pension pot / 401k balance' field in the refinement panel. Public pension entitlements (like Social Security or state pensions) are excluded from the WID.world wealth data because they are not transferable or sellable. This means countries with strong public pension systems (like the Nordics) appear to have lower median wealth than they would if pension wealth were included.",
   },
   {
     question: "Where does the data come from?",

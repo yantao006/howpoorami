@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { type CountryData } from "@/data/wealth-data";
+import { type CountryData, getWealthThresholds } from "@/data/wealth-data";
 import { getDetailedShares, type DetailedWealthShares } from "@/data/billionaires";
+import { formatCurrency } from "@/lib/format";
+import { fromUSD } from "@/lib/currency";
 
 interface WealthDistributionChartProps {
   readonly country: CountryData;
@@ -97,6 +99,19 @@ export default function WealthDistributionChart({
 
   // Approximate adult (20+) fraction — varies by country (75–85%), 78% is OECD average
   const populationAdults = country.population * 0.78;
+
+  const thresholds = useMemo(() => getWealthThresholds(country), [country]);
+  const cc = country.currency;
+
+  /** Map a segment label to its entry threshold (USD), if applicable. */
+  function getEntryThreshold(label: string): number | null {
+    if (label === "Middle 40%") return thresholds.p50;
+    if (label === "Top 10–1%") return thresholds.p90;
+    if (label === "Top 1–0.1%") return thresholds.p99;
+    if (label === "Top 0.1–0.01%") return thresholds.p999;
+    if (label === "Top 0.01%") return thresholds.p9999;
+    return null;
+  }
 
   const maxWealth = useMemo(
     () => Math.max(...segments.map((s) => s.wealthShare)),
@@ -311,6 +326,15 @@ export default function WealthDistributionChart({
                             </p>
                           </div>
                         </div>
+                        {(() => {
+                          const threshold = getEntryThreshold(seg.label);
+                          if (threshold === null) return null;
+                          return (
+                            <p className="text-accent-periwinkle/80 text-xs mt-3">
+                              Entry threshold: ~{formatCurrency(fromUSD(threshold, cc), cc, true)}
+                            </p>
+                          );
+                        })()}
                         {seg.populationPercent <= 0.01 && (
                           <p className="text-accent-rose/80 text-xs mt-3 italic">
                             That&apos;s just {formatPeopleCount(peopleCount).replace("~", "")} controlling more wealth than the bottom half of the entire country.

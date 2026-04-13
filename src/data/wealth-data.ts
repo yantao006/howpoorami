@@ -264,6 +264,61 @@ function estimateNegativeFraction(bottom50Share: number): number {
   return 0.05;
 }
 
+// ─── Threshold computation (shared by findPercentile and getWealthThresholds) ─
+
+export interface WealthThresholds {
+  readonly p50: number;
+  readonly p90: number;
+  readonly p99: number;
+  readonly p999: number;
+  readonly p9999: number;
+}
+
+interface InternalThresholds extends WealthThresholds {
+  readonly negFloor: number;
+  readonly negPct: number;
+}
+
+function computeThresholds(country: CountryData): InternalThresholds {
+  const mean = country.meanWealthPerAdult;
+  const median = country.medianWealthPerAdult;
+  const { bottom50, top10, top1 } = country.wealthShares;
+
+  const detailed = getDetailedSharesForCountry(country.code);
+  const next09Share = detailed?.next009 ?? (top1 * 0.17);
+  const top001Share = detailed?.top001 ?? (top1 * 0.10);
+
+  const alpha = estimateParetoAlpha(top1, top10);
+  const bCoeff = alpha / (alpha - 1);
+
+  const avgTop10 = mean * top10 / 10;
+  const avgTop1 = mean * top1 / 1;
+  const avgTop01Combined = mean * (next09Share + top001Share) / 0.1;
+  const avgTop001 = mean * top001Share / 0.01;
+
+  const p50 = Math.max(0, median);
+  const bAdj90 = (alpha + 0.5) / (alpha + 0.5 - 1);
+  const p90 = Math.max(p50 * 1.5, avgTop10 / bAdj90);
+  const p99 = Math.max(p90 * 1.5, avgTop1 / bCoeff);
+  const p999 = Math.max(p99 * 2, avgTop01Combined / bCoeff);
+  const p9999 = Math.max(p999 * 2, avgTop001 / bCoeff);
+
+  const negFraction = estimateNegativeFraction(bottom50);
+  const negPct = negFraction * 100;
+  const negFloor = -Math.max(median, mean * 0.4);
+
+  return { p50, p90, p99, p999, p9999, negFloor, negPct };
+}
+
+/**
+ * Get estimated wealth thresholds (in USD) for key percentile boundaries.
+ * These are Pareto-estimated entry points — approximate, not exact.
+ */
+export function getWealthThresholds(country: CountryData): WealthThresholds {
+  const { p50, p90, p99, p999, p9999 } = computeThresholds(country);
+  return { p50, p90, p99, p999, p9999 };
+}
+
 /**
  * Estimate percentile position given a wealth amount in USD.
  *
@@ -275,56 +330,9 @@ function estimateNegativeFraction(bottom50Share: number): number {
  * Returns a value between 0 and 99.99.
  */
 export function findPercentile(wealthUSD: number, country: CountryData): number {
-  const mean = country.meanWealthPerAdult;
-  const median = country.medianWealthPerAdult;
-  const { bottom50, top10, top1 } = country.wealthShares;
-
-  // ── Retrieve detailed sub-percentile shares ──
-  const detailed = getDetailedSharesForCountry(country.code);
-  const next9Share = detailed?.next9 ?? (top10 - top1);
-  const next09Share = detailed?.next09 ?? (top1 * 0.45);
-  const next009Share = detailed?.next009 ?? (top1 * 0.17);
-  const top001Share = detailed?.top001 ?? (top1 * 0.10);
-
-  // ── Pareto tail exponent ──
-  const alpha = estimateParetoAlpha(top1, top10);
-  const bCoeff = alpha / (alpha - 1);
-
-  // ── Segment averages (per-adult wealth within each segment) ──
-  const avgTop10 = mean * top10 / 10;
-  const avgTop1 = mean * top1 / 1;
-  const avgNext9 = mean * next9Share / 9;
-  const avgNext09 = mean * next09Share / 0.9;
-  const avgNext009 = mean * next009Share / 0.09;
-  const avgTop001 = mean * top001Share / 0.01;
-
-  // ── Estimate thresholds at key percentile boundaries ──
-  // p50: use WID-provided median (the most accurate anchor point)
-  const p50 = Math.max(0, median);
-
-  // p90: threshold to enter top 10%.
-  // Use Pareto estimate with body-to-tail correction (+0.5 to alpha).
-  const bAdj90 = (alpha + 0.5) / (alpha + 0.5 - 1);
-  const p90 = Math.max(p50 * 1.5, avgTop10 / bAdj90);
-
-  // p99: threshold to enter top 1% (Pareto more reliable in deep tail)
-  const p99 = Math.max(p90 * 1.5, avgTop1 / bCoeff);
-
-  // p99.9: threshold to enter top 0.1%
-  const avgTop01Combined = mean * (next009Share + top001Share) / 0.1;
-  const p999 = Math.max(p99 * 2, avgTop01Combined / bCoeff);
-
-  // p99.99: threshold to enter top 0.01%
-  const p9999 = Math.max(p999 * 2, avgTop001 / bCoeff);
-
-  // ── Negative wealth segment ──
-  const negFraction = estimateNegativeFraction(bottom50);
-  const negPct = negFraction * 100; // percentile where wealth = $0
-  // Floor: estimate a reasonable minimum from the data
-  const negFloor = -Math.max(median, mean * 0.4);
+  const { p50, p90, p99, p999, p9999, negFloor, negPct } = computeThresholds(country);
 
   // ── Interpolation anchor points: [wealth, percentile] ──
-  // Sorted by wealth ascending. Each pair defines a piecewise linear segment.
   const anchors: [number, number][] = [
     [negFloor, 0],
     [0, negPct],

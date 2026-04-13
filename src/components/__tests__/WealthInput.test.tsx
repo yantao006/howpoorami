@@ -105,7 +105,7 @@ describe("WealthInput", () => {
     fireEvent.click(incomeButton);
 
     // Enter zero
-    const input = screen.getByLabelText(/enter your annual income/i);
+    const input = screen.getByLabelText(/enter your gross.*annual income/i);
     fireEvent.change(input, { target: { value: "0" } });
 
     expect(

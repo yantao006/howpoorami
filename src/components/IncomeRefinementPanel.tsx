@@ -443,7 +443,7 @@ export default function IncomeRefinementPanel({
                   {factors.hasRetirement && (
                     <SmallInput
                       id="ref-ret-val"
-                      label={`Retirement value (${currencyCode})`}
+                      label={`Pension pot / 401k (${currencyCode})`}
                       value={factors.retirementValue}
                       placeholder="e.g. 80000"
                       onChange={(v) => numChange("retirementValue", v, 10)}

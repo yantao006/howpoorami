@@ -1,7 +1,7 @@
 "use client";
 
 import AnimatedCounter from "./AnimatedCounter";
-import { type CountryData, GLOBAL_STATS } from "@/data/wealth-data";
+import { type CountryData, GLOBAL_STATS, getWealthThresholds } from "@/data/wealth-data";
 import { formatCurrency } from "@/lib/format";
 import { fromUSD } from "@/lib/currency";
 
@@ -46,6 +46,9 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
   const avgTop1Wealth = (country.wealthShares.top1 / 100) * country.meanWealthPerAdult / 0.01;
   const yearsToEarnTop1 = Math.round(avgTop1Wealth / country.medianIncome);
 
+  // Wealth thresholds for key percentile boundaries
+  const thresholds = getWealthThresholds(country);
+
   // Convert USD values to local currency for display
   const cc = country.currency;
   const meanLocal = fromUSD(country.meanWealthPerAdult, cc);
@@ -80,6 +83,25 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
             <AnimatedCounter end={meanToMedianRatio} suffix="x" decimals={1} />
           </StatCard>
         </div>
+      </div>
+
+      {/* Entry thresholds */}
+      <div>
+        <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-4 text-text-primary">
+          What Does It Take to Join Each Group?
+        </h3>
+        <p className="text-text-muted text-sm text-center mb-8 max-w-lg mx-auto">
+          Estimated minimum net wealth to enter each wealth bracket in {country.name}.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <ThresholdCard label="Top 50%" amount={fromUSD(thresholds.p50, cc)} currency={cc} />
+          <ThresholdCard label="Top 10%" amount={fromUSD(thresholds.p90, cc)} currency={cc} />
+          <ThresholdCard label="Top 1%" amount={fromUSD(thresholds.p99, cc)} currency={cc} />
+          <ThresholdCard label="Top 0.1%" amount={fromUSD(thresholds.p999, cc)} currency={cc} />
+        </div>
+        <p className="text-text-muted text-xs text-center mt-4">
+          Thresholds are estimates based on Pareto-interpolated WID.world data.
+        </p>
       </div>
 
       {/* Big impact statement */}
@@ -148,6 +170,17 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
         </div>
         <p className="text-text-muted text-sm mt-6">Source: {GLOBAL_STATS.source}</p>
       </div>
+    </div>
+  );
+}
+
+function ThresholdCard({ label, amount, currency }: { readonly label: string; readonly amount: number; readonly currency: string }) {
+  return (
+    <div className="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+      <p className="text-text-muted text-xs mb-1">{label}</p>
+      <p className="text-text-primary font-bold text-lg sm:text-xl tabular-nums">
+        {formatCurrency(amount, currency, true)}
+      </p>
     </div>
   );
 }

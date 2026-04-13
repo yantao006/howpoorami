@@ -187,7 +187,7 @@ export default function CompareClient({ initialCountry }: CompareClientProps) {
               htmlFor="salary-input"
               className="block text-sm text-text-secondary mb-2 text-center"
             >
-              Enter your annual income ({country.currency}) — or we&apos;ll use the median
+              Enter your gross (pre-tax) annual income ({country.currency}) — or we&apos;ll use the median
             </label>
             <input
               id="salary-input"

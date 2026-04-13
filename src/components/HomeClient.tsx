@@ -194,8 +194,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
         </div>
       </section>
 
+      <hr className="section-divider" />
+
       {/* The Scale of Concentration */}
-      <section className="px-4 sm:px-6 lg:px-8 py-20">
+      <section className="px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">
@@ -223,8 +225,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
         </div>
       </section>
 
+      <hr className="section-divider" />
+
       {/* Statistics Section */}
-      <section className="px-4 sm:px-6 lg:px-8 py-20">
+      <section className="px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-6xl mx-auto">
           <StatisticsSection country={country} />
         </div>
@@ -263,8 +267,10 @@ export default function HomeClient({ initialCountry }: HomeClientProps) {
         </section>
       )}
 
+      <hr className="section-divider" />
+
       {/* Historical Trends */}
-      <section className="px-4 sm:px-6 lg:px-8 py-20">
+      <section className="px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl font-bold text-text-primary">

@@ -13,6 +13,7 @@ import { findPercentile, getWealthThresholds } from "@/data/wealth-data";
 import type { CountryData } from "@/data/wealth-data";
 import { toUSD, fromUSD } from "@/lib/currency";
 import { formatCurrency, getCurrencySymbol } from "@/lib/format";
+import { getPPPFactor } from "@/lib/ppp";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -41,6 +42,7 @@ interface CountryResult {
   readonly segment: string;
   readonly thresholdToNext: number | null;
   readonly thresholdToNextLabel: string | null;
+  readonly pppEquivalent: number | null;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -97,6 +99,10 @@ export default function CrossCountryCompare() {
       const localAmount = fromUSD(amountUSD, country.currency);
       const thresholds = getWealthThresholds(country);
       const next = getNextThreshold(percentile, thresholds);
+      // PPP: what does this local amount buy in US-dollar terms?
+      const pppFactor = getPPPFactor(country.code);
+      const pppEquivalent = pppFactor && pppFactor > 0 ? localAmount / pppFactor : null;
+
       return {
         country,
         percentile,
@@ -104,6 +110,7 @@ export default function CrossCountryCompare() {
         segment: getSegmentLabel(percentile),
         thresholdToNext: next ? fromUSD(next.amount, country.currency) : null,
         thresholdToNextLabel: next?.label ?? null,
+        pppEquivalent,
       };
     }).sort((a, b) => b.percentile - a.percentile);
   }, [amountUSD, selectedCodes]);
@@ -352,6 +359,14 @@ export default function CrossCountryCompare() {
                               {formatCurrency(r.localAmount, r.country.currency, true)}
                             </span>
                           </span>
+                          {r.pppEquivalent !== null && r.country.code !== "US" && (
+                            <span className="text-text-muted">
+                              Buying power:{" "}
+                              <span className="text-text-secondary font-medium tabular-nums">
+                                {formatCurrency(r.pppEquivalent, "USD", true)}
+                              </span>
+                            </span>
+                          )}
                           {r.thresholdToNext !== null && r.thresholdToNextLabel !== null && (
                             <span className="text-text-muted">
                               Need{" "}

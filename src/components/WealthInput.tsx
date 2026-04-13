@@ -14,6 +14,12 @@ import {
   estimateWealthRange,
   computePercentileRange,
 } from "@/lib/wealth-estimate";
+import {
+  adjustPercentileForAge,
+  hasAgeData,
+  AGE_GROUP_LABELS,
+  type AgeAdjustedResult,
+} from "@/data/age-adjustment";
 import IncomeRefinementPanel from "./IncomeRefinementPanel";
 
 interface WealthInputProps {
@@ -36,6 +42,8 @@ export default function WealthInput({
     DEFAULT_INCOME_FACTORS,
   );
   const [refinePanelOpen, setRefinePanelOpen] = useState(false);
+  const [ageInput, setAgeInput] = useState("");
+  const [ageResult, setAgeResult] = useState<AgeAdjustedResult | null>(null);
   const refinePanelRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll refinement panel into view on mobile when opened
@@ -131,6 +139,30 @@ export default function WealthInput({
     if (mode !== "income") return;
     computeFromIncome(inputValue, incomeFactors);
   }, [incomeFactors, mode, inputValue, computeFromIncome]);
+
+  // Compute age-adjusted percentile when age or wealth changes
+  useEffect(() => {
+    const age = parseInt(ageInput, 10);
+    if (!Number.isFinite(age) || age < 18 || age > 120 || percentile === null) {
+      setAgeResult(null);
+      return;
+    }
+    if (!hasAgeData(country.code)) {
+      setAgeResult(null);
+      return;
+    }
+    // Get the USD wealth from the current input
+    if (inputValue.length === 0 || inputValue === "-") {
+      setAgeResult(null);
+      return;
+    }
+    const parsed = parseInt(inputValue, 10);
+    if (!Number.isFinite(parsed)) { setAgeResult(null); return; }
+    const usd = mode === "income"
+      ? estimateWealthRange(toUSD(parsed, country.currency), country, incomeFactors, country.currency).mid
+      : toUSD(parsed, country.currency);
+    setAgeResult(adjustPercentileForAge(usd, age, country));
+  }, [ageInput, percentile, inputValue, country, mode, incomeFactors]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -257,6 +289,24 @@ export default function WealthInput({
         />
       </div>
 
+      {/* Optional age input */}
+      {percentile !== null && hasAgeData(country.code) && (
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <label htmlFor="age-input" className="text-text-muted text-xs">
+            Your age (optional):
+          </label>
+          <input
+            id="age-input"
+            type="text"
+            inputMode="numeric"
+            value={ageInput}
+            onChange={(e) => setAgeInput(e.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
+            placeholder="e.g. 30"
+            className="w-16 px-2 py-1 rounded-lg text-center text-sm tabular-nums bg-bg-card border border-border-subtle text-text-primary placeholder:text-text-muted/40 focus:outline-none focus:border-accent-periwinkle/50 transition-colors"
+          />
+        </div>
+      )}
+
       {/* Income refinement panel */}
       {mode === "income" && (
         <div ref={refinePanelRef}>
@@ -316,6 +366,27 @@ export default function WealthInput({
             />
           ) : (
             <PercentilePreciseDisplay percentile={percentile} />
+          )}
+
+          {/* Age-adjusted result */}
+          {ageResult && (
+            <div className="mt-3 bg-accent-periwinkle/5 border border-accent-periwinkle/15 rounded-xl px-4 py-3 max-w-sm mx-auto">
+              <p className="text-text-secondary text-xs mb-1">
+                For your age group ({AGE_GROUP_LABELS[ageResult.ageGroup]}):
+              </p>
+              <p className="text-2xl font-bold tabular-nums">
+                <span className={percentileColor(ageResult.ageAdjustedPercentile)}>
+                  {ageResult.ageAdjustedPercentile.toFixed(1)}%
+                </span>
+              </p>
+              <p className="text-text-muted text-[10px] mt-1">
+                {ageResult.ageAdjustedPercentile > ageResult.overallPercentile
+                  ? `You're doing better among your age peers than overall (${ageResult.overallPercentile.toFixed(1)}%)`
+                  : ageResult.ageAdjustedPercentile < ageResult.overallPercentile
+                    ? `Your age group typically has more wealth — your overall rank (${ageResult.overallPercentile.toFixed(1)}%) is higher`
+                    : "Your ranking is similar among your age peers"}
+              </p>
+            </div>
           )}
 
           {comedic && (

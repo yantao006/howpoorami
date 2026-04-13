@@ -783,6 +783,43 @@ async function fetchCountryMetadataAndShares(exchangeRates) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// 6. PPP Conversion Factors — World Bank
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function fetchPPPFactors() {
+  console.log("\n🌐 Fetching PPP conversion factors...");
+
+  const codes = ALL_COUNTRIES.join(";");
+  const url = `https://api.worldbank.org/v2/country/${codes}/indicator/PA.NUS.PPP?date=2024&format=json&per_page=100`;
+  const data = await fetchJSON(url);
+  const records = data[1] || [];
+
+  const factors = { US: 1.0 };
+  for (const r of records) {
+    const cc = r.countryiso2code || r.country?.id;
+    if (!cc || r.value == null) continue;
+    factors[cc] = Math.round(r.value * 1_000_000) / 1_000_000;
+  }
+
+  saveJSON("ppp-factors.json", {
+    _meta: {
+      description: "PPP conversion factors: units of local currency per 1 international dollar (GDP-based)",
+      indicator: "PA.NUS.PPP",
+      source: "World Bank International Comparison Program",
+      url: "https://data.worldbank.org/indicator/PA.NUS.PPP",
+      methodology: "PPP conversion factors adjust for differences in price levels between countries. Dividing a local-currency amount by the PPP factor gives a purchasing-power-adjusted 'international dollar' value, comparable across countries.",
+      year: 2023,
+      citation: "World Bank, International Comparison Program database. Indicator PA.NUS.PPP — PPP conversion factor, GDP (LCU per international $).",
+      fetchedAt: new Date().toISOString(),
+      generatedBy: "scripts/fetch-all-data.mjs (fetchPPPFactors)",
+    },
+    factors,
+  });
+
+  console.log(`  ✓ PPP factors fetched for ${Object.keys(factors).length} countries`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Main
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -800,6 +837,7 @@ async function main() {
     const exchangeRates = await fetchExchangeRates();
     await fetchCountryMetadataAndShares(exchangeRates);
   }
+  if (!SKIP_ECONOMIC) await fetchPPPFactors();
 
   console.log("\n✅ All data fetched. Raw JSON files in data/raw/");
   console.log("   Next: pnpm build");

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import AnimatedCounter from "./AnimatedCounter";
 import { type CountryData, GLOBAL_STATS, getWealthThresholds } from "@/data/wealth-data";
 import { formatCurrency } from "@/lib/format";
 import { fromUSD } from "@/lib/currency";
+import { getPPPFactor } from "@/lib/ppp";
+import { REGIONS, type RegionStats } from "@/data/regions";
 
 interface StatisticsSectionProps {
   readonly country: CountryData;
@@ -39,6 +42,10 @@ function StatCard({ label, children, sublabel, accent = "periwinkle" }: StatCard
 }
 
 export default function StatisticsSection({ country }: StatisticsSectionProps) {
+  const [showPPP, setShowPPP] = useState(false);
+  const pppFactor = getPPPFactor(country.code);
+  const hasPPP = pppFactor !== null && country.code !== "US" && country.code !== "GLOBAL";
+
   const meanToMedianRatio = country.meanWealthPerAdult / country.medianWealthPerAdult;
 
   // Average wealth of a top 1% member = (their share of total wealth) / (1% of adults)
@@ -56,12 +63,34 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
   const medianIncomeLocal = fromUSD(country.medianIncome, cc);
   const avgTop1Local = fromUSD(avgTop1Wealth, cc);
 
+  // PPP-adjusted values (USD purchasing power equivalent)
+  const pppMeanUSD = pppFactor ? meanLocal / pppFactor : null;
+  const pppMedianUSD = pppFactor ? medianLocal / pppFactor : null;
+
+  // Find which region this country belongs to
+  const countryRegion = REGIONS.find((r) => r.countries.includes(country.code)) ?? null;
+
   return (
     <div className="space-y-16">
       <div>
-        <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-10 text-text-primary">
-          The Numbers That Define Inequality
-        </h3>
+        <div className="flex flex-col items-center gap-3 mb-10">
+          <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center text-text-primary">
+            The Numbers That Define Inequality
+          </h3>
+          {hasPPP && (
+            <button
+              type="button"
+              onClick={() => setShowPPP((v) => !v)}
+              className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
+                showPPP
+                  ? "bg-accent-amber/20 text-accent-amber border border-accent-amber/30"
+                  : "bg-bg-card text-text-secondary border border-border-subtle hover:text-text-primary"
+              }`}
+            >
+              {showPPP ? "Showing purchasing power" : "Show purchasing power (PPP)"}
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <StatCard label={`The top 1% in ${country.name} owns`} accent="rose" sublabel="of total national wealth">
@@ -73,10 +102,18 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
           <StatCard label="Wealth Gini coefficient" accent="lavender" sublabel="0 = perfect equality, 1 = one person owns everything">
             <AnimatedCounter end={country.giniWealth} decimals={2} />
           </StatCard>
-          <StatCard label="Mean wealth per adult" accent="amber" sublabel="Skewed upward by the ultra-wealthy">
+          <StatCard
+            label="Mean wealth per adult"
+            accent="amber"
+            sublabel={showPPP && pppMeanUSD ? `PPP: ~$${Math.round(pppMeanUSD / 1000)}K purchasing power` : "Skewed upward by the ultra-wealthy"}
+          >
             {formatCurrency(meanLocal, cc, true)}
           </StatCard>
-          <StatCard label="Median wealth per adult" accent="periwinkle" sublabel="What the typical person actually has">
+          <StatCard
+            label="Median wealth per adult"
+            accent="periwinkle"
+            sublabel={showPPP && pppMedianUSD ? `PPP: ~$${Math.round(pppMedianUSD / 1000)}K purchasing power` : "What the typical person actually has"}
+          >
             {formatCurrency(medianLocal, cc, true)}
           </StatCard>
           <StatCard label="Mean / Median ratio" accent="rose" sublabel="Higher = more skewed distribution">
@@ -170,6 +207,48 @@ export default function StatisticsSection({ country }: StatisticsSectionProps) {
         </div>
         <p className="text-text-muted text-sm mt-6">Source: {GLOBAL_STATS.source}</p>
       </div>
+
+      {/* Regional context */}
+      {countryRegion && (
+        <div>
+          <h3 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl text-center mb-8 text-text-primary">
+            {country.name} in Regional Context
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {REGIONS.filter((r) => r.countries.length > 1).map((r) => {
+              const isCurrent = r.code === countryRegion.code;
+              return (
+                <div
+                  key={r.code}
+                  className={`bg-bg-card border rounded-xl p-4 text-center ${
+                    isCurrent
+                      ? "border-accent-periwinkle/40 ring-1 ring-accent-periwinkle/20"
+                      : "border-border-subtle"
+                  }`}
+                >
+                  <p className="text-text-secondary text-xs mb-1">{r.name}</p>
+                  <p className="text-text-primary font-bold text-lg tabular-nums">
+                    {formatCurrency(r.weightedMedianWealth, "USD", true)}
+                  </p>
+                  <p className="text-text-muted text-[10px] mt-1">median wealth (USD)</p>
+                  <div className="flex justify-center gap-3 mt-2 text-[10px]">
+                    <span className="text-accent-rose">Top 1%: {r.weightedTop1Share}%</span>
+                    <span className="text-accent-sage">Bot 50%: {r.weightedBottom50Share}%</span>
+                  </div>
+                  {isCurrent && (
+                    <p className="text-accent-periwinkle text-[10px] font-medium mt-1">
+                      {country.name}&apos;s region
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-text-muted text-xs text-center mt-4">
+            Regional aggregates are population-weighted averages of covered countries.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

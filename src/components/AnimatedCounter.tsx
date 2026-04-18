@@ -26,7 +26,8 @@ export default function AnimatedCounter({
   // Sync if `end` changes (e.g. country switch) without animation
   useEffect(() => {
     if (hasAnimated.current) {
-      setCount(end);
+      const id = requestAnimationFrame(() => setCount(end));
+      return () => cancelAnimationFrame(id);
     }
   }, [end]);
 
@@ -34,6 +35,12 @@ export default function AnimatedCounter({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      hasAnimated.current = true;
+      const id = requestAnimationFrame(() => setCount(end));
+      return () => cancelAnimationFrame(id);
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {

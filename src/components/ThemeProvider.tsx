@@ -36,11 +36,11 @@ export function ThemeProvider({
 }: Readonly<{ children: React.ReactNode }>) {
   const [theme, setTheme] = useState<Theme>("dark");
 
-  // Sync React state with the data-theme attribute set by the inline script
   useEffect(() => {
-    const current =
-      (document.documentElement.getAttribute("data-theme") as Theme) ?? "dark";
-    setTheme(current);
+    const attr = document.documentElement.getAttribute("data-theme");
+    if (attr === "light" || attr === "dark") {
+      setTheme(attr);
+    }
   }, []);
 
   const toggleTheme = useCallback(() => {

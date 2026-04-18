@@ -382,34 +382,67 @@ export const GLOBAL_STATS = {
 
 export const DATA_SOURCES = [
   {
-    name: "World Inequality Database (WID.world)",
+    name: {
+      en: "World Inequality Database (WID.world)",
+      zh: "世界不平等数据库（WID.world）",
+    },
     url: "https://wid.world",
-    description: "Wealth and income distribution data for 100+ countries. Uses tax records, surveys, and national accounts to produce the most comprehensive inequality database available.",
-    citation: "Chancel, L., Piketty, T., Saez, E., Zucman, G. (2022). World Inequality Report 2022.",
+    description: {
+      en: "Wealth and income distribution data for 100+ countries. Uses tax records, surveys, and national accounts to produce the most comprehensive inequality database available.",
+      zh: "覆盖 100 多个国家的财富与收入分配数据。结合税务记录、住户调查和国民账户，是目前最完整的不平等数据库之一。",
+    },
+    citation: {
+      en: "Chancel, L., Piketty, T., Saez, E., Zucman, G. (2022). World Inequality Report 2022.",
+      zh: "Chancel, L., Piketty, T., Saez, E., Zucman, G.（2022）《世界不平等报告 2022》。",
+    },
     accessed: "2026",
   },
   {
-    name: "Forbes Real-Time Billionaires",
+    name: {
+      en: "Forbes Real-Time Billionaires",
+      zh: "福布斯实时亿万富豪榜",
+    },
     url: "https://www.forbes.com/real-time-billionaires/",
-    description: "Daily tracking of the world's wealthiest individuals. Net worth figures are estimates based on stock prices, exchange rates, and reported assets.",
+    description: {
+      en: "Daily tracking of the world's wealthiest individuals. Net worth figures are estimates based on stock prices, exchange rates, and reported assets.",
+      zh: "按日追踪全球最富有个人的财富变化。净资产基于股价、汇率和公开披露资产估算。",
+    },
     accessed: "2026",
   },
   {
-    name: "OECD Data Explorer",
+    name: {
+      en: "OECD Data Explorer",
+      zh: "OECD 数据浏览器",
+    },
     url: "https://data-explorer.oecd.org",
-    description: "Average annual wages, tax statistics, and economic indicators for OECD member countries.",
+    description: {
+      en: "Average annual wages, tax statistics, and economic indicators for OECD member countries.",
+      zh: "提供 OECD 成员国的平均工资、税收统计和宏观经济指标。",
+    },
     accessed: "2026",
   },
   {
-    name: "World Bank Open Data",
+    name: {
+      en: "World Bank Open Data",
+      zh: "世界银行开放数据",
+    },
     url: "https://data.worldbank.org",
-    description: "Consumer price indices, GDP, and development indicators for all countries.",
+    description: {
+      en: "Consumer price indices, GDP, and development indicators for all countries.",
+      zh: "提供各国消费者价格指数、GDP 和发展指标等公开统计数据。",
+    },
     accessed: "2026",
   },
   {
-    name: "FRED (Federal Reserve Economic Data)",
+    name: {
+      en: "FRED (Federal Reserve Economic Data)",
+      zh: "FRED（美联储经济数据库）",
+    },
     url: "https://fred.stlouisfed.org",
-    description: "House price indices (BIS residential property prices) and other economic time series.",
+    description: {
+      en: "House price indices (BIS residential property prices) and other economic time series.",
+      zh: "提供房价指数（含 BIS 住宅价格数据）及其他经济时间序列。",
+    },
     accessed: "2026",
   },
 ] as const;

@@ -3,6 +3,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { type CountryData } from "@/data/wealth-data";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tSegmentLabel } from "@/lib/i18n";
 
 interface WealthShareBarsProps {
   readonly country: CountryData;
@@ -16,6 +18,7 @@ const SEGMENTS = [
 ];
 
 export default function WealthShareBars({ country }: WealthShareBarsProps) {
+  const { language } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -31,7 +34,9 @@ export default function WealthShareBars({ country }: WealthShareBarsProps) {
     <div ref={ref} className="space-y-6">
       {/* Population bar */}
       <div>
-        <p className="text-text-secondary text-sm mb-2">Population share</p>
+        <p className="text-text-secondary text-sm mb-2">
+          {language === "zh" ? "人口占比" : "Population share"}
+        </p>
         <div className="flex h-10 rounded-xl overflow-hidden">
           {SEGMENTS.map((seg, i) => (
             <motion.div
@@ -46,7 +51,7 @@ export default function WealthShareBars({ country }: WealthShareBarsProps) {
                 className="truncate px-1"
                 style={{ color: seg.color }}
               >
-                {seg.popWidth >= 10 ? seg.label : ""}
+                {seg.popWidth >= 10 ? tSegmentLabel(seg.label, language) : ""}
               </span>
             </motion.div>
           ))}
@@ -55,7 +60,9 @@ export default function WealthShareBars({ country }: WealthShareBarsProps) {
 
       {/* Wealth bar */}
       <div>
-        <p className="text-text-secondary text-sm mb-2">Wealth share</p>
+        <p className="text-text-secondary text-sm mb-2">
+          {language === "zh" ? "财富占比" : "Wealth share"}
+        </p>
         <div className="flex h-10 rounded-xl overflow-hidden">
           {SEGMENTS.map((seg, i) => (
             <motion.div
@@ -83,7 +90,9 @@ export default function WealthShareBars({ country }: WealthShareBarsProps) {
               style={{ backgroundColor: seg.color }}
             />
             <span>
-              {seg.label}: <span className="text-text-primary tabular-nums">{shares[i].toFixed(1)}%</span> of wealth
+              {tSegmentLabel(seg.label, language)}:{" "}
+              <span className="text-text-primary tabular-nums">{shares[i].toFixed(1)}%</span>{" "}
+              {language === "zh" ? "财富" : "of wealth"}
             </span>
           </div>
         ))}

@@ -64,7 +64,8 @@ function AnimatedFormattedNumber({
   // Sync immediately when value changes after initial animation
   useEffect(() => {
     if (hasAnimated.current) {
-      setDisplayValue(value);
+      const id = requestAnimationFrame(() => setDisplayValue(value));
+      return () => cancelAnimationFrame(id);
     }
   }, [value]);
 
@@ -72,6 +73,12 @@ function AnimatedFormattedNumber({
   useEffect(() => {
     const el = ref.current;
     if (!el || hasAnimated.current) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      hasAnimated.current = true;
+      const id = requestAnimationFrame(() => setDisplayValue(value));
+      return () => cancelAnimationFrame(id);
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {

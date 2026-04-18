@@ -1,8 +1,11 @@
+"use client";
+
 import {
   getRelevantComparisons,
   type ComparisonResult,
 } from "@/data/time-comparisons";
 import { getYearsToMatchLine } from "@/data/comedic-lines";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatNumber } from "@/lib/format";
 
 interface TimeComparisonsProps {
@@ -28,6 +31,68 @@ const CATEGORY_BORDER: Record<string, string> = {
   pop_culture: "border-accent-rose/20",
 };
 
+const TIME_LABELS_ZH: Record<string, string> = {
+  "working-career": "平均职业生涯",
+  "human-lifetime": "平均人类寿命",
+  "grandparents-born": "从你祖父母出生到现在",
+  "dog-lifetime": "狗的平均寿命",
+  generations: "一代人的时间",
+  "retirement-savings": "为退休储蓄的平均时长",
+  "great-pyramid": "建造金字塔的时间",
+  "us-independence": "美国独立至今",
+  "industrial-revolution": "工业革命至今",
+  "roman-empire": "罗马帝国持续时间",
+  renaissance: "文艺复兴至今",
+  "genghis-khan": "成吉思汗帝国至今",
+  cleopatra: "克利奥帕特拉至今",
+  "moon-landing": "登月至今",
+  "internet-invented": "互联网诞生至今",
+  "first-iphone": "第一代 iPhone 发布至今",
+  "world-cup-cycle": "世界杯周期",
+  "olympics-cycle": "奥运会周期",
+  "blockbuster-closed": "最后一家百视达关门至今",
+  "count-to-billion": "每秒数一个数到 10 亿",
+  "walk-around-earth": "步行绕地球一圈",
+  "mars-mission": "往返火星一次",
+};
+
+function formatMultiplierZh(multiplier: number): string {
+  if (multiplier >= 1_000_000) {
+    return `${(multiplier / 1_000_000).toFixed(1).replace(/\.0$/, "")} 百万`;
+  }
+  if (multiplier >= 1_000) {
+    return new Intl.NumberFormat("zh-CN", {
+      maximumFractionDigits: 0,
+    }).format(Math.round(multiplier));
+  }
+  if (multiplier >= 1) {
+    return multiplier.toFixed(multiplier >= 10 ? 0 : 1).replace(/\.0$/, "");
+  }
+  return `${multiplier.toFixed(multiplier >= 0.1 ? 1 : 2).replace(/\.0+$/, "")}`;
+}
+
+function getLocalizedLabel(comparison: ComparisonResult, language: "en" | "zh"): string {
+  if (language === "en") return comparison.ref.label;
+  return TIME_LABELS_ZH[comparison.ref.id] ?? comparison.ref.label;
+}
+
+function getLocalizedFormatted(comparison: ComparisonResult, language: "en" | "zh"): string {
+  if (language === "en") return comparison.formatted;
+
+  const n = formatMultiplierZh(comparison.multiplier);
+  const label = getLocalizedLabel(comparison, language);
+
+  if (comparison.ref.id === "human-lifetime") {
+    return `你得连续活上 ${n} 个人类一生`;
+  }
+
+  if (comparison.ref.id === "grandparents-born") {
+    return `相当于 ${n} 次祖辈的人生跨度`;
+  }
+
+  return `相当于 ${n} 个「${label}」`;
+}
+
 function LifetimeHighlight({
   comparison,
   comedicQuote,
@@ -35,16 +100,18 @@ function LifetimeHighlight({
   readonly comparison: ComparisonResult;
   readonly comedicQuote: string;
 }) {
+  const { language } = useLanguage();
   return (
     <div className="bg-bg-card border border-border-subtle rounded-2xl p-8 sm:p-10 text-center">
       <span className="text-4xl sm:text-5xl mb-4 block" aria-hidden="true">
         {comparison.ref.emoji}
       </span>
       <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-accent-sage mb-3">
-        {comparison.formatted}
+        {getLocalizedFormatted(comparison, language)}
       </p>
       <p className="text-text-muted text-sm sm:text-base">
-        {comparison.ref.label} ({comparison.ref.years} years)
+        {getLocalizedLabel(comparison, language)}{" "}
+        ({comparison.ref.years} {language === "zh" ? "年" : "years"})
       </p>
       {comedicQuote && (
         <p className="text-text-muted text-sm italic mt-5 pt-5 border-t border-border-subtle/50 max-w-lg mx-auto">
@@ -60,6 +127,7 @@ function ComparisonCard({
 }: {
   readonly comparison: ComparisonResult;
 }) {
+  const { language } = useLanguage();
   const accent = CATEGORY_ACCENT[comparison.ref.category] ?? "text-text-primary";
   const border = CATEGORY_BORDER[comparison.ref.category] ?? "border-border-subtle";
 
@@ -69,10 +137,10 @@ function ComparisonCard({
         {comparison.ref.emoji}
       </span>
       <p className={`text-lg sm:text-xl font-bold ${accent} mb-2`}>
-        {comparison.formatted}
+        {getLocalizedFormatted(comparison, language)}
       </p>
       <p className="text-text-muted text-xs sm:text-sm">
-        {comparison.ref.label}
+        {getLocalizedLabel(comparison, language)}
       </p>
     </div>
   );
@@ -82,6 +150,7 @@ export default function TimeComparisons({
   yearsToMatch,
   billionaireName,
 }: TimeComparisonsProps) {
+  const { language } = useLanguage();
   const comparisons = getRelevantComparisons(yearsToMatch, billionaireName);
 
   const lifetimeComparison = comparisons.find(
@@ -92,11 +161,13 @@ export default function TimeComparisons({
     .filter((c) => c.ref.id !== "human-lifetime")
     .slice(0, 6);
 
-  const comedicQuote = getYearsToMatchLine(
-    yearsToMatch,
-    billionaireName,
-    formatNumber(yearsToMatch),
-  );
+  const comedicQuote = language === "zh"
+    ? `按这个速度，得花上 ${formatNumber(yearsToMatch)} 年，远远超过一个普通人的一生。`
+    : getYearsToMatchLine(
+        yearsToMatch,
+        billionaireName,
+        formatNumber(yearsToMatch),
+      );
 
   if (comparisons.length === 0) {
     return null;

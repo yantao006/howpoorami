@@ -3,33 +3,43 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
+import { useLanguage } from "@/components/LanguageProvider";
 
-const NAV_ITEMS = [
-  { href: "/", label: "How Poor Am I?" },
-  { href: "/compare", label: "How Long?" },
-  { href: "/compare-countries", label: "Compare" },
-] as const;
+const NAV_ITEMS = {
+  en: [
+    { href: "/", label: "How Poor Am I?" },
+    { href: "/compare", label: "How Long?" },
+    { href: "/compare-countries", label: "Compare" },
+  ],
+  zh: [
+    { href: "/", label: "我到底有多穷？" },
+    { href: "/compare", label: "要多久？" },
+    { href: "/compare-countries", label: "跨国比较" },
+  ],
+} as const;
 
 export default function Navigation() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
+  const navItems = NAV_ITEMS[language];
 
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 bg-bg-primary/80 backdrop-blur-xl border-b border-border-subtle"
       role="navigation"
-      aria-label="Main navigation"
+      aria-label={language === "zh" ? "主导航" : "Main navigation"}
     >
       <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-12 sm:h-14 flex items-center justify-between gap-2">
         <Link
           href="/"
           className="font-[family-name:var(--font-heading)] text-sm sm:text-lg font-bold text-text-primary hover:text-accent-periwinkle transition-colors whitespace-nowrap shrink-0"
         >
-          How Poor Am I?
+          {language === "zh" ? "我到底有多穷？" : "How Poor Am I?"}
         </Link>
 
         <div className="flex items-center gap-0.5 sm:gap-1">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const NON_COUNTRY_PATHS = ["/about", "/faq", "/methodology", "/compare"];
             const isActive =
               item.href === "/"
@@ -56,9 +66,34 @@ export default function Navigation() {
           })}
 
           <button
+            onClick={toggleLanguage}
+            aria-label={
+              language === "zh"
+                ? "切换到英文"
+                : "Switch to Chinese"
+            }
+            title={
+              language === "zh"
+                ? "切换到英文"
+                : "Switch to Chinese"
+            }
+            className="ml-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-card transition-all duration-200"
+          >
+            {language === "zh" ? "EN" : "中文"}
+          </button>
+
+          <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            aria-label={
+              language === "zh"
+                ? `切换到${theme === "dark" ? "浅色" : "深色"}模式`
+                : `Switch to ${theme === "dark" ? "light" : "dark"} mode`
+            }
+            title={
+              language === "zh"
+                ? `切换到${theme === "dark" ? "浅色" : "深色"}模式`
+                : `Switch to ${theme === "dark" ? "light" : "dark"} mode`
+            }
             className="ml-1 sm:ml-2 p-1.5 sm:p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-bg-card transition-all duration-200"
           >
             {theme === "dark" ? (

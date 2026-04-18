@@ -7,6 +7,8 @@ import { type CountryData } from "@/data/wealth-data";
 import { getDetailedShares, type DetailedWealthShares } from "@/data/billionaires";
 import { formatNumber } from "@/lib/format";
 import ChartTooltip from "./ChartTooltip";
+import { useLanguage } from "@/components/LanguageProvider";
+import { type Language, tCountryName, tSegmentLabel } from "@/lib/i18n";
 
 interface WealthHoardingChartProps {
   readonly country: CountryData;
@@ -73,17 +75,26 @@ function computePopulationCount(
   return Math.round(populationMillions * 1_000_000 * fraction);
 }
 
-function formatPeopleCount(count: number): string {
+function formatPeopleCount(count: number, language: Language): string {
   if (count >= 1_000_000) {
     const millions = count / 1_000_000;
+    if (language === "zh") {
+      return millions >= 10
+        ? `约 ${Math.round(millions)} 百万人`
+        : `约 ${millions.toFixed(1)} 百万人`;
+    }
     return millions >= 10
       ? `~${Math.round(millions)}M people`
       : `~${millions.toFixed(1)}M people`;
   }
   if (count >= 1_000) {
-    return `~${formatNumber(Math.round(count / 1_000) * 1_000)} people`;
+    return language === "zh"
+      ? `约 ${formatNumber(Math.round(count / 1_000) * 1_000)} 人`
+      : `~${formatNumber(Math.round(count / 1_000) * 1_000)} people`;
   }
-  return `~${formatNumber(count)} people`;
+  return language === "zh"
+    ? `约 ${formatNumber(count)} 人`
+    : `~${formatNumber(count)} people`;
 }
 
 function buildRectangles(
@@ -137,12 +148,13 @@ export default function WealthHoardingChart({
   width,
   height,
 }: WealthHoardingChartProps) {
+  const { language } = useLanguage();
   const [hoveredRect, setHoveredRect] = useState<RectData | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   const shares = useMemo(
     () => getDetailedShares(country),
-    [country.code, country.wealthShares.bottom50, country.wealthShares.middle40, country.wealthShares.top10, country.wealthShares.top1],
+    [country],
   );
 
   const innerWidth = width - MARGIN.left - MARGIN.right;
@@ -207,12 +219,22 @@ export default function WealthHoardingChart({
   const bottomPeopleCount = bottomGroup?.peopleCount ?? 0;
   const topShare = topGroup?.wealthShare ?? 0;
   const bottomShare = bottomGroup?.wealthShare ?? 0;
+  const countryName = tCountryName(country.code, country.name, language);
 
   return (
     <div className="relative">
-      <svg width={width} height={height} role="img" aria-label={`Wealth concentration by population group for ${country.name}`}>
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-label={
+          language === "zh"
+            ? `${countryName} 各人口分组的财富集中图`
+            : `Wealth concentration by population group for ${countryName}`
+        }
+      >
         <Group left={MARGIN.left} top={MARGIN.top}>
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {rectangles.map((rect) => {
               const showLabel = shouldShowLabel(rect);
               const showPercent = shouldShowPercent(rect);
@@ -262,7 +284,7 @@ export default function WealthHoardingChart({
                         style={{ color: textColor }}
                       >
                         <span className="font-semibold text-[10px] leading-tight truncate w-full">
-                          {rect.label}
+                          {tSegmentLabel(rect.label, language)}
                         </span>
                         {showPercent && (
                           <span className="font-bold text-xs leading-tight mt-0.5 tabular-nums">
@@ -293,18 +315,18 @@ export default function WealthHoardingChart({
                 className="inline-block w-2 h-2 rounded-sm shrink-0"
                 style={{ backgroundColor: hoveredRect.color }}
               />
-              {hoveredRect.label}
+              {tSegmentLabel(hoveredRect.label, language)}
             </p>
             <p className="text-text-secondary tabular-nums">
-              Wealth share: <span className="font-medium text-text-primary">{hoveredRect.wealthShare.toFixed(1)}%</span>
+              {language === "zh" ? "财富占比：" : "Wealth share: "}<span className="font-medium text-text-primary">{hoveredRect.wealthShare.toFixed(1)}%</span>
             </p>
             <p className="text-text-secondary">
-              {formatPeopleCount(hoveredRect.peopleCount)}
+              {formatPeopleCount(hoveredRect.peopleCount, language)}
             </p>
             <p className="text-text-muted text-[10px]">
               {(hoveredRect.populationFraction * 100).toFixed(
                 hoveredRect.populationFraction < 0.001 ? 2 : hoveredRect.populationFraction < 0.01 ? 1 : 0
-              )}% of the population
+              )}% {language === "zh" ? "的人口" : "of the population"}
             </p>
           </div>
         </ChartTooltip>
@@ -320,7 +342,7 @@ export default function WealthHoardingChart({
             />
             <div className="min-w-0 truncate">
               <span className="text-text-primary text-xs sm:text-sm font-medium">
-                {rect.label}
+                {tSegmentLabel(rect.label, language)}
               </span>
               <span className="text-text-secondary text-xs sm:text-sm ml-1 tabular-nums">
                 {rect.wealthShare.toFixed(1)}%
@@ -339,15 +361,15 @@ export default function WealthHoardingChart({
         transition={{ duration: 0.5, delay: 0.3 }}
       >
         <span className="font-semibold" style={{ color: COLORS.top001 }}>
-          {formatPeopleCount(topPeopleCount)}
+          {formatPeopleCount(topPeopleCount, language)}
         </span>{" "}
-        own{" "}
+        {language === "zh" ? "掌握着" : "own"}{" "}
         <span className="font-semibold tabular-nums">{topShare.toFixed(1)}%</span>{" "}
-        of all wealth, while{" "}
+        {language === "zh" ? "的全部财富，而" : "of all wealth, while"}{" "}
         <span className="font-semibold" style={{ color: COLORS.bottom50 }}>
-          {formatPeopleCount(bottomPeopleCount)}
+          {formatPeopleCount(bottomPeopleCount, language)}
         </span>{" "}
-        share just{" "}
+        {language === "zh" ? "只分到" : "share just"}{" "}
         <span className="font-semibold tabular-nums">
           {bottomShare.toFixed(1)}%
         </span>

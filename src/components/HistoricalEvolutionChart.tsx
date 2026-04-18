@@ -10,6 +10,8 @@ import { localPoint } from "@visx/event";
 import ChartTooltip from "@/components/ChartTooltip";
 import { motion } from "framer-motion";
 import { type CountryData } from "@/data/wealth-data";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tCountryName, tSegmentLabel } from "@/lib/i18n";
 
 interface HistoricalEvolutionChartProps {
   readonly country: CountryData;
@@ -87,8 +89,31 @@ const DEFAULT_EVENTS: readonly EventMarker[] = [
   { year: 2008, label: "Financial crisis" },
 ] as const;
 
+const EVENT_LABELS_ZH: Record<string, string> = {
+  "New Deal": "新政",
+  "Top tax rate 94%": "最高税率 94%",
+  "Great Society": "伟大社会",
+  Reaganomics: "里根经济学",
+  "Bush tax cuts": "布什减税",
+  "Financial crisis": "金融危机",
+  "Tax Cuts & Jobs Act": "减税与就业法案",
+  "Post-war welfare state": "战后福利国家",
+  "Thatcherism begins": "撒切尔主义开启",
+  "Post-war reconstruction": "战后重建",
+  "Wealth tax introduced": "开征财富税",
+  "Currency reform": "货币改革",
+  Reunification: "两德统一",
+  "Welfare state expansion": "福利国家扩张",
+  "Housing boom starts": "房地产繁荣开启",
+};
+
 function getEventsForCountry(code: string): readonly EventMarker[] {
   return COUNTRY_EVENTS[code] ?? DEFAULT_EVENTS;
+}
+
+function tEventLabel(label: string, language: "en" | "zh"): string {
+  if (language === "en") return label;
+  return EVENT_LABELS_ZH[label] ?? label;
 }
 
 function buildStackedData(country: CountryData): readonly StackedPoint[] {
@@ -136,8 +161,10 @@ export default function HistoricalEvolutionChart({
   width,
   height,
 }: HistoricalEvolutionChartProps) {
+  const { language } = useLanguage();
   const innerWidth = width - MARGIN.left - MARGIN.right;
   const innerHeight = height - MARGIN.top - MARGIN.bottom;
+  const countryName = tCountryName(country.code, country.name, language);
 
   const stackedData = useMemo(() => buildStackedData(country), [country]);
 
@@ -214,7 +241,9 @@ export default function HistoricalEvolutionChart({
   if (stackedData.length === 0) {
     return (
       <div className="flex items-center justify-center text-text-muted text-sm py-12">
-        Historical data not available for {country.name}.
+        {language === "zh"
+          ? `${countryName} 暂无历史数据。`
+          : `Historical data not available for ${countryName}.`}
       </div>
     );
   }
@@ -228,7 +257,13 @@ export default function HistoricalEvolutionChart({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <svg width={width} height={height} role="img" aria-label={`Historical wealth distribution evolution for ${country.name}`} style={{ overflow: "visible" }}>
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-label={language === "zh" ? `${countryName} 财富分布历史演变` : `Historical wealth distribution evolution for ${countryName}`}
+        style={{ overflow: "visible" }}
+      >
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Grid lines */}
           {[20, 40, 60, 80].map((tick) => (
@@ -318,7 +353,7 @@ export default function HistoricalEvolutionChart({
                   fontFamily="var(--font-body)"
                   textAnchor="start"
                 >
-                  {evt.label}
+                  {tEventLabel(evt.label, language)}
                 </text>
               </g>
             );
@@ -376,7 +411,7 @@ export default function HistoricalEvolutionChart({
               textAnchor: "end",
               fontFamily: "var(--font-body)",
             }}
-            label="Share of total wealth"
+            label={language === "zh" ? "总财富占比" : "Share of total wealth"}
             labelOffset={45}
             labelProps={{
               fill: "var(--text-secondary)",
@@ -396,7 +431,7 @@ export default function HistoricalEvolutionChart({
             style={{ backgroundColor: COLORS.bottom50.fill }}
           />
           <span className="text-text-secondary text-sm">
-            {COLORS.bottom50.label}
+            {tSegmentLabel(COLORS.bottom50.label, language)}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -405,7 +440,7 @@ export default function HistoricalEvolutionChart({
             style={{ backgroundColor: COLORS.middle40.fill }}
           />
           <span className="text-text-secondary text-sm">
-            {COLORS.middle40.label}
+            {tSegmentLabel(COLORS.middle40.label, language)}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -414,7 +449,7 @@ export default function HistoricalEvolutionChart({
             style={{ backgroundColor: COLORS.top10.fill }}
           />
           <span className="text-text-secondary text-sm">
-            {COLORS.top10.label}
+            {tSegmentLabel(COLORS.top10.label, language)}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -423,7 +458,7 @@ export default function HistoricalEvolutionChart({
             style={{ backgroundColor: COLORS.top1Line.stroke }}
           />
           <span className="text-text-secondary text-sm">
-            {COLORS.top1Line.label}
+            {tSegmentLabel(COLORS.top1Line.label, language)}
           </span>
         </div>
       </div>
@@ -445,7 +480,7 @@ export default function HistoricalEvolutionChart({
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
                 style={{ backgroundColor: COLORS.top10.fill }}
               />
-              <span className="text-text-secondary">Top 10%: </span>
+              <span className="text-text-secondary">{tSegmentLabel("Top 10%", language)}: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.top10.toFixed(1)}%
               </span>
@@ -455,7 +490,7 @@ export default function HistoricalEvolutionChart({
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
                 style={{ backgroundColor: COLORS.top1Line.stroke }}
               />
-              <span className="text-text-secondary">Top 1%: </span>
+              <span className="text-text-secondary">{tSegmentLabel("Top 1%", language)}: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.top1.toFixed(1)}%
               </span>
@@ -465,7 +500,7 @@ export default function HistoricalEvolutionChart({
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
                 style={{ backgroundColor: COLORS.middle40.fill }}
               />
-              <span className="text-text-secondary">Middle 40%: </span>
+              <span className="text-text-secondary">{tSegmentLabel("Middle 40%", language)}: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.middle40.toFixed(1)}%
               </span>
@@ -475,7 +510,7 @@ export default function HistoricalEvolutionChart({
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
                 style={{ backgroundColor: COLORS.bottom50.fill }}
               />
-              <span className="text-text-secondary">Bottom 50%: </span>
+              <span className="text-text-secondary">{tSegmentLabel("Bottom 50%", language)}: </span>
               <span className="text-text-primary font-medium tabular-nums">
                 {tooltip.data.bottom50.toFixed(1)}%
               </span>

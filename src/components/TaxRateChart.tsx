@@ -7,6 +7,8 @@ import { scaleLinear, scaleBand } from "@visx/scale";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { motion } from "framer-motion";
 import { TAX_RATES, type TaxRateByClass } from "@/data/tax-rates";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tSegmentLabel } from "@/lib/i18n";
 
 interface TaxRateChartProps {
   readonly countryCode: string;
@@ -67,6 +69,7 @@ export default function TaxRateChart({
   width,
   height,
 }: TaxRateChartProps) {
+  const { language } = useLanguage();
   const rates = TAX_RATES[countryCode];
 
   const entries = useMemo(
@@ -117,11 +120,12 @@ export default function TaxRateChart({
       <div className="flex items-center justify-center" style={{ width, height }}>
         <div className="text-center px-8">
           <p className="text-text-secondary text-sm">
-            Tax rate data is not yet available for this country.
+            {language === "zh" ? "这个国家暂时还没有税率数据。" : "Tax rate data is not yet available for this country."}
           </p>
           <p className="text-text-muted text-xs mt-2">
-            We currently cover {Object.keys(TAX_RATES).length} countries.
-            More are being added as data becomes available.
+            {language === "zh"
+              ? `当前已覆盖 ${Object.keys(TAX_RATES).length} 个国家，后续会继续补充。`
+              : `We currently cover ${Object.keys(TAX_RATES).length} countries. More are being added as data becomes available.`}
           </p>
         </div>
       </div>
@@ -143,18 +147,27 @@ export default function TaxRateChart({
       {/* Narrative title */}
       {peakClass && (
         <p className="text-text-secondary text-xs text-center mb-1 italic">
-          The peak rate is at the {peakClass.label} level, then it drops
+          {language === "zh"
+            ? `最高有效税率出现在 ${tSegmentLabel(peakClass.label, language)}，随后开始下降`
+            : `The peak rate is at the ${peakClass.label} level, then it drops`}
         </p>
       )}
 
       {/* Regressivity callout */}
       {isRegressive && regressivityGap && (
         <p className="text-center text-xs font-semibold mb-3" style={{ color: "#882255" }}>
-          The ultra-wealthy pay {regressivityGap}% less than the middle class
+          {language === "zh"
+            ? `超级富豪的有效税率比中产阶层低 ${regressivityGap}%`
+            : `The ultra-wealthy pay ${regressivityGap}% less than the middle class`}
         </p>
       )}
 
-      <svg width={width} height={height} role="img" aria-label={`Effective tax rates by wealth class for ${countryCode}`}>
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-label={language === "zh" ? `${countryCode} 各财富阶层的有效税率` : `Effective tax rates by wealth class for ${countryCode}`}
+      >
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Vertical grid lines */}
           {xScale.ticks(6).map((tick) => (
@@ -185,7 +198,7 @@ export default function TaxRateChart({
             fontSize={10}
             fontFamily="var(--font-body)"
           >
-            Nominal top rate {rates.nominalTopRate}%
+            {language === "zh" ? `名义最高税率 ${rates.nominalTopRate}%` : `Nominal top rate ${rates.nominalTopRate}%`}
           </text>
 
           {/* Animated horizontal bars */}
@@ -293,7 +306,7 @@ export default function TaxRateChart({
               textAnchor: "middle",
               fontFamily: "var(--font-body)",
             }}
-            label="Effective tax rate"
+            label={language === "zh" ? "有效税率" : "Effective tax rate"}
             labelOffset={30}
             labelProps={{
               fill: "var(--text-secondary)",
@@ -306,6 +319,7 @@ export default function TaxRateChart({
             scale={yScale}
             stroke="var(--border-subtle)"
             tickStroke="transparent"
+            tickFormat={(value) => tSegmentLabel(String(value), language)}
             tickLabelProps={{
               fill: "var(--text-secondary)",
               fontSize: 11,
@@ -318,7 +332,7 @@ export default function TaxRateChart({
 
       {/* Source attribution */}
       <p className="text-text-muted text-[10px] text-center mt-1">
-        Source: {rates.source} ({rates.year})
+        {language === "zh" ? "来源：" : "Source: "} {rates.source} ({rates.year})
       </p>
     </div>
   );

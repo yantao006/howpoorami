@@ -1,5 +1,9 @@
+"use client";
+
 import { TAX_RATES } from "@/data/tax-rates";
 import rawMetadata from "../../data/raw/country-metadata.json";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tCountryName } from "@/lib/i18n";
 
 type RawMeta = Record<string, { name?: string; flag?: string }>;
 
@@ -26,6 +30,7 @@ function buildSourceEntries(): readonly TaxSourceEntry[] {
 }
 
 export default function TaxSourcesTable() {
+  const { language } = useLanguage();
   const entries = buildSourceEntries();
 
   return (
@@ -34,13 +39,13 @@ export default function TaxSourcesTable() {
         <thead>
           <tr className="border-b border-border-subtle">
             <th className="text-left py-3 px-3 text-text-primary font-semibold text-xs uppercase tracking-wider">
-              Country
+              {language === "zh" ? "国家" : "Country"}
             </th>
             <th className="text-left py-3 px-3 text-text-primary font-semibold text-xs uppercase tracking-wider">
-              Source
+              {language === "zh" ? "来源" : "Source"}
             </th>
             <th className="text-center py-3 px-3 text-text-primary font-semibold text-xs uppercase tracking-wider w-20">
-              Year
+              {language === "zh" ? "年份" : "Year"}
             </th>
           </tr>
         </thead>
@@ -52,7 +57,7 @@ export default function TaxSourcesTable() {
             >
               <td className="py-2.5 px-3 text-text-primary whitespace-nowrap">
                 <span className="mr-1.5">{entry.flag}</span>
-                {entry.countryName}
+                {tCountryName(entry.countryCode, entry.countryName, language)}
               </td>
               <td className="py-2.5 px-3 text-text-secondary text-xs leading-relaxed">
                 {entry.source}
@@ -66,10 +71,9 @@ export default function TaxSourcesTable() {
       </table>
 
       <p className="text-text-muted text-[11px] mt-4 leading-relaxed">
-        Effective tax rates include all taxes: income, payroll, corporate
-        (allocated to shareholders), property, estate, and consumption taxes,
-        divided by total pre-tax economic income. Sources combine academic
-        research, government tax statistics, and the{" "}
+        {language === "zh"
+          ? "这里的有效税率包含所得税、工资税、公司税（按股东归属）、财产税、遗产税和消费税，并用税前经济收入作分母。来源综合了学术研究、政府税收统计，以及 "
+          : "Effective tax rates include all taxes: income, payroll, corporate (allocated to shareholders), property, estate, and consumption taxes, divided by total pre-tax economic income. Sources combine academic research, government tax statistics, and the "}{" "}
         <a
           href="https://www.taxobservatory.eu"
           target="_blank"
@@ -78,8 +82,9 @@ export default function TaxSourcesTable() {
         >
           EU Tax Observatory
         </a>{" "}
-        Global Tax Evasion Report (2024). Tax rate data is not API-fetchable
-        and is maintained manually from published government statistics and academic papers.
+        {language === "zh"
+          ? "发布的《全球逃税报告（2024）》。税率数据目前无法通过 API 统一获取，因此需要根据公开政府统计和论文资料手动维护。"
+          : "Global Tax Evasion Report (2024). Tax rate data is not API-fetchable and is maintained manually from published government statistics and academic papers."}
       </p>
     </div>
   );

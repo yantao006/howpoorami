@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tCountryName, tRegionLabel } from "@/lib/i18n";
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -10,6 +12,10 @@ interface Country {
   readonly code: string;
   readonly name: string;
   readonly flag: string;
+}
+
+interface DisplayCountry extends Country {
+  readonly localizedName: string;
 }
 
 interface CountrySearchDropdownProps {
@@ -63,9 +69,9 @@ function regionOf(code: string): string {
 }
 
 function groupByRegion(
-  items: readonly Country[],
-): { region: string; items: readonly Country[] }[] {
-  const buckets = new Map<string, Country[]>();
+  items: readonly DisplayCountry[],
+): { region: string; items: readonly DisplayCountry[] }[] {
+  const buckets = new Map<string, DisplayCountry[]>();
 
   for (const country of items) {
     const region = regionOf(country.code);
@@ -77,7 +83,7 @@ function groupByRegion(
     }
   }
 
-  const ordered: { region: string; items: readonly Country[] }[] = [];
+  const ordered: { region: string; items: readonly DisplayCountry[] }[] = [];
 
   for (const region of REGION_ORDER) {
     const bucket = buckets.get(region);
@@ -104,6 +110,7 @@ export default function CountrySearchDropdown({
   onSelect,
   countries,
 }: CountrySearchDropdownProps) {
+  const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -120,15 +127,24 @@ export default function CountrySearchDropdown({
     [countries, selected],
   );
 
+  const localizedCountries = useMemo(
+    () => countries.map((country) => ({
+      ...country,
+      localizedName: tCountryName(country.code, country.name, language),
+    })),
+    [countries, language],
+  );
+
   const filtered = useMemo(() => {
-    if (query.trim() === "") return [...countries];
+    if (query.trim() === "") return [...localizedCountries];
     const lower = query.toLowerCase();
-    return countries.filter(
+    return localizedCountries.filter(
       (c) =>
         c.name.toLowerCase().includes(lower) ||
+        c.localizedName.toLowerCase().includes(lower) ||
         c.code.toLowerCase().includes(lower),
     );
-  }, [countries, query]);
+  }, [localizedCountries, query]);
 
   const grouped = useMemo(() => groupByRegion(filtered), [filtered]);
 
@@ -323,7 +339,7 @@ export default function CountrySearchDropdown({
             aria-autocomplete="list"
             aria-controls={listboxId}
             aria-activedescendant={activeOptionId}
-            placeholder="Search countries..."
+            placeholder={language === "zh" ? "搜索国家或地区..." : "Search countries..."}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -351,10 +367,14 @@ export default function CountrySearchDropdown({
             {selectedCountry ? (
               <>
                 <span className="text-lg">{selectedCountry.flag}</span>
-                <span className="font-medium">{selectedCountry.name}</span>
+                <span className="font-medium">
+                  {tCountryName(selectedCountry.code, selectedCountry.name, language)}
+                </span>
               </>
             ) : (
-              <span className="text-text-muted">Select a country</span>
+              <span className="text-text-muted">
+                {language === "zh" ? "选择国家" : "Select a country"}
+              </span>
             )}
             <ChevronDown className="ml-auto" />
           </button>
@@ -384,12 +404,12 @@ export default function CountrySearchDropdown({
                 ref={listboxRef}
                 id={listboxId}
                 role="listbox"
-                aria-label="Countries"
+                aria-label={language === "zh" ? "国家列表" : "Countries"}
                 className="max-h-64 overflow-y-auto py-1"
               >
                 {grouped.length === 0 && (
                   <li className="px-4 py-3 text-sm text-text-muted text-center">
-                    No countries found
+                    {language === "zh" ? "没有找到匹配国家" : "No countries found"}
                   </li>
                 )}
                 {grouped.map((group) => (
@@ -401,9 +421,9 @@ export default function CountrySearchDropdown({
                       "
                       role="presentation"
                     >
-                      {group.region}
+                      {tRegionLabel(group.region, language)}
                     </span>
-                    <ul role="group" aria-label={group.region}>
+                    <ul role="group" aria-label={tRegionLabel(group.region, language)}>
                       {group.items.map((country) => {
                         const idx = itemIndexMap.get(country) ?? -1;
                         const isActive = idx === activeIndex;
@@ -433,7 +453,7 @@ export default function CountrySearchDropdown({
                             <span className="text-lg leading-none">
                               {country.flag}
                             </span>
-                            <span>{country.name}</span>
+                            <span>{country.localizedName}</span>
                             {isSelected && (
                               <CheckIcon className="ml-auto flex-shrink-0" />
                             )}

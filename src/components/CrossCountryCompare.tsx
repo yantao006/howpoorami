@@ -14,6 +14,8 @@ import type { CountryData } from "@/data/wealth-data";
 import { toUSD, fromUSD } from "@/lib/currency";
 import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 import { getPPPFactor } from "@/lib/ppp";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tCountryName, tSegmentLabel } from "@/lib/i18n";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -76,11 +78,17 @@ function getNextThreshold(
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function CrossCountryCompare() {
+  const { language } = useLanguage();
   const [inputValue, setInputValue] = useState("");
   const [inputCurrency, setInputCurrency] = useState<string>("USD");
   const [selectedCodes, setSelectedCodes] = useState<readonly AllCountryCode[]>(DEFAULT_SELECTIONS);
   const [showPicker, setShowPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const localizeCountry = useCallback(
+    (country: CountryData) => tCountryName(country.code, country.name, language),
+    [language],
+  );
 
   // Parse input amount to USD
   const amountUSD = useMemo(() => {
@@ -130,14 +138,20 @@ export default function CrossCountryCompare() {
     const selSet = new Set<string>(selectedCodes);
     return ALL_COUNTRIES
       .filter((c) => !selSet.has(c.code))
-      .filter((c) => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q))
+      .filter((c) => {
+        const localizedName = localizeCountry(c).toLowerCase();
+        return !q
+          || c.name.toLowerCase().includes(q)
+          || localizedName.includes(q)
+          || c.code.toLowerCase().includes(q);
+      })
       .sort((a, b) => {
         const rA = REGION_MAP[a.code] ?? "Other";
         const rB = REGION_MAP[b.code] ?? "Other";
         if (rA !== rB) return rA.localeCompare(rB);
-        return a.name.localeCompare(b.name);
+        return localizeCountry(a).localeCompare(localizeCountry(b));
       });
-  }, [searchQuery, selectedCodes]);
+  }, [localizeCountry, searchQuery, selectedCodes]);
 
   const handleToggleCountry = useCallback((code: string) => {
     if (!isAllCountryCode(code)) return;
@@ -172,10 +186,12 @@ export default function CrossCountryCompare() {
             className="text-center mb-10"
           >
             <h1 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary leading-tight">
-              Compare Countries
+              {language === "zh" ? "跨国比较" : "Compare Countries"}
             </h1>
             <p className="text-text-secondary text-base sm:text-lg mt-3 max-w-xl mx-auto">
-              Same wealth, different country. See how your ranking changes across borders.
+              {language === "zh"
+                ? "同样的财富，换个国家，排名可能完全不同。"
+                : "Same wealth, different country. See how your ranking changes across borders."}
             </p>
           </m.div>
 
@@ -187,7 +203,9 @@ export default function CrossCountryCompare() {
             className="bg-bg-card border border-border-subtle rounded-2xl p-6 sm:p-8 mb-8"
           >
             <label className="block text-text-secondary text-sm mb-2">
-              Enter your net wealth (assets minus debts)
+              {language === "zh"
+                ? "输入你的净资产（资产减去负债）"
+                : "Enter your net wealth (assets minus debts)"}
             </label>
             <div className="flex gap-3">
               <div className="relative flex-1">
@@ -199,7 +217,7 @@ export default function CrossCountryCompare() {
                   inputMode="numeric"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="e.g. 250000"
+                  placeholder={language === "zh" ? "例如 250000" : "e.g. 250000"}
                   className="w-full bg-bg-primary border border-border-subtle rounded-xl pl-10 pr-4 py-3 text-text-primary text-lg tabular-nums placeholder:text-text-muted/40 focus:outline-none focus:border-accent-periwinkle/50 focus:ring-1 focus:ring-accent-periwinkle/30 transition-colors"
                 />
               </div>
@@ -214,7 +232,9 @@ export default function CrossCountryCompare() {
               </select>
             </div>
             <p className="text-text-muted text-xs mt-2">
-              All data is per-adult (WID.world equal-split). If you share finances with a partner, enter your personal half.
+              {language === "zh"
+                ? "所有数据都按成年人个体口径计算（WID.world equal-split）。如果你与伴侣共同持有财务，请填写你个人那一半。"
+                : "All data is per-adult (WID.world equal-split). If you share finances with a partner, enter your personal half."}
             </p>
           </m.div>
 
@@ -227,13 +247,21 @@ export default function CrossCountryCompare() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-text-primary font-semibold text-sm">
-                Countries ({selectedCodes.length}/{MAX_COUNTRIES})
+                {language === "zh"
+                  ? `国家 (${selectedCodes.length}/${MAX_COUNTRIES})`
+                  : `Countries (${selectedCodes.length}/${MAX_COUNTRIES})`}
               </h2>
               <button
                 onClick={() => { setShowPicker(!showPicker); setSearchQuery(""); }}
                 className="text-accent-periwinkle text-xs font-medium hover:underline cursor-pointer"
               >
-                {showPicker ? "Done" : "+ Add / Remove"}
+                {showPicker
+                  ? language === "zh"
+                    ? "完成"
+                    : "Done"
+                  : language === "zh"
+                    ? "+ 添加 / 移除"
+                    : "+ Add / Remove"}
               </button>
             </div>
 
@@ -247,12 +275,12 @@ export default function CrossCountryCompare() {
                     className="inline-flex items-center gap-1.5 bg-bg-card border border-border-subtle rounded-full px-3 py-1 text-sm text-text-primary"
                   >
                     <span>{c.flag}</span>
-                    <span>{c.name}</span>
+                    <span>{localizeCountry(c)}</span>
                     {selectedCodes.length > MIN_COUNTRIES && (
                       <button
                         onClick={() => handleRemoveCountry(code)}
                         className="text-text-muted hover:text-accent-rose ml-0.5 cursor-pointer"
-                        aria-label={`Remove ${c.name}`}
+                        aria-label={language === "zh" ? `移除 ${localizeCountry(c)}` : `Remove ${localizeCountry(c)}`}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <line x1="18" y1="6" x2="6" y2="18" />
@@ -280,7 +308,7 @@ export default function CrossCountryCompare() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search countries..."
+                      placeholder={language === "zh" ? "搜索国家..." : "Search countries..."}
                       className="w-full bg-bg-primary border border-border-subtle rounded-lg px-3 py-2 text-text-primary text-sm placeholder:text-text-muted/40 focus:outline-none focus:border-accent-periwinkle/50 mb-3"
                     />
                     <div className="max-h-48 overflow-y-auto space-y-1">
@@ -291,12 +319,14 @@ export default function CrossCountryCompare() {
                           disabled={selectedCodes.length >= MAX_COUNTRIES}
                           className="w-full text-left px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-bg-primary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
-                          {c.flag} {c.name}
+                          {c.flag} {localizeCountry(c)}
                           <span className="text-text-muted text-xs ml-2">({c.currency})</span>
                         </button>
                       ))}
                       {filteredCountries.length === 0 && (
-                        <p className="text-text-muted text-xs text-center py-2">No countries found</p>
+                        <p className="text-text-muted text-xs text-center py-2">
+                          {language === "zh" ? "没有找到匹配国家" : "No countries found"}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -317,7 +347,7 @@ export default function CrossCountryCompare() {
                 className="space-y-3"
               >
                 <h2 className="text-text-primary font-semibold text-sm mb-4">
-                  Your ranking across countries
+                  {language === "zh" ? "你在不同国家的排名" : "Your ranking across countries"}
                 </h2>
                 {results.map((r, i) => (
                   <m.div
@@ -333,10 +363,10 @@ export default function CrossCountryCompare() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg">{r.country.flag}</span>
                           <span className="text-text-primary font-semibold text-sm sm:text-base truncate">
-                            {r.country.name}
+                            {localizeCountry(r.country)}
                           </span>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-bg-primary ${getSegmentColor(r.percentile)}`}>
-                            {r.segment}
+                            {tSegmentLabel(r.segment, language)}
                           </span>
                         </div>
 
@@ -354,14 +384,14 @@ export default function CrossCountryCompare() {
 
                         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
                           <span className="text-text-muted">
-                            Local value:{" "}
+                            {language === "zh" ? "本地币值：" : "Local value: "}{" "}
                             <span className="text-text-secondary font-medium tabular-nums">
                               {formatCurrency(r.localAmount, r.country.currency, true)}
                             </span>
                           </span>
                           {r.pppEquivalent !== null && r.country.code !== "US" && (
                             <span className="text-text-muted">
-                              Buying power:{" "}
+                              {language === "zh" ? "购买力等值：" : "Buying power: "}{" "}
                               <span className="text-text-secondary font-medium tabular-nums">
                                 {formatCurrency(r.pppEquivalent, "USD", true)}
                               </span>
@@ -369,11 +399,13 @@ export default function CrossCountryCompare() {
                           )}
                           {r.thresholdToNext !== null && r.thresholdToNextLabel !== null && (
                             <span className="text-text-muted">
-                              Need{" "}
+                              {language === "zh" ? "还差 " : "Need "}{" "}
                               <span className="text-text-secondary font-medium tabular-nums">
                                 {formatCurrency(r.thresholdToNext, r.country.currency, true)}
                               </span>
-                              {" "}for {r.thresholdToNextLabel}
+                              {language === "zh"
+                                ? ` 才能进入 ${tSegmentLabel(r.thresholdToNextLabel.replace("top", "Top").replace("bottom", "Bottom"), language)}`
+                                : ` for ${r.thresholdToNextLabel}`}
                             </span>
                           )}
                         </div>
@@ -386,7 +418,9 @@ export default function CrossCountryCompare() {
                           <span className="text-sm font-normal text-text-muted">%ile</span>
                         </p>
                         <p className="text-text-muted text-[10px] mt-0.5">
-                          Richer than {r.percentile.toFixed(1)}% of adults
+                          {language === "zh"
+                            ? `超过了 ${r.percentile.toFixed(1)}% 的成年人`
+                            : `Richer than ${r.percentile.toFixed(1)}% of adults`}
                         </p>
                       </div>
                     </div>
@@ -402,15 +436,23 @@ export default function CrossCountryCompare() {
                     className="bg-gradient-to-br from-accent-periwinkle/8 to-accent-lavender/8 border border-accent-periwinkle/15 rounded-xl p-5 text-center mt-6"
                   >
                     <p className="text-text-secondary text-sm">
-                      The same amount of wealth puts you in the{" "}
+                      {language === "zh" ? "同样一笔财富，在 " : "The same amount of wealth puts you in the "}{" "}
                       <span className="text-accent-periwinkle font-semibold">
-                        {results[0].segment.toLowerCase()}
+                        {language === "zh"
+                          ? tSegmentLabel(results[0].segment, language)
+                          : results[0].segment.toLowerCase()}
                       </span>
-                      {" "}in {results[0].country.name} but the{" "}
+                      {language === "zh"
+                        ? `，会让你处在 ${localizeCountry(results[0].country)} 的这个区间；但在 `
+                        : ` in ${localizeCountry(results[0].country)} but the `}{" "}
                       <span className="text-accent-amber font-semibold">
-                        {results[results.length - 1].segment.toLowerCase()}
+                        {language === "zh"
+                          ? tSegmentLabel(results[results.length - 1].segment, language)
+                          : results[results.length - 1].segment.toLowerCase()}
                       </span>
-                      {" "}in {results[results.length - 1].country.name}.
+                      {language === "zh"
+                        ? ` 在 ${localizeCountry(results[results.length - 1].country)} 只能排到这里。`
+                        : ` in ${localizeCountry(results[results.length - 1].country)}.`}
                     </p>
                   </m.div>
                 )}
@@ -422,7 +464,7 @@ export default function CrossCountryCompare() {
                 animate={{ opacity: 1 }}
                 className="text-center text-text-muted text-sm"
               >
-                Enter a valid number to see results.
+                {language === "zh" ? "请输入有效数字查看结果。" : "Enter a valid number to see results."}
               </m.p>
             ) : inputValue.length === 0 ? (
               <m.div
@@ -433,14 +475,16 @@ export default function CrossCountryCompare() {
                 className="text-center py-12"
               >
                 <p className="text-text-muted text-sm mb-2">
-                  Enter your net wealth above to compare across countries.
+                  {language === "zh"
+                    ? "在上方输入你的净资产，开始做跨国比较。"
+                    : "Enter your net wealth above to compare across countries."}
                 </p>
                 <p className="text-text-muted text-xs">
-                  Tip: Use the main{" "}
+                  {language === "zh" ? "提示：如果你想根据收入估算财富，请使用主站的 " : "Tip: Use the main "}{" "}
                   <Link href="/" className="text-accent-periwinkle hover:underline">
-                    calculator
+                    {language === "zh" ? "计算器" : "calculator"}
                   </Link>
-                  {" "}if you want to estimate wealth from income.
+                  {language === "zh" ? "" : " if you want to estimate wealth from income."}
                 </p>
               </m.div>
             ) : null}
@@ -449,12 +493,13 @@ export default function CrossCountryCompare() {
           {/* Methodology note */}
           <div className="mt-12 text-center">
             <p className="text-text-muted text-xs">
-              Percentiles use Pareto-interpolated WID.world distribution data.
-              Currency conversion via ECB exchange rates (not purchasing-power adjusted).
+              {language === "zh"
+                ? "百分位基于 WID.world 的 Pareto 插值分布数据计算。货币换算使用 ECB 汇率，不做购买力平价调整。"
+                : "Percentiles use Pareto-interpolated WID.world distribution data. Currency conversion via ECB exchange rates (not purchasing-power adjusted)."}
             </p>
             <p className="text-text-muted text-xs mt-1">
               <Link href="/methodology" className="text-accent-periwinkle hover:underline">
-                Read the full methodology
+                {language === "zh" ? "查看完整方法说明" : "Read the full methodology"}
               </Link>
             </p>
           </div>

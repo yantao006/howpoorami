@@ -9,6 +9,7 @@ import {
   computeSpreadFactor,
   computeFactorImpacts,
 } from "@/lib/wealth-estimate";
+import type { Language } from "@/lib/i18n";
 
 interface IncomeRefinementPanelProps {
   readonly factors: IncomeFactors;
@@ -19,6 +20,7 @@ interface IncomeRefinementPanelProps {
     value: IncomeFactors[K],
   ) => void;
   readonly currencyCode?: string;
+  readonly language: Language;
 }
 
 // ── Small UI primitives ────────────────────────────────────────────
@@ -44,20 +46,38 @@ function ChevronIcon({ open }: { readonly open: boolean }) {
   );
 }
 
-function ConfidenceBar({ filled }: { readonly filled: number }) {
+function ConfidenceBar({
+  filled,
+  language,
+}: {
+  readonly filled: number;
+  readonly language: Language;
+}) {
   const pct = Math.round((filled / MAX_FACTORS) * 100);
   const label =
     pct === 0
-      ? "Very rough"
+      ? language === "zh"
+        ? "非常粗略"
+        : "Very rough"
       : pct <= 20
-        ? "Rough"
+        ? language === "zh"
+          ? "粗略"
+          : "Rough"
         : pct <= 40
-          ? "Moderate"
+          ? language === "zh"
+            ? "一般"
+            : "Moderate"
           : pct <= 60
-            ? "Good"
+            ? language === "zh"
+              ? "不错"
+              : "Good"
             : pct <= 80
-              ? "Precise"
-              : "Very precise";
+              ? language === "zh"
+                ? "精确"
+                : "Precise"
+              : language === "zh"
+                ? "非常精确"
+                : "Very precise";
   const color =
     pct <= 20
       ? "bg-accent-rose/60"
@@ -193,7 +213,13 @@ function SectionLegend({ children }: { readonly children: string }) {
   );
 }
 
-function FactorImpactSummary({ impacts }: { readonly impacts: readonly FactorImpact[] }) {
+function FactorImpactSummary({
+  impacts,
+  language,
+}: {
+  readonly impacts: readonly FactorImpact[];
+  readonly language: Language;
+}) {
   if (impacts.length === 0) return null;
 
   const upFactors = impacts.filter((i) => i.direction === "up");
@@ -202,7 +228,7 @@ function FactorImpactSummary({ impacts }: { readonly impacts: readonly FactorImp
   return (
     <div className="pt-3 border-t border-border-subtle space-y-2">
       <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
-        What&apos;s influencing your estimate
+        {language === "zh" ? "影响估算结果的因素" : "What's influencing your estimate"}
       </p>
       {upFactors.length > 0 && (
         <div className="space-y-1">
@@ -242,6 +268,7 @@ export default function IncomeRefinementPanel({
   onToggle,
   onChange,
   currencyCode = "USD",
+  language,
 }: IncomeRefinementPanelProps) {
   const filled = countFilledFactors(factors);
   const spread = computeSpreadFactor(factors);
@@ -267,7 +294,7 @@ export default function IncomeRefinementPanel({
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-text-secondary">
-            Refine estimate
+            {language === "zh" ? "细化估算" : "Refine estimate"}
           </span>
           {filled > 0 && (
             <span className="text-xs tabular-nums text-accent-periwinkle bg-accent-periwinkle/10 px-1.5 py-0.5 rounded-full">
@@ -278,7 +305,9 @@ export default function IncomeRefinementPanel({
         <div className="flex items-center gap-2 text-text-muted">
           {filled > 0 && !isOpen && (
             <span className="text-xs tabular-nums">
-              {filled} factor{filled !== 1 ? "s" : ""}
+              {language === "zh"
+                ? `${filled} 项因素`
+                : `${filled} factor${filled !== 1 ? "s" : ""}`}
             </span>
           )}
           <ChevronIcon open={isOpen} />
@@ -293,29 +322,29 @@ export default function IncomeRefinementPanel({
       >
         <div className="overflow-hidden">
           <div className="px-4 pb-4 pt-2 space-y-4 bg-bg-card border-t border-border-subtle">
-            <ConfidenceBar filled={filled} />
+            <ConfidenceBar filled={filled} language={language} />
 
             {/* ── Demographics ── */}
             <fieldset>
-              <SectionLegend>Demographics</SectionLegend>
+              <SectionLegend>{language === "zh" ? "人口特征" : "Demographics"}</SectionLegend>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
                 <SmallInput
                   id="ref-age"
-                  label="Age"
+                  label={language === "zh" ? "年龄" : "Age"}
                   value={factors.age}
                   placeholder="35"
                   onChange={(v) => numChange("age", v, 3)}
                 />
                 <SmallInput
                   id="ref-household"
-                  label="Household"
+                  label={language === "zh" ? "家庭人数" : "Household"}
                   value={factors.householdSize}
                   placeholder="2"
                   onChange={(v) => numChange("householdSize", v, 2)}
                 />
                 <SmallInput
                   id="ref-years-worked"
-                  label="Yrs worked"
+                  label={language === "zh" ? "工作年限" : "Yrs worked"}
                   value={factors.yearsWorked}
                   placeholder="10"
                   onChange={(v) => numChange("yearsWorked", v, 2)}
@@ -325,15 +354,15 @@ export default function IncomeRefinementPanel({
               {/* Education */}
               <div className="mb-2">
                 <span className="block text-xs text-text-muted mb-1">
-                  Education
+                  {language === "zh" ? "教育程度" : "Education"}
                 </span>
                 <SegmentedButtons
                   options={[
-                    ["no_degree", "No degree"],
-                    ["high_school", "High school"],
-                    ["bachelor", "Bachelor"],
-                    ["master", "Master"],
-                    ["doctorate", "PhD"],
+                    ["no_degree", language === "zh" ? "无学位" : "No degree"],
+                    ["high_school", language === "zh" ? "高中" : "High school"],
+                    ["bachelor", language === "zh" ? "本科" : "Bachelor"],
+                    ["master", language === "zh" ? "硕士" : "Master"],
+                    ["doctorate", language === "zh" ? "博士" : "PhD"],
                   ]}
                   value={factors.educationLevel}
                   onSelect={(v) => onChange("educationLevel", v)}
@@ -343,16 +372,16 @@ export default function IncomeRefinementPanel({
               {/* Employment type */}
               <div className="mb-2">
                 <span className="block text-xs text-text-muted mb-1">
-                  Employment
+                  {language === "zh" ? "就业状态" : "Employment"}
                 </span>
                 <SegmentedButtons
                   options={[
-                    ["unemployed", "Unemployed"],
-                    ["part_time", "Part-time"],
-                    ["full_time", "Full-time"],
-                    ["self_employed", "Self-empl."],
-                    ["business_owner", "Business"],
-                    ["retired", "Retired"],
+                    ["unemployed", language === "zh" ? "失业" : "Unemployed"],
+                    ["part_time", language === "zh" ? "兼职" : "Part-time"],
+                    ["full_time", language === "zh" ? "全职" : "Full-time"],
+                    ["self_employed", language === "zh" ? "自由职业" : "Self-empl."],
+                    ["business_owner", language === "zh" ? "企业主" : "Business"],
+                    ["retired", language === "zh" ? "退休" : "Retired"],
                   ]}
                   value={factors.employmentType}
                   onSelect={(v) => onChange("employmentType", v)}
@@ -362,15 +391,15 @@ export default function IncomeRefinementPanel({
               {/* Marital status */}
               <div>
                 <span className="block text-xs text-text-muted mb-1">
-                  Marital status
+                  {language === "zh" ? "婚姻状态" : "Marital status"}
                 </span>
                 <SegmentedButtons
                   options={[
-                    ["single", "Single"],
-                    ["partnered", "Partner"],
-                    ["married", "Married"],
-                    ["divorced", "Divorced"],
-                    ["widowed", "Widowed"],
+                    ["single", language === "zh" ? "单身" : "Single"],
+                    ["partnered", language === "zh" ? "伴侣同住" : "Partner"],
+                    ["married", language === "zh" ? "已婚" : "Married"],
+                    ["divorced", language === "zh" ? "离异" : "Divorced"],
+                    ["widowed", language === "zh" ? "丧偶" : "Widowed"],
                   ]}
                   value={factors.maritalStatus}
                   onSelect={(v) => onChange("maritalStatus", v)}
@@ -380,19 +409,19 @@ export default function IncomeRefinementPanel({
 
             {/* ── Financial Profile ── */}
             <fieldset>
-              <SectionLegend>Financial profile</SectionLegend>
+              <SectionLegend>{language === "zh" ? "财务画像" : "Financial profile"}</SectionLegend>
 
               <div className="mb-2">
                 <span className="block text-xs text-text-muted mb-1">
-                  Savings habit
+                  {language === "zh" ? "储蓄习惯" : "Savings habit"}
                 </span>
                 <SegmentedButtons
                   options={[
-                    ["very_low", "Minimal"],
-                    ["low", "Below avg"],
-                    ["moderate", "Average"],
-                    ["high", "Above avg"],
-                    ["very_high", "Aggressive"],
+                    ["very_low", language === "zh" ? "很少" : "Minimal"],
+                    ["low", language === "zh" ? "低于平均" : "Below avg"],
+                    ["moderate", language === "zh" ? "平均" : "Average"],
+                    ["high", language === "zh" ? "高于平均" : "Above avg"],
+                    ["very_high", language === "zh" ? "非常积极" : "Aggressive"],
                   ]}
                   value={factors.savingsRate}
                   onSelect={(v) => onChange("savingsRate", v)}
@@ -403,7 +432,7 @@ export default function IncomeRefinementPanel({
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <ToggleChip
                   active={factors.hasInvestments}
-                  label={<><span aria-hidden="true">📈 </span>Investments</>}
+                  label={<><span aria-hidden="true">📈 </span>{language === "zh" ? "投资" : "Investments"}</>}
                   onClick={() =>
                     onChange("hasInvestments", !factors.hasInvestments)
                   }
@@ -411,7 +440,7 @@ export default function IncomeRefinementPanel({
                 />
                 <ToggleChip
                   active={factors.hasRetirement}
-                  label={<><span aria-hidden="true">🏛️ </span>Retirement fund</>}
+                  label={<><span aria-hidden="true">🏛️ </span>{language === "zh" ? "退休账户" : "Retirement fund"}</>}
                   onClick={() =>
                     onChange("hasRetirement", !factors.hasRetirement)
                   }
@@ -419,7 +448,7 @@ export default function IncomeRefinementPanel({
                 />
                 <ToggleChip
                   active={factors.hasInheritance}
-                  label={<><span aria-hidden="true">🏦 </span>Inheritance</>}
+                  label={<><span aria-hidden="true">🏦 </span>{language === "zh" ? "继承/赠与" : "Inheritance"}</>}
                   onClick={() =>
                     onChange("hasInheritance", !factors.hasInheritance)
                   }
@@ -433,9 +462,9 @@ export default function IncomeRefinementPanel({
                   {factors.hasInvestments && (
                     <SmallInput
                       id="ref-inv-val"
-                      label={`Investment value (${currencyCode})`}
+                      label={language === "zh" ? `投资金额（${currencyCode}）` : `Investment value (${currencyCode})`}
                       value={factors.investmentValue}
-                      placeholder="e.g. 50000"
+                      placeholder={language === "zh" ? "例如 50000" : "e.g. 50000"}
                       onChange={(v) => numChange("investmentValue", v, 10)}
                       maxLen={10}
                     />
@@ -443,9 +472,9 @@ export default function IncomeRefinementPanel({
                   {factors.hasRetirement && (
                     <SmallInput
                       id="ref-ret-val"
-                      label={`Pension pot / 401k (${currencyCode})`}
+                      label={language === "zh" ? `养老金 / 401k（${currencyCode}）` : `Pension pot / 401k (${currencyCode})`}
                       value={factors.retirementValue}
-                      placeholder="e.g. 80000"
+                      placeholder={language === "zh" ? "例如 80000" : "e.g. 80000"}
                       onChange={(v) => numChange("retirementValue", v, 10)}
                       maxLen={10}
                     />
@@ -456,12 +485,12 @@ export default function IncomeRefinementPanel({
 
             {/* ── Property ── */}
             <fieldset>
-              <SectionLegend>Property</SectionLegend>
+              <SectionLegend>{language === "zh" ? "房产" : "Property"}</SectionLegend>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-1.5">
                   <ToggleChip
                     active={factors.hasProperty}
-                    label={<><span aria-hidden="true">🏠 </span>I own property</>}
+                    label={<><span aria-hidden="true">🏠 </span>{language === "zh" ? "我有房产" : "I own property"}</>}
                     onClick={() =>
                       onChange("hasProperty", !factors.hasProperty)
                     }
@@ -469,7 +498,7 @@ export default function IncomeRefinementPanel({
                   />
                   <ToggleChip
                     active={factors.hasMortgage}
-                    label={<><span aria-hidden="true">🏗️ </span>Mortgage</>}
+                    label={<><span aria-hidden="true">🏗️ </span>{language === "zh" ? "房贷" : "Mortgage"}</>}
                     onClick={() =>
                       onChange("hasMortgage", !factors.hasMortgage)
                     }
@@ -481,9 +510,9 @@ export default function IncomeRefinementPanel({
                     {factors.hasProperty && (
                       <SmallInput
                         id="ref-prop-val"
-                        label={`Property value (${currencyCode})`}
+                        label={language === "zh" ? `房产市值（${currencyCode}）` : `Property value (${currencyCode})`}
                         value={factors.propertyValue}
-                        placeholder="e.g. 350000"
+                        placeholder={language === "zh" ? "例如 350000" : "e.g. 350000"}
                         onChange={(v) => numChange("propertyValue", v, 10)}
                         maxLen={10}
                       />
@@ -491,9 +520,9 @@ export default function IncomeRefinementPanel({
                     {factors.hasMortgage && (
                       <SmallInput
                         id="ref-mort-val"
-                        label={`Mortgage remaining (${currencyCode})`}
+                        label={language === "zh" ? `剩余房贷（${currencyCode}）` : `Mortgage remaining (${currencyCode})`}
                         value={factors.mortgageRemaining}
-                        placeholder="e.g. 200000"
+                        placeholder={language === "zh" ? "例如 200000" : "e.g. 200000"}
                         onChange={(v) => numChange("mortgageRemaining", v, 10)}
                         maxLen={10}
                       />
@@ -505,25 +534,25 @@ export default function IncomeRefinementPanel({
 
             {/* ── Debts ── */}
             <fieldset>
-              <SectionLegend>Non-mortgage debts</SectionLegend>
+              <SectionLegend>{language === "zh" ? "非房贷负债" : "Non-mortgage debts"}</SectionLegend>
               <div className="space-y-2">
                 <ToggleChip
                   active={factors.hasDebts}
-                  label={<><span aria-hidden="true">💳 </span>I have significant debts</>}
+                  label={<><span aria-hidden="true">💳 </span>{language === "zh" ? "我有较大负债" : "I have significant debts"}</>}
                   onClick={() => onChange("hasDebts", !factors.hasDebts)}
                   variant="negative"
                 />
                 {factors.hasDebts && (
                   <div className="ml-1">
                     <span className="block text-xs text-text-muted mb-1">
-                      Debt level (excl. mortgage)
+                      {language === "zh" ? "负债水平（不含房贷）" : "Debt level (excl. mortgage)"}
                     </span>
                     <SegmentedButtons
                       options={[
-                        ["low", "< 1yr income"],
-                        ["moderate", "1–3yr"],
-                        ["high", "3–5yr"],
-                        ["very_high", "> 5yr"],
+                        ["low", language === "zh" ? "< 1 年收入" : "< 1yr income"],
+                        ["moderate", language === "zh" ? "1–3 年" : "1–3yr"],
+                        ["high", language === "zh" ? "3–5 年" : "3–5yr"],
+                        ["very_high", language === "zh" ? "> 5 年" : "> 5yr"],
                       ]}
                       value={factors.debtLevel}
                       onSelect={(v) => onChange("debtLevel", v)}
@@ -535,13 +564,13 @@ export default function IncomeRefinementPanel({
             </fieldset>
 
             {/* Factor impact summary */}
-            <FactorImpactSummary impacts={impacts} />
+            <FactorImpactSummary impacts={impacts} language={language} />
 
             {/* Methodology note */}
             <p className="text-xs text-text-muted/70 leading-relaxed pt-2 border-t border-border-subtle">
-              Based on Federal Reserve SCF, OECD, ECB HFCS, and Credit Suisse
-              data. Model: income × age × education × employment × marital ×
-              savings × assets − debts. Currently ±{spreadPct}% uncertainty.
+              {language === "zh"
+                ? `基于美联储 SCF、OECD、ECB HFCS 与 Credit Suisse 数据。模型为：收入 × 年龄 × 教育 × 就业 × 婚姻 × 储蓄 × 资产 − 负债。目前不确定区间约为 ±${spreadPct}%。`
+                : `Based on Federal Reserve SCF, OECD, ECB HFCS, and Credit Suisse data. Model: income × age × education × employment × marital × savings × assets − debts. Currently ±${spreadPct}% uncertainty.`}
             </p>
           </div>
         </div>

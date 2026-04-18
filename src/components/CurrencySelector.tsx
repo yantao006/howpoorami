@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLanguage } from "@/components/LanguageProvider";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -10,32 +11,33 @@ import { createPortal } from "react-dom";
 interface CurrencyOption {
   readonly code: string;
   readonly label: string;
+  readonly zhLabel: string;
   readonly symbol: string;
 }
 
 const CURRENCIES: readonly CurrencyOption[] = [
-  { code: "USD", label: "US Dollar", symbol: "$" },
-  { code: "EUR", label: "Euro", symbol: "\u20AC" },
-  { code: "GBP", label: "British Pound", symbol: "\u00A3" },
-  { code: "JPY", label: "Japanese Yen", symbol: "\u00A5" },
-  { code: "CHF", label: "Swiss Franc", symbol: "CHF" },
-  { code: "CAD", label: "Canadian Dollar", symbol: "C$" },
-  { code: "AUD", label: "Australian Dollar", symbol: "A$" },
-  { code: "NZD", label: "New Zealand Dollar", symbol: "NZ$" },
-  { code: "SEK", label: "Swedish Krona", symbol: "kr" },
-  { code: "NOK", label: "Norwegian Krone", symbol: "kr" },
-  { code: "DKK", label: "Danish Krone", symbol: "kr" },
-  { code: "CNY", label: "Chinese Yuan", symbol: "\u00A5" },
-  { code: "KRW", label: "South Korean Won", symbol: "\u20A9" },
-  { code: "INR", label: "Indian Rupee", symbol: "\u20B9" },
-  { code: "BRL", label: "Brazilian Real", symbol: "R$" },
-  { code: "MXN", label: "Mexican Peso", symbol: "MX$" },
-  { code: "SGD", label: "Singapore Dollar", symbol: "S$" },
-  { code: "ZAR", label: "South African Rand", symbol: "R" },
-  { code: "PLN", label: "Polish Zloty", symbol: "z\u0142" },
-  { code: "CZK", label: "Czech Koruna", symbol: "K\u010D" },
-  { code: "CLP", label: "Chilean Peso", symbol: "CL$" },
-  { code: "HUF", label: "Hungarian Forint", symbol: "Ft" },
+  { code: "USD", label: "US Dollar", zhLabel: "美元", symbol: "$" },
+  { code: "EUR", label: "Euro", zhLabel: "欧元", symbol: "\u20AC" },
+  { code: "GBP", label: "British Pound", zhLabel: "英镑", symbol: "\u00A3" },
+  { code: "JPY", label: "Japanese Yen", zhLabel: "日元", symbol: "\u00A5" },
+  { code: "CHF", label: "Swiss Franc", zhLabel: "瑞士法郎", symbol: "CHF" },
+  { code: "CAD", label: "Canadian Dollar", zhLabel: "加元", symbol: "C$" },
+  { code: "AUD", label: "Australian Dollar", zhLabel: "澳元", symbol: "A$" },
+  { code: "NZD", label: "New Zealand Dollar", zhLabel: "新西兰元", symbol: "NZ$" },
+  { code: "SEK", label: "Swedish Krona", zhLabel: "瑞典克朗", symbol: "kr" },
+  { code: "NOK", label: "Norwegian Krone", zhLabel: "挪威克朗", symbol: "kr" },
+  { code: "DKK", label: "Danish Krone", zhLabel: "丹麦克朗", symbol: "kr" },
+  { code: "CNY", label: "Chinese Yuan", zhLabel: "人民币", symbol: "\u00A5" },
+  { code: "KRW", label: "South Korean Won", zhLabel: "韩元", symbol: "\u20A9" },
+  { code: "INR", label: "Indian Rupee", zhLabel: "印度卢比", symbol: "\u20B9" },
+  { code: "BRL", label: "Brazilian Real", zhLabel: "巴西雷亚尔", symbol: "R$" },
+  { code: "MXN", label: "Mexican Peso", zhLabel: "墨西哥比索", symbol: "MX$" },
+  { code: "SGD", label: "Singapore Dollar", zhLabel: "新加坡元", symbol: "S$" },
+  { code: "ZAR", label: "South African Rand", zhLabel: "南非兰特", symbol: "R" },
+  { code: "PLN", label: "Polish Zloty", zhLabel: "波兰兹罗提", symbol: "z\u0142" },
+  { code: "CZK", label: "Czech Koruna", zhLabel: "捷克克朗", symbol: "K\u010D" },
+  { code: "CLP", label: "Chilean Peso", zhLabel: "智利比索", symbol: "CL$" },
+  { code: "HUF", label: "Hungarian Forint", zhLabel: "匈牙利福林", symbol: "Ft" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -48,6 +50,7 @@ interface CurrencySelectorProps {
 }
 
 export default function CurrencySelector({ selected, onSelect }: CurrencySelectorProps) {
+  const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number; width: number } | null>(null);
@@ -219,7 +222,11 @@ export default function CurrencySelector({ selected, onSelect }: CurrencySelecto
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-controls={listboxId}
-        aria-label={`Select currency, current: ${selectedCurrency.code}`}
+        aria-label={
+          language === "zh"
+            ? `选择货币，当前为 ${selectedCurrency.code}`
+            : `Select currency, current: ${selectedCurrency.code}`
+        }
         aria-activedescendant={isOpen ? activeOptionId : undefined}
         className="
           flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
@@ -269,7 +276,7 @@ export default function CurrencySelector({ selected, onSelect }: CurrencySelecto
                 ref={listboxRef}
                 id={listboxId}
                 role="listbox"
-                aria-label="Currencies"
+                aria-label={language === "zh" ? "货币列表" : "Currencies"}
                 className="max-h-52 overflow-y-auto py-1"
               >
                 {CURRENCIES.map((currency, idx) => {
@@ -306,7 +313,9 @@ export default function CurrencySelector({ selected, onSelect }: CurrencySelecto
                       <span className="w-8 text-right tabular-nums font-medium shrink-0">
                         {currency.symbol}
                       </span>
-                      <span className="flex-1 text-left">{currency.label}</span>
+                      <span className="flex-1 text-left">
+                        {language === "zh" ? currency.zhLabel : currency.label}
+                      </span>
                       <span className="text-text-muted text-xs">{currency.code}</span>
                     </li>
                   );

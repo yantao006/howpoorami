@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { type AllCountryCode, ALL_COUNTRY_MAP } from "@/data/countries-extended";
 
 /**
@@ -8,24 +7,7 @@ import { type AllCountryCode, ALL_COUNTRY_MAP } from "@/data/countries-extended"
  * Returns a valid AllCountryCode if found, or null.
  */
 export function useGeoCountry(): AllCountryCode | null {
-  const [detected, setDetected] = useState<AllCountryCode | null>(null);
-
-  useEffect(() => {
-    // First try timezone-based detection (no permission needed)
-    const tzCountry = detectFromTimezone();
-    if (tzCountry) {
-      setDetected(tzCountry);
-      return;
-    }
-
-    // Fallback: try navigator language
-    const langCountry = detectFromLanguage();
-    if (langCountry) {
-      setDetected(langCountry);
-    }
-  }, []);
-
-  return detected;
+  return detectFromTimezone() ?? detectFromLanguage();
 }
 
 const TIMEZONE_TO_COUNTRY: Readonly<Record<string, AllCountryCode>> = {

@@ -6,6 +6,8 @@ import { type CountryData, getWealthThresholds } from "@/data/wealth-data";
 import { getDetailedShares, type DetailedWealthShares } from "@/data/billionaires";
 import { formatCurrency } from "@/lib/format";
 import { fromUSD } from "@/lib/currency";
+import { useLanguage } from "@/components/LanguageProvider";
+import { type Language, tSegmentLabel } from "@/lib/i18n";
 
 interface WealthDistributionChartProps {
   readonly country: CountryData;
@@ -57,18 +59,24 @@ function getSegments(shares: DetailedWealthShares, zoom: ZoomLevel): readonly Ba
   ];
 }
 
-function formatPeopleCount(count: number): string {
+function formatPeopleCount(count: number, language: Language): string {
   if (count >= 1_000_000) {
-    return `~${(count / 1_000_000).toFixed(1)}M people`;
+    return language === "zh"
+      ? `约 ${(count / 1_000_000).toFixed(1)} 百万人`
+      : `~${(count / 1_000_000).toFixed(1)}M people`;
   }
   if (count >= 1_000) {
-    return `~${Math.round(count / 1_000).toLocaleString("en")}K people`;
+    return language === "zh"
+      ? `约 ${Math.round(count / 1_000).toLocaleString("zh-CN")} 千人`
+      : `~${Math.round(count / 1_000).toLocaleString("en")}K people`;
   }
-  return `~${Math.round(count).toLocaleString("en")} people`;
+  return language === "zh"
+    ? `约 ${Math.round(count).toLocaleString("zh-CN")} 人`
+    : `~${Math.round(count).toLocaleString("en")} people`;
 }
 
-function formatPerPerson(wealthShare: number, populationPercent: number): string {
-  if (wealthShare <= 0) return "net debt";
+function formatPerPerson(wealthShare: number, populationPercent: number, language: Language): string {
+  if (wealthShare <= 0) return language === "zh" ? "净负债" : "net debt";
   const ratio = wealthShare / populationPercent;
   if (ratio >= 100) return `${Math.round(ratio)}x`;
   if (ratio >= 10) return `${ratio.toFixed(0)}x`;
@@ -80,6 +88,7 @@ export default function WealthDistributionChart({
   country,
   userPercentile,
 }: WealthDistributionChartProps) {
+  const { language } = useLanguage();
   const [zoom, setZoom] = useState<ZoomLevel>("overview");
   const [expandedLabels, setExpandedLabels] = useState<ReadonlySet<string>>(new Set());
 
@@ -124,9 +133,9 @@ export default function WealthDistributionChart({
   );
 
   const zoomOptions: { value: ZoomLevel; label: string }[] = [
-    { value: "overview", label: "All groups" },
-    { value: "top10", label: "Top 10%" },
-    { value: "top1", label: "Top 1%" },
+    { value: "overview", label: language === "zh" ? "全部分组" : "All groups" },
+    { value: "top10", label: tSegmentLabel("Top 10%", language) },
+    { value: "top1", label: tSegmentLabel("Top 1%", language) },
   ];
 
   function toggleExpand(label: string) {
@@ -145,7 +154,7 @@ export default function WealthDistributionChart({
     <div className="relative">
       {/* Zoom controls */}
       <div className="flex items-center justify-center gap-2 mb-6">
-        <span className="text-text-muted text-xs mr-2">Zoom:</span>
+        <span className="text-text-muted text-xs mr-2">{language === "zh" ? "缩放：" : "Zoom:"}</span>
         {zoomOptions.map((opt) => (
           <button
             key={opt.value}
@@ -172,9 +181,10 @@ export default function WealthDistributionChart({
             const wealthBarPct = maxWealth > 0 ? (clampedWealth / maxWealth) * 100 : 0;
             const popBarPct = (seg.populationPercent / maxPop) * 100;
             const peopleCount = Math.round(populationAdults * 1_000_000 * (seg.populationPercent / 100));
-            const perPersonMultiple = formatPerPerson(seg.wealthShare, seg.populationPercent);
+            const perPersonMultiple = formatPerPerson(seg.wealthShare, seg.populationPercent, language);
             const isExpanded = expandedLabels.has(seg.label);
             const isUserSegment = seg.label === userSegmentLabel;
+            const localizedLabel = tSegmentLabel(seg.label, language);
 
             return (
               <motion.div
@@ -199,22 +209,26 @@ export default function WealthDistributionChart({
                   type="button"
                   onClick={() => toggleExpand(seg.label)}
                   aria-expanded={expandedLabels.has(seg.label)}
-                  aria-label={`${seg.label}: ${seg.wealthShare.toFixed(1)}% of wealth. Click to ${expandedLabels.has(seg.label) ? "collapse" : "expand"} details.`}
+                  aria-label={
+                    language === "zh"
+                      ? `${localizedLabel}：持有 ${seg.wealthShare.toFixed(1)}% 的财富。点击${expandedLabels.has(seg.label) ? "收起" : "展开"}详情。`
+                      : `${seg.label}: ${seg.wealthShare.toFixed(1)}% of wealth. Click to ${expandedLabels.has(seg.label) ? "collapse" : "expand"} details.`
+                  }
                   className="w-full text-left p-4 cursor-pointer"
                 >
                   {/* Row header */}
                   <div className="flex items-baseline justify-between mb-3">
                     <div className="flex items-baseline gap-3">
                       <span className="text-text-primary text-sm font-semibold">
-                        {seg.label}
+                        {localizedLabel}
                       </span>
                       {isUserSegment && (
                         <span className="text-accent-periwinkle text-[10px] font-semibold bg-accent-periwinkle/10 px-1.5 py-0.5 rounded-full">
-                          You are here
+                          {language === "zh" ? "你在这里" : "You are here"}
                         </span>
                       )}
                       <span className="text-text-muted text-xs hidden sm:inline">
-                        {formatPeopleCount(peopleCount)}
+                        {formatPeopleCount(peopleCount, language)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -222,10 +236,10 @@ export default function WealthDistributionChart({
                         className="text-sm font-bold tabular-nums"
                         style={{ color: seg.color }}
                       >
-                        {seg.wealthShare.toFixed(1)}% of wealth
+                        {language === "zh" ? `${seg.wealthShare.toFixed(1)}% 财富` : `${seg.wealthShare.toFixed(1)}% of wealth`}
                       </span>
                       <span className="text-text-muted text-xs tabular-nums hidden sm:inline">
-                        {perPersonMultiple} per person
+                        {language === "zh" ? `${perPersonMultiple} / 人` : `${perPersonMultiple} per person`}
                       </span>
                       <svg
                         width="14"
@@ -249,7 +263,7 @@ export default function WealthDistributionChart({
                     {/* Wealth bar */}
                     <div className="flex items-center gap-3">
                       <span className="text-text-muted text-[10px] w-12 text-right flex-shrink-0">
-                        Wealth
+                        {language === "zh" ? "财富" : "Wealth"}
                       </span>
                       <div className="flex-1 h-5 rounded-full bg-white/5 overflow-hidden">
                         <motion.div
@@ -271,7 +285,7 @@ export default function WealthDistributionChart({
                     {/* Population bar */}
                     <div className="flex items-center gap-3">
                       <span className="text-text-muted text-[10px] w-12 text-right flex-shrink-0">
-                        People
+                        {language === "zh" ? "人口" : "People"}
                       </span>
                       <div className="flex-1 h-3 rounded-full bg-white/5 overflow-hidden">
                         <motion.div
@@ -302,27 +316,29 @@ export default function WealthDistributionChart({
                       <div className="px-4 pb-4 pt-1 border-t border-border-subtle/30">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                           <div>
-                            <p className="text-text-muted mb-0.5">People</p>
+                            <p className="text-text-muted mb-0.5">{language === "zh" ? "人数" : "People"}</p>
                             <p className="text-text-primary font-semibold tabular-nums">
-                              {formatPeopleCount(peopleCount)}
+                              {formatPeopleCount(peopleCount, language)}
                             </p>
                           </div>
                           <div>
-                            <p className="text-text-muted mb-0.5">Population share</p>
+                            <p className="text-text-muted mb-0.5">{language === "zh" ? "人口占比" : "Population share"}</p>
                             <p className="text-text-primary font-semibold tabular-nums">
                               {seg.populationPercent}%
                             </p>
                           </div>
                           <div>
-                            <p className="text-text-muted mb-0.5">Per-person share</p>
+                            <p className="text-text-muted mb-0.5">{language === "zh" ? "人均份额" : "Per-person share"}</p>
                             <p className="text-text-primary font-semibold tabular-nums">
-                              {perPersonMultiple} average
+                              {language === "zh" ? `${perPersonMultiple} 平均水平` : `${perPersonMultiple} average`}
                             </p>
                           </div>
                           <div>
-                            <p className="text-text-muted mb-0.5">Concentration</p>
+                            <p className="text-text-muted mb-0.5">{language === "zh" ? "集中度" : "Concentration"}</p>
                             <p className="text-text-primary font-semibold tabular-nums">
-                              {seg.populationPercent}% of people hold {seg.wealthShare.toFixed(1)}% of wealth
+                              {language === "zh"
+                                ? `${seg.populationPercent}% 的人持有 ${seg.wealthShare.toFixed(1)}% 的财富`
+                                : `${seg.populationPercent}% of people hold ${seg.wealthShare.toFixed(1)}% of wealth`}
                             </p>
                           </div>
                         </div>
@@ -331,13 +347,17 @@ export default function WealthDistributionChart({
                           if (threshold === null) return null;
                           return (
                             <p className="text-accent-periwinkle/80 text-xs mt-3">
-                              Entry threshold: ~{formatCurrency(fromUSD(threshold, cc), cc, true)}
+                              {language === "zh" ? "进入门槛：" : "Entry threshold: ~"}
+                              {language === "zh" ? "约 " : ""}
+                              {formatCurrency(fromUSD(threshold, cc), cc, true)}
                             </p>
                           );
                         })()}
                         {seg.populationPercent <= 0.01 && (
                           <p className="text-accent-rose/80 text-xs mt-3 italic">
-                            That&apos;s just {formatPeopleCount(peopleCount).replace("~", "")} controlling more wealth than the bottom half of the entire country.
+                            {language === "zh"
+                              ? `也就是说，仅 ${formatPeopleCount(peopleCount, language).replace("约 ", "")} 就控制了比全国底部一半人更多的财富。`
+                              : `That's just ${formatPeopleCount(peopleCount, language).replace("~", "")} controlling more wealth than the bottom half of the entire country.`}
                           </p>
                         )}
                       </div>
@@ -356,15 +376,15 @@ export default function WealthDistributionChart({
           <div className="w-4 h-3 rounded-sm bg-white/5 overflow-hidden">
             <div className="w-full h-full rounded-sm" style={{ backgroundColor: COLORS.bottom50 }} />
           </div>
-          <span>Wealth share</span>
+          <span>{language === "zh" ? "财富占比" : "Wealth share"}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-2 rounded-sm bg-white/5 overflow-hidden">
             <div className="w-full h-full rounded-sm opacity-40" style={{ backgroundColor: COLORS.bottom50 }} />
           </div>
-          <span>Population share</span>
+          <span>{language === "zh" ? "人口占比" : "Population share"}</span>
         </div>
-        <span className="text-text-muted">Click any group for details</span>
+        <span className="text-text-muted">{language === "zh" ? "点击任意分组查看详情" : "Click any group for details"}</span>
       </div>
     </div>
   );

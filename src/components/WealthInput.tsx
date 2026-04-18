@@ -21,6 +21,8 @@ import {
   type AgeAdjustedResult,
 } from "@/data/age-adjustment";
 import IncomeRefinementPanel from "./IncomeRefinementPanel";
+import { useLanguage } from "@/components/LanguageProvider";
+import { tCountryName, type Language } from "@/lib/i18n";
 
 interface WealthInputProps {
   readonly country: CountryData;
@@ -33,6 +35,8 @@ export default function WealthInput({
   country,
   onPercentileChange,
 }: WealthInputProps) {
+  const { language } = useLanguage();
+  const countryName = tCountryName(country.code, country.name, language);
   const [inputValue, setInputValue] = useState("");
   const [percentile, setPercentile] = useState<number | null>(null);
   const [percentileRange, setPercentileRange] =
@@ -43,7 +47,6 @@ export default function WealthInput({
   );
   const [refinePanelOpen, setRefinePanelOpen] = useState(false);
   const [ageInput, setAgeInput] = useState("");
-  const [ageResult, setAgeResult] = useState<AgeAdjustedResult | null>(null);
   const refinePanelRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll refinement panel into view on mobile when opened
@@ -63,42 +66,41 @@ export default function WealthInput({
   // Convert input and recompute when country changes (instead of resetting)
   const prevCurrencyRef = useRef(country.currency);
   const prevCountryCodeRef = useRef(country.code);
+  const [zeroIncomeMessage, setZeroIncomeMessage] = useState<string | null>(
+    null,
+  );
   useEffect(() => {
     if (prevCountryCodeRef.current === country.code) return;
     const prevCurrency = prevCurrencyRef.current;
     prevCurrencyRef.current = country.currency;
     prevCountryCodeRef.current = country.code;
 
-    if (inputValue.length === 0 || inputValue === "-") {
-      setPercentile(null);
-      setPercentileRange(null);
-      setZeroIncomeMessage(null);
-      onPercentileChange(null);
-      return;
-    }
+    const id = requestAnimationFrame(() => {
+      if (inputValue.length === 0 || inputValue === "-") {
+        setPercentile(null);
+        setPercentileRange(null);
+        setZeroIncomeMessage(null);
+        onPercentileChange(null);
+        return;
+      }
 
-    // Convert the input value from old currency to new currency
-    const parsed = parseInt(inputValue, 10);
-    if (!Number.isFinite(parsed)) return;
-    const usd = toUSD(parsed, prevCurrency);
-    const converted = Math.round(fromUSD(usd, country.currency));
-    const newRaw = String(converted);
-    setInputValue(newRaw);
+      const parsed = parseInt(inputValue, 10);
+      if (!Number.isFinite(parsed)) return;
+      const usd = toUSD(parsed, prevCurrency);
+      const converted = Math.round(fromUSD(usd, country.currency));
+      const newRaw = String(converted);
+      setInputValue(newRaw);
 
-    // Recompute percentile for the new country
-    if (mode === "income") {
-      // computeFromIncome will be called by the incomeFactors effect
-    } else {
-      const p = findPercentile(usd, country);
-      setPercentile(p);
-      setPercentileRange(null);
-      onPercentileChange(p);
-    }
-  }, [country.code, country.currency, inputValue, mode, onPercentileChange]);
+      if (mode !== "income") {
+        const p = findPercentile(usd, country);
+        setPercentile(p);
+        setPercentileRange(null);
+        onPercentileChange(p);
+      }
+    });
 
-  const [zeroIncomeMessage, setZeroIncomeMessage] = useState<string | null>(
-    null,
-  );
+    return () => cancelAnimationFrame(id);
+  }, [country, inputValue, mode, onPercentileChange]);
 
   const computeFromIncome = useCallback(
     (raw: string, factors: IncomeFactors) => {
@@ -116,7 +118,9 @@ export default function WealthInput({
         setPercentile(null);
         setPercentileRange(null);
         setZeroIncomeMessage(
-          "Enter your annual income to see where you stand. For zero or no income, try Net Wealth mode instead.",
+          language === "zh"
+            ? "请输入你的年度收入来查看位置。如果当前没有收入，建议改用“净资产”模式。"
+            : "Enter your annual income to see where you stand. For zero or no income, try Net Wealth mode instead.",
         );
         onPercentileChange(null);
         return;
@@ -131,37 +135,35 @@ export default function WealthInput({
       setPercentileRange(pRange);
       onPercentileChange(pRange.mid);
     },
-    [country, onPercentileChange],
+    [country, language, onPercentileChange],
   );
 
   // Recompute when income factors change
   useEffect(() => {
     if (mode !== "income") return;
-    computeFromIncome(inputValue, incomeFactors);
+    const id = requestAnimationFrame(() => {
+      computeFromIncome(inputValue, incomeFactors);
+    });
+    return () => cancelAnimationFrame(id);
   }, [incomeFactors, mode, inputValue, computeFromIncome]);
 
-  // Compute age-adjusted percentile when age or wealth changes
-  useEffect(() => {
+  const ageResult = useMemo((): AgeAdjustedResult | null => {
     const age = parseInt(ageInput, 10);
     if (!Number.isFinite(age) || age < 18 || age > 120 || percentile === null) {
-      setAgeResult(null);
-      return;
+      return null;
     }
     if (!hasAgeData(country.code)) {
-      setAgeResult(null);
-      return;
+      return null;
     }
-    // Get the USD wealth from the current input
     if (inputValue.length === 0 || inputValue === "-") {
-      setAgeResult(null);
-      return;
+      return null;
     }
     const parsed = parseInt(inputValue, 10);
-    if (!Number.isFinite(parsed)) { setAgeResult(null); return; }
+    if (!Number.isFinite(parsed)) return null;
     const usd = mode === "income"
       ? estimateWealthRange(toUSD(parsed, country.currency), country, incomeFactors, country.currency).mid
       : toUSD(parsed, country.currency);
-    setAgeResult(adjustPercentileForAge(usd, age, country));
+    return adjustPercentileForAge(usd, age, country);
   }, [ageInput, percentile, inputValue, country, mode, incomeFactors]);
 
   const handleChange = useCallback(
@@ -246,12 +248,12 @@ export default function WealthInput({
       {/* Mode toggle — Net Wealth first */}
       <div className="flex justify-center gap-1 mb-4">
         <ModeButton
-          label="Net Wealth"
+          label={language === "zh" ? "净资产" : "Net Wealth"}
           active={mode === "wealth"}
           onClick={() => handleModeSwitch("wealth")}
         />
         <ModeButton
-          label="Annual Income"
+          label={language === "zh" ? "年收入" : "Annual Income"}
           active={mode === "income"}
           onClick={() => handleModeSwitch("income")}
         />
@@ -262,13 +264,21 @@ export default function WealthInput({
         className="block text-sm text-text-secondary mb-2 text-center"
       >
         {mode === "income"
-          ? `Enter your gross (pre-tax) annual income in ${country.currency}`
-          : `Enter your net wealth in ${country.currency}`}
+          ? language === "zh"
+            ? `输入你的税前年收入（${country.currency}）`
+            : `Enter your gross (pre-tax) annual income in ${country.currency}`
+          : language === "zh"
+            ? `输入你的净资产（${country.currency}）`
+            : `Enter your net wealth in ${country.currency}`}
       </label>
       <p className="text-text-muted text-[11px] text-center mb-2">
         {mode === "income"
-          ? "Pre-tax includes wages, capital income, and pensions before tax."
-          : "Enter YOUR personal share — if you share finances with a partner, enter half."}
+          ? language === "zh"
+            ? "税前收入包括工资、资本收入以及养老金等税前金额。"
+            : "Pre-tax includes wages, capital income, and pensions before tax."
+          : language === "zh"
+            ? "请输入你个人名下的份额；如果与伴侣共同持有资产，请填写属于你的那一半。"
+            : "Enter YOUR personal share — if you share finances with a partner, enter half."}
       </p>
 
       <div className="relative">
@@ -293,7 +303,7 @@ export default function WealthInput({
       {percentile !== null && hasAgeData(country.code) && (
         <div className="mt-3 flex items-center justify-center gap-2">
           <label htmlFor="age-input" className="text-text-muted text-xs">
-            Your age (optional):
+            {language === "zh" ? "你的年龄（可选）：" : "Your age (optional):"}
           </label>
           <input
             id="age-input"
@@ -301,7 +311,7 @@ export default function WealthInput({
             inputMode="numeric"
             value={ageInput}
             onChange={(e) => setAgeInput(e.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
-            placeholder="e.g. 30"
+            placeholder={language === "zh" ? "例如 30" : "e.g. 30"}
             className="w-16 px-2 py-1 rounded-lg text-center text-sm tabular-nums bg-bg-card border border-border-subtle text-text-primary placeholder:text-text-muted/40 focus:outline-none focus:border-accent-periwinkle/50 transition-colors"
           />
         </div>
@@ -316,7 +326,9 @@ export default function WealthInput({
               onClick={() => setRefinePanelOpen(true)}
               className="w-full text-center text-xs text-accent-periwinkle hover:text-accent-periwinkle/80 mt-2 mb-1 cursor-pointer transition-colors"
             >
-              Know your assets? Add property, investments &amp; more for a tighter estimate
+              {language === "zh"
+                ? "如果你知道自己的资产情况，可补充房产、投资等信息，让估算更精确"
+                : "Know your assets? Add property, investments & more for a tighter estimate"}
             </button>
           )}
           <IncomeRefinementPanel
@@ -325,6 +337,7 @@ export default function WealthInput({
             onToggle={() => setRefinePanelOpen((o) => !o)}
             onChange={updateFactor}
             currencyCode={country.currency}
+            language={language}
           />
         </div>
       )}
@@ -332,7 +345,7 @@ export default function WealthInput({
       {/* Estimated wealth range */}
       {wealthRange !== null && (
         <p className="text-text-muted text-[11px] text-center mt-2 tabular-nums">
-          Est. net wealth:{" "}
+          {language === "zh" ? "估算净资产：" : "Est. net wealth: "}{" "}
           <span className="text-text-secondary font-medium">
             {formatCurrency(wealthRange.low, country.currency)}
           </span>
@@ -355,24 +368,31 @@ export default function WealthInput({
         <div className="mt-4 text-center animate-fade-in">
           <p className="text-text-secondary text-sm">
             {mode === "income"
-              ? `In ${country.name}, based on estimated wealth from your income, you rank higher than`
-              : `In ${country.name}, you are wealthier than`}
+              ? language === "zh"
+                ? `在 ${countryName}，按你的收入推算出的财富水平计算，你超过了`
+                : `In ${countryName}, based on estimated wealth from your income, you rank higher than`
+              : language === "zh"
+                ? `在 ${countryName}，你的财富超过了`
+                : `In ${countryName}, you are wealthier than`}
           </p>
 
           {isRange && percentileRange ? (
             <PercentileRangeDisplay
               range={percentileRange}
               refinePanelOpen={refinePanelOpen}
+              language={language}
             />
           ) : (
-            <PercentilePreciseDisplay percentile={percentile} />
+            <PercentilePreciseDisplay percentile={percentile} language={language} />
           )}
 
           {/* Age-adjusted result */}
           {ageResult && (
             <div className="mt-3 bg-accent-periwinkle/5 border border-accent-periwinkle/15 rounded-xl px-4 py-3 max-w-sm mx-auto">
               <p className="text-text-secondary text-xs mb-1">
-                For your age group ({AGE_GROUP_LABELS[ageResult.ageGroup]}):
+                {language === "zh"
+                  ? `按你的年龄组（${AGE_GROUP_LABELS[ageResult.ageGroup]}）：`
+                  : `For your age group (${AGE_GROUP_LABELS[ageResult.ageGroup]}):`}
               </p>
               <p className="text-2xl font-bold tabular-nums">
                 <span className={percentileColor(ageResult.ageAdjustedPercentile)}>
@@ -381,15 +401,21 @@ export default function WealthInput({
               </p>
               <p className="text-text-muted text-[10px] mt-1">
                 {ageResult.ageAdjustedPercentile > ageResult.overallPercentile
-                  ? `You're doing better among your age peers than overall (${ageResult.overallPercentile.toFixed(1)}%)`
+                  ? language === "zh"
+                    ? `和同龄人相比，你的表现比整体排名更好（整体为 ${ageResult.overallPercentile.toFixed(1)}%）`
+                    : `You're doing better among your age peers than overall (${ageResult.overallPercentile.toFixed(1)}%)`
                   : ageResult.ageAdjustedPercentile < ageResult.overallPercentile
-                    ? `Your age group typically has more wealth — your overall rank (${ageResult.overallPercentile.toFixed(1)}%) is higher`
-                    : "Your ranking is similar among your age peers"}
+                    ? language === "zh"
+                      ? `你的年龄组通常积累了更多财富，因此你的整体排名（${ageResult.overallPercentile.toFixed(1)}%）反而更高`
+                      : `Your age group typically has more wealth — your overall rank (${ageResult.overallPercentile.toFixed(1)}%) is higher`
+                    : language === "zh"
+                      ? "你在同龄人中的位置与整体排名大致相近"
+                      : "Your ranking is similar among your age peers"}
               </p>
             </div>
           )}
 
-          {comedic && (
+          {language === "en" && comedic && (
             <p className="text-text-muted text-sm mt-3 italic max-w-sm mx-auto">
               {comedic}
             </p>
@@ -398,15 +424,15 @@ export default function WealthInput({
           {/* Negative wealth context */}
           {mode === "wealth" && inputValue.startsWith("-") && (
             <p className="text-text-muted text-xs mt-2 max-w-sm mx-auto">
-              Negative net wealth (debt exceeding assets) is common.
-              In many countries, 10-20% of adults have negative net wealth.
-              WID.world data includes these individuals in the bottom percentiles.
+              {language === "zh"
+                ? "净资产为负（负债大于资产）并不少见。很多国家都有 10%-20% 的成年人处于负净资产状态，WID.world 的数据也将这些人纳入底部百分位。"
+                : "Negative net wealth (debt exceeding assets) is common. In many countries, 10-20% of adults have negative net wealth. WID.world data includes these individuals in the bottom percentiles."}
             </p>
           )}
 
           {percentile < 50 && !(mode === "wealth" && inputValue.startsWith("-")) && (
             <p className="text-text-muted text-xs mt-2">
-              Below the median wealth of{" "}
+              {language === "zh" ? "低于该国财富中位数：" : "Below the median wealth of"}{" "}
               {formatCurrency(
                 fromUSD(country.medianWealthPerAdult, country.currency),
                 country.currency,
@@ -415,15 +441,16 @@ export default function WealthInput({
           )}
           {percentile >= 99 && (
             <p className="text-accent-amber/80 text-xs mt-2">
-              You are in the top 1%
+              {language === "zh" ? "你已进入前 1%" : "You are in the top 1%"}
             </p>
           )}
 
           <ShareButtons
             percentile={percentile}
             percentileRange={isRange ? percentileRange : null}
-            countryName={country.name}
+            countryName={countryName}
             countryCode={country.code}
+            language={language}
           />
 
           {/* Cross-link to How Long page */}
@@ -449,13 +476,13 @@ export default function WealthInput({
             return (
               <div className="mt-5 pt-4 border-t border-border-subtle/50 max-w-sm mx-auto">
                 <p className="text-text-muted text-xs mb-1">
-                  Average top 1% wealth:{" "}
+                  {language === "zh" ? "前 1% 平均财富：" : "Average top 1% wealth: "}{" "}
                   <span className="text-text-secondary font-medium">
                     {formatCurrency(avgTop1Local, country.currency)}
                   </span>
                 </p>
                 <p className="text-text-muted text-xs mb-3">
-                  Richest in {country.name}:{" "}
+                  {language === "zh" ? `${countryName} 最富有的人：` : `Richest in ${countryName}: `}{" "}
                   <span className="text-text-secondary font-medium">
                     {richest.name}
                   </span>{" "}
@@ -465,7 +492,7 @@ export default function WealthInput({
                   href={compareUrl}
                   className="inline-block text-accent-periwinkle text-xs font-medium hover:underline"
                 >
-                  See how long it would take to match them &rarr;
+                  {language === "zh" ? "看看需要多久才能追平他们 →" : "See how long it would take to match them →"}
                 </Link>
               </div>
             );
@@ -474,11 +501,14 @@ export default function WealthInput({
       )}
 
       <p className="text-text-muted text-xs text-center mt-3">
-        Your data stays in your browser. Nothing is stored or sent anywhere.
+        {language === "zh"
+          ? "你的数据始终保留在浏览器中，不会被存储或发送到任何地方。"
+          : "Your data stays in your browser. Nothing is stored or sent anywhere."}
         {mode === "income" && (
           <span className="block mt-1">
-            Income is converted to an estimated wealth range. For exact
-            results, use &quot;Net Wealth&quot; mode.
+            {language === "zh"
+              ? "收入会被换算为一个估算净资产区间。若想获得更精确的结果，请使用“净资产”模式。"
+              : 'Income is converted to an estimated wealth range. For exact results, use "Net Wealth" mode.'}
           </span>
         )}
       </p>
@@ -521,13 +551,17 @@ function percentileColor(p: number): string {
 function PercentileRangeDisplay({
   range,
   refinePanelOpen,
+  language,
 }: {
   readonly range: PercentileRange;
   readonly refinePanelOpen: boolean;
+  readonly language: Language;
 }) {
   return (
     <>
-      <p className="text-text-secondary text-sm mt-1">approximately</p>
+      <p className="text-text-secondary text-sm mt-1">
+        {language === "zh" ? "大约" : "approximately"}
+      </p>
       <p className="text-4xl sm:text-5xl font-bold mt-1 tabular-nums">
         <span className={percentileColor(range.low)}>
           {range.low.toFixed(1)}%
@@ -539,10 +573,14 @@ function PercentileRangeDisplay({
           {range.high.toFixed(1)}%
         </span>
       </p>
-      <p className="text-text-secondary text-sm mt-1">of the population</p>
+      <p className="text-text-secondary text-sm mt-1">
+        {language === "zh" ? "的人口" : "of the population"}
+      </p>
       {!refinePanelOpen && (
         <p className="text-text-muted text-[11px] mt-1">
-          Open &quot;Refine estimate&quot; above to narrow this range
+          {language === "zh"
+            ? '展开上方“细化估算”可缩小这个区间'
+            : 'Open "Refine estimate" above to narrow this range'}
         </p>
       )}
     </>
@@ -551,8 +589,10 @@ function PercentileRangeDisplay({
 
 function PercentilePreciseDisplay({
   percentile,
+  language,
 }: {
   readonly percentile: number;
+  readonly language: Language;
 }) {
   return (
     <>
@@ -561,7 +601,9 @@ function PercentilePreciseDisplay({
           {percentile.toFixed(1)}%
         </span>
       </p>
-      <p className="text-text-secondary text-sm mt-1">of the population</p>
+      <p className="text-text-secondary text-sm mt-1">
+        {language === "zh" ? "的人口" : "of the population"}
+      </p>
     </>
   );
 }
@@ -571,11 +613,13 @@ function ShareButtons({
   percentileRange,
   countryName,
   countryCode,
+  language,
 }: {
   readonly percentile: number;
   readonly percentileRange: PercentileRange | null;
   readonly countryName: string;
   readonly countryCode: string;
+  readonly language: Language;
 }) {
   const [copyStatus, setCopyStatus] = useState<
     "idle" | "copied" | "failed"
@@ -584,7 +628,10 @@ function ShareButtons({
   const pText = percentileRange
     ? `${percentileRange.low.toFixed(1)}–${percentileRange.high.toFixed(1)}%`
     : `${percentile.toFixed(1)}%`;
-  const shareText = `I'm wealthier than ${pText} of the population in ${countryName}. Where do you stand?`;
+  const shareText =
+    language === "zh"
+      ? `我在 ${countryName} 的财富超过了 ${pText} 的人口。你又处在哪个位置？`
+      : `I'm wealthier than ${pText} of the population in ${countryName}. Where do you stand?`;
   const url = countryCode === "GLOBAL"
     ? "https://howpoorami.org"
     : `https://howpoorami.org/${countryCode.toLowerCase()}`;
@@ -608,17 +655,23 @@ function ShareButtons({
 
   const copyLabel =
     copyStatus === "copied"
-      ? "Copied!"
+      ? language === "zh"
+        ? "已复制"
+        : "Copied!"
       : copyStatus === "failed"
-        ? "Copy failed"
-        : "Copy link";
+        ? language === "zh"
+          ? "复制失败"
+          : "Copy failed"
+        : language === "zh"
+          ? "复制链接"
+          : "Copy link";
 
   const btnClass =
     "px-2.5 py-1 rounded-lg text-[11px] font-medium min-h-[44px] min-w-[44px] bg-bg-card border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent-periwinkle/30 transition-all cursor-pointer";
 
   return (
     <div className="flex items-center justify-center gap-2 mt-4">
-      <span className="text-text-muted text-xs">Share:</span>
+      <span className="text-text-muted text-xs">{language === "zh" ? "分享：" : "Share:"}</span>
       <button
         type="button"
         onClick={() =>
@@ -629,7 +682,7 @@ function ShareButtons({
           )
         }
         className={btnClass}
-        aria-label="Share on X"
+        aria-label={language === "zh" ? "分享到 X" : "Share on X"}
       >
         X / Twitter
       </button>
@@ -643,7 +696,7 @@ function ShareButtons({
           )
         }
         className={btnClass}
-        aria-label="Share on WhatsApp"
+        aria-label={language === "zh" ? "分享到 WhatsApp" : "Share on WhatsApp"}
       >
         WhatsApp
       </button>
@@ -657,7 +710,7 @@ function ShareButtons({
               ? "!text-accent-rose !border-accent-rose/30"
               : ""
         }`}
-        aria-label="Copy link"
+        aria-label={language === "zh" ? "复制链接" : "Copy link"}
       >
         {copyLabel}
       </button>

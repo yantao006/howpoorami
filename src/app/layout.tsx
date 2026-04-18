@@ -4,6 +4,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/components/LanguageProvider";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-heading",
@@ -95,16 +96,24 @@ export const metadata: Metadata = {
 };
 
 /**
- * Inline script to set the theme before React hydration to prevent flash.
- * Reads from localStorage, falls back to system preference, defaults to dark.
+ * Inline script to set theme and language before React hydration to prevent
+ * flashes and hydration mismatches.
  */
-const themeScript = `
+const bootScript = `
   (function() {
     try {
+      var storedLanguage = localStorage.getItem('language');
+      var language = (storedLanguage || navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh-CN' : 'en';
+      document.documentElement.setAttribute('lang', language);
+      document.documentElement.setAttribute('data-language', language.indexOf('zh') === 0 ? 'zh' : 'en');
+
       var stored = localStorage.getItem('theme');
       var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       document.documentElement.setAttribute('data-theme', theme);
     } catch(e) {
+      var fallbackLanguage = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh-CN' : 'en';
+      document.documentElement.setAttribute('lang', fallbackLanguage);
+      document.documentElement.setAttribute('data-language', fallbackLanguage.indexOf('zh') === 0 ? 'zh' : 'en');
       document.documentElement.setAttribute('data-theme', 'dark');
     }
   })();
@@ -122,7 +131,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -144,11 +153,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <Navigation />
-          {children}
-          <Footer />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <Navigation />
+            {children}
+            <Footer />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

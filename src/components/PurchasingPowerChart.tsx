@@ -13,6 +13,7 @@ import {
   ECONOMIC_SOURCES,
   type EconomicDataPoint,
 } from "@/data/purchasing-power";
+import { useLanguage } from "@/components/LanguageProvider";
 
 interface PurchasingPowerChartProps {
   readonly countryCode: string;
@@ -56,6 +57,7 @@ export default function PurchasingPowerChart({
   width,
   height,
 }: PurchasingPowerChartProps) {
+  const { language } = useLanguage();
   const data = PURCHASING_POWER[countryCode];
 
   const [tooltip, setTooltip] = useState<{
@@ -127,11 +129,12 @@ export default function PurchasingPowerChart({
     return (
       <div className="rounded-xl border border-border-subtle bg-bg-card p-8 text-center">
         <p className="text-text-secondary text-lg">
-          Economic trend data is not available for this country.
+          {language === "zh" ? "这个国家暂时还没有经济趋势数据。" : "Economic trend data is not available for this country."}
         </p>
         <p className="text-text-muted mt-2 text-sm">
-          Data is currently available for the US, UK, France, Germany, and the
-          Netherlands.
+          {language === "zh"
+            ? "目前仅覆盖美国、英国、法国、德国和荷兰。"
+            : "Data is currently available for the US, UK, France, Germany, and the Netherlands."}
         </p>
       </div>
     );
@@ -147,16 +150,29 @@ export default function PurchasingPowerChart({
               className="h-0.5 w-5 rounded"
               style={{ backgroundColor: line.color }}
             />
-            <span className="text-text-secondary text-xs">{line.label}</span>
+            <span className="text-text-secondary text-xs">
+              {language === "zh"
+                ? line.label === "Wages"
+                  ? "工资"
+                  : line.label === "Cost of Living"
+                    ? "生活成本"
+                    : "房价"
+                : line.label}
+            </span>
           </div>
         ))}
         <div className="flex items-center gap-2">
           <div className="h-0.5 w-5 border-t border-dashed border-text-muted" />
-          <span className="text-text-secondary text-xs">Year 2000 baseline</span>
+          <span className="text-text-secondary text-xs">{language === "zh" ? "以 2000 年为基准" : "Year 2000 baseline"}</span>
         </div>
       </div>
 
-      <svg width={width} height={height} role="img" aria-label="Wages vs. cost of living and house prices indexed to year 2000">
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-label={language === "zh" ? "工资、生活成本与房价的指数对比图（2000 年 = 100）" : "Wages vs. cost of living and house prices indexed to year 2000"}
+      >
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Grid lines */}
           {yScale.ticks(5).map((tick) => (
@@ -298,7 +314,15 @@ export default function PurchasingPowerChart({
                     className="inline-block h-2 w-2 rounded-full"
                     style={{ backgroundColor: line.color }}
                   />
-                  <span className="text-text-secondary">{line.label}</span>
+                  <span className="text-text-secondary">
+                    {language === "zh"
+                      ? line.label === "Wages"
+                        ? "工资"
+                        : line.label === "Cost of Living"
+                          ? "生活成本"
+                          : "房价"
+                      : line.label}
+                  </span>
                 </span>
                 <span className="text-text-primary font-medium tabular-nums">
                   {value.toFixed(1)}
@@ -307,7 +331,7 @@ export default function PurchasingPowerChart({
             );
           })}
           <p className="text-text-muted text-[10px] mt-1.5 border-t border-border-subtle pt-1">
-            100 = year 2000 level
+            {language === "zh" ? "100 = 2000 年水平" : "100 = year 2000 level"}
           </p>
         </ChartTooltip>
       )}
@@ -315,7 +339,7 @@ export default function PurchasingPowerChart({
       {/* Sources */}
       <div className="mt-4 space-y-0.5 text-center">
         <p className="text-text-muted text-[10px]">
-          Wages:{" "}
+          {language === "zh" ? "工资：" : "Wages: "}{" "}
           <a
             href={ECONOMIC_SOURCES.wages.url}
             target="_blank"
@@ -324,7 +348,7 @@ export default function PurchasingPowerChart({
           >
             {ECONOMIC_SOURCES.wages.name}
           </a>
-          {" · "}CPI:{" "}
+          {" · "}{language === "zh" ? "CPI：" : "CPI: "}{" "}
           <a
             href={ECONOMIC_SOURCES.cpi.url}
             target="_blank"
@@ -333,7 +357,7 @@ export default function PurchasingPowerChart({
           >
             {ECONOMIC_SOURCES.cpi.name}
           </a>
-          {" · "}House prices:{" "}
+          {" · "}{language === "zh" ? "房价：" : "House prices: "}{" "}
           <a
             href={ECONOMIC_SOURCES.housePrices.url}
             target="_blank"

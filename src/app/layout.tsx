@@ -108,13 +108,13 @@ const bootScript = `
       document.documentElement.setAttribute('data-language', language.indexOf('zh') === 0 ? 'zh' : 'en');
 
       var stored = localStorage.getItem('theme');
-      var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      var theme = stored || 'light';
       document.documentElement.setAttribute('data-theme', theme);
     } catch(e) {
       var fallbackLanguage = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh-CN' : 'en';
       document.documentElement.setAttribute('lang', fallbackLanguage);
       document.documentElement.setAttribute('data-language', fallbackLanguage.indexOf('zh') === 0 ? 'zh' : 'en');
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   })();
 `;
@@ -127,6 +127,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="light"
       className={`${playfairDisplay.variable} ${firaCode.variable} h-full antialiased`}
       suppressHydrationWarning
     >

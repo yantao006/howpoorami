@@ -1,32 +1,9 @@
 @import "tailwindcss";
 
 /* ==========================================================================
- * Theme: Dark Mode (default)
+ * Theme: Light Mode (default before JS / first visit)
  * ========================================================================== */
 :root {
-  --bg-primary: #0b0f1a;
-  --bg-secondary: #101724;
-  --bg-card: #151d2e;
-  --bg-card-hover: #1c2640;
-  --text-primary: #e4e7ed;
-  --text-secondary: #919bb0;
-  --text-muted: #8090a8;
-  --accent-rose: #CC6677;
-  --accent-amber: #DDCC77;
-  --accent-sage: #44AA99;
-  --accent-periwinkle: #88CCEE;
-  --accent-lavender: #AA4499;
-  --border-subtle: #1f2942;
-  --scrollbar-track: #0b0f1a;
-  --scrollbar-thumb: #1f2942;
-  --scrollbar-thumb-hover: #5b6478;
-  --selection-bg: rgba(146, 158, 232, 0.3);
-}
-
-/* ==========================================================================
- * Theme: Light Mode
- * ========================================================================== */
-[data-theme="light"] {
   --bg-primary: #f5f0eb;
   --bg-secondary: #ece5dd;
   --bg-card: #faf7f4;
@@ -44,6 +21,29 @@
   --scrollbar-thumb: #d6cfc7;
   --scrollbar-thumb-hover: #78716c;
   --selection-bg: rgba(74, 85, 162, 0.2);
+}
+
+/* ==========================================================================
+ * Theme: Dark Mode
+ * ========================================================================== */
+[data-theme="dark"] {
+  --bg-primary: #0b0f1a;
+  --bg-secondary: #101724;
+  --bg-card: #151d2e;
+  --bg-card-hover: #1c2640;
+  --text-primary: #e4e7ed;
+  --text-secondary: #919bb0;
+  --text-muted: #8090a8;
+  --accent-rose: #CC6677;
+  --accent-amber: #DDCC77;
+  --accent-sage: #44AA99;
+  --accent-periwinkle: #88CCEE;
+  --accent-lavender: #AA4499;
+  --border-subtle: #1f2942;
+  --scrollbar-track: #0b0f1a;
+  --scrollbar-thumb: #1f2942;
+  --scrollbar-thumb-hover: #5b6478;
+  --selection-bg: rgba(146, 158, 232, 0.3);
 }
 
 /* ==========================================================================

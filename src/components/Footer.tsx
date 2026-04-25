@@ -57,6 +57,37 @@ export default function Footer() {
         <p className="text-xs text-text-muted/60 mt-3">
           {language === "zh" ? `数据构建日期 ${BUILD_DATE}` : `Data built ${BUILD_DATE}`}
         </p>
+        <p className="text-xs text-text-muted/50 mt-4 max-w-2xl mx-auto leading-relaxed">
+          {language === "zh" ? (
+            <>
+              本站基于开源仓库{" "}
+              <a
+                href="https://github.com/yrunhaar/howpoorami"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-muted hover:text-accent-periwinkle underline-offset-2 hover:underline"
+              >
+                yrunhaar/howpoorami
+              </a>
+              {" "}
+              调整构建；谨向原作者与社区致谢。
+            </>
+          ) : (
+            <>
+              This site is adapted from the open-source{" "}
+              <a
+                href="https://github.com/yrunhaar/howpoorami"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-muted hover:text-accent-periwinkle underline-offset-2 hover:underline"
+              >
+                yrunhaar/howpoorami
+              </a>
+              {" "}
+              repository — thank you to the original authors and contributors.
+            </>
+          )}
+        </p>
       </div>
     </footer>
   );
